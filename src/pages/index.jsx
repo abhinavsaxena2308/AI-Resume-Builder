@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import heroImage from "@/assets/hero-image.jpg";
+import heroImage from "@/assets/hero-image.png";
 import { Link } from "react-router-dom"; 
 import { FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
