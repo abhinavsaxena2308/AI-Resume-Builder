@@ -54,58 +54,56 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-      
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-b shadow-sm">
-  <div className="container mx-auto flex justify-between items-center px-3 sm:px-6 py-3 sm:py-4">
-    {/* Logo & Title */}
-    <Link to="/" className="flex items-center gap-2">
-      <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-purple-800" />
-      <span className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
-        AI Resume Builder
-      </span>
-    </Link>
+        <div className="container mx-auto flex justify-between items-center px-3 sm:px-6 py-3 sm:py-4">
+          {/* Logo & Title */}
+          <Link to="/" className="flex items-center gap-2">
+            <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-purple-800" />
+            <span className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+              AI Resume Builder
+            </span>
+          </Link>
 
-    {/* Right Section */}
-    <div className="flex items-center gap-2 sm:gap-4">
-      {user ? (
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="px-2 sm:px-4 py-1 sm:py-2 flex items-center gap-1 sm:gap-2 font-semibold text-gray-700 border rounded-full dark:text-gray-200 hover:shadow-lg hover:shadow-purple-400 transition text-sm sm:text-base"
-        >
-          Hi, {user.user_metadata?.full_name || user.email}
-        </button>
-      ) : (
-        <button
-          onClick={() => navigate("/auth")}
-          className="px-3 sm:px-4 py-1 sm:py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:opacity-90 transition text-sm sm:text-base"
-        >
-          Sign Up
-        </button>
-      )}
+          {/* Right Section */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            {user ? (
+              <button
+                onClick={() => navigate("/dashboard")}
+                className="px-2 sm:px-4 py-1 sm:py-2 flex items-center gap-1 sm:gap-2 font-semibold text-gray-700 border rounded-full dark:text-gray-200 hover:shadow-lg hover:shadow-purple-400 transition text-sm sm:text-base"
+              >
+                Hi, {user.user_metadata?.full_name || user.email}
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate("/auth")}
+                className="px-3 sm:px-4 py-1 sm:py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:opacity-90 transition text-sm sm:text-base"
+              >
+                Sign Up
+              </button>
+            )}
 
-      {/* Theme Toggle (currently commented out) */}
-      {/* <button
+            {/* Theme Toggle (currently commented out) */}
+            {/* <button
         onClick={toggleTheme}
         className="px-2 sm:px-3 py-1 sm:py-2 border rounded-3xl hover:bg-gray-200 dark:hover:bg-gray-700 transition"
       >
         {theme === "light" ? "🌙" : "☀️"}
       </button> */}
 
-      {user ? (
-        <button
-          onClick={handleLogout}
-          className="px-3 sm:px-4 py-1 sm:py-2 border bg-gradient-to-r from-purple-500 to-pink-500 text-white dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition text-sm sm:text-base"
-        >
-          Logout
-        </button>
-      ) : (
-        <p className="hidden"></p>
-      )}
-    </div>
-  </div>
-</header>
-
+            {user ? (
+              <button
+                onClick={handleLogout}
+                className="px-3 sm:px-4 py-1 sm:py-2 border bg-gradient-to-r from-purple-500 to-pink-500 text-white dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition text-sm sm:text-base"
+              >
+                Logout
+              </button>
+            ) : (
+              <p className="hidden"></p>
+            )}
+          </div>
+        </div>
+      </header>
 
       {/* Hero Section */}
       <section className="container mx-auto px-6 py-20 grid lg:grid-cols-2 gap-12 items-center">
@@ -123,7 +121,8 @@ const Index = () => {
           </h1>
 
           <p className="text-xl text-gray-700 dark:text-gray-300">
-            Create professional, ATS-friendly resumes with AI assistance. Stand out and land your dream job faster.
+            Create professional, ATS-friendly resumes with AI assistance. Stand
+            out and land your dream job faster.
           </p>
 
           <div className="flex gap-4">
@@ -135,7 +134,7 @@ const Index = () => {
             </button>
             <button
               className="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-            // onClick={alert("Examples coming Soon....")}
+              // onClick={alert("Examples coming Soon....")}
             >
               View Examples
             </button>
@@ -170,21 +169,24 @@ const Index = () => {
           <div className="p-6 border rounded-xl hover:shadow-lg transition">
             <h3 className="text-xl font-bold mb-2">AI-Powered Writing</h3>
             <p className="text-gray-700 dark:text-gray-300">
-              Generate professional summaries and descriptions with AI that understands your career goals.
+              Generate professional summaries and descriptions with AI that
+              understands your career goals.
             </p>
           </div>
 
           <div className="p-6 border rounded-xl hover:shadow-lg transition">
             <h3 className="text-xl font-bold mb-2">Professional Templates</h3>
             <p className="text-gray-700 dark:text-gray-300">
-              Choose from beautifully designed templates that are ATS-friendly and optimized for modern hiring.
+              Choose from beautifully designed templates that are ATS-friendly
+              and optimized for modern hiring.
             </p>
           </div>
 
           <div className="p-6 border rounded-xl hover:shadow-lg transition">
             <h3 className="text-xl font-bold mb-2">Instant Preview</h3>
             <p className="text-gray-700 dark:text-gray-300">
-              See your resume come to life in real-time as you type. What you see is exactly what you get.
+              See your resume come to life in real-time as you type. What you
+              see is exactly what you get.
             </p>
           </div>
         </div>
@@ -193,9 +195,12 @@ const Index = () => {
       {/* CTA Section */}
       <section className="container mx-auto px-6 py-20 text-center">
         <div className="p-12 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl shadow-2xl">
-          <h2 className="text-4xl font-bold mb-4">Ready to Build Your Resume?</h2>
+          <h2 className="text-4xl font-bold mb-4">
+            Ready to Build Your Resume?
+          </h2>
           <p className="text-xl mb-6">
-            Join thousands of job seekers who have successfully landed their dream jobs with our AI-powered resume builder.
+            Join thousands of job seekers who have successfully landed their
+            dream jobs with our AI-powered resume builder.
           </p>
           <button
             onClick={() => navigate(user ? "/dashboard" : "/auth")}
@@ -208,7 +213,18 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="border-t bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm py-8">
-        <p className="text-center text-gray-600 dark:text-gray-400">© 2025 AI Resume Builder. Built with AI and care.</p>
+        <p className="text-center text-gray-600 dark:text-gray-400">
+          © 2025 AI Resume Builder. Want to{" "}
+          <a
+            href="https://github.com/abhinavsaxena2308/AI-Resume-Builder"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-purple-800"
+          >
+            Contribute
+          </a>
+          ?
+        </p>
       </footer>
     </div>
   );

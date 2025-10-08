@@ -65,12 +65,14 @@ const Auth = () => {
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider:"google",
-        options: { redirectTo: `${window.location.origin}/dashboard` },
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`, // Must match GitHub OAuth app redirect
+        },
       });
       if (error) throw error;
     } catch (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: error.message || "OAuth login failed", variant: "destructive" });
     } finally {
       setLoading(false);
     }
