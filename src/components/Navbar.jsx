@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client"; // make sure you have supabase client
+import { supabase } from "@/integrations/supabase/client";
 import { FileText } from "lucide-react";
 
 const Navbar = ({ user }) => {
@@ -33,7 +33,7 @@ const Navbar = ({ user }) => {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      navigate("/auth");
+      navigate("/");
     } catch (err) {
       console.error("Logout error:", err);
     }
@@ -41,46 +41,40 @@ const Navbar = ({ user }) => {
 
   return (
     <header className="w-full bg-white dark:bg-gray-900 shadow-md sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex justify-between items-center">
+        {/* Left Section */}
         <div
           className="flex items-center cursor-pointer"
           onClick={() => navigate("/")}
         >
-          <div className="h-10 w-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white font-bold">
-            <FileText />
+          <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg flex items-center justify-center text-purple-800 font-bold">
+            <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">
+          <span className="ml-2 text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
             AI Resume Builder
           </span>
         </div>
 
-        <nav className="flex items-center space-x-4">
+        {/* Right Section */}
+        <nav className="flex items-center space-x-2 sm:space-x-4">
           <button
-            onClick={toggleDarkMode}
-            className="px-3 py-2 border rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border-gray-300 dark:border-gray-600  hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+            onClick={() => navigate("/")}
+            className="flex items-center gap-1 sm:gap-2 text-gray-700 border rounded-full px-2 py-1 sm:px-3 sm:py-2 text-sm sm:text-base dark:text-gray-200 hover:shadow-lg hover:shadow-purple-400 transition"
           >
-            {darkMode ? "☀️ " : "🌙 "}
+            ← Back to Home
           </button>
 
           {user ? (
-            <>
-              {/* <button
-                onClick={() => navigate("/dashboard")}
-                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:opacity-90 transition"
-              >
-                Dashboard
-              </button> */}
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 border bg-gradient-to-r from-purple-500 to-pink-500 text-white dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-              >
-                Logout
-              </button>
-            </>
+            <button
+              onClick={handleLogout}
+              className="px-3 sm:px-4 py-1 sm:py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:opacity-90 transition text-sm sm:text-base"
+            >
+              Logout
+            </button>
           ) : (
             <button
               onClick={() => navigate("/auth")}
-              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:opacity-90 transition"
+              className="px-3 sm:px-4 py-1 sm:py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:opacity-90 transition text-sm sm:text-base"
             >
               Get Started
             </button>

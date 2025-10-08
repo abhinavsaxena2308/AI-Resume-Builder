@@ -10,6 +10,15 @@ const Index = () => {
   const [theme, setTheme] = useState("light");
   const [user, setUser] = useState(null);
 
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate("/");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
+
   // Load saved theme from localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -48,47 +57,61 @@ const Index = () => {
       
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-b shadow-sm">
-        <div className="container mx-auto flex justify-between items-center px-6 py-4">
-          <Link to="/" className="flex items-center gap-2">
-            <FileText className="h-6 w-6 text-purple-800" />
-            <span className="text-xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
-              AI Resume Builder
-            </span>
-          </Link>
+  <div className="container mx-auto flex justify-between items-center px-3 sm:px-6 py-3 sm:py-4">
+    {/* Logo & Title */}
+    <Link to="/" className="flex items-center gap-2">
+      <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-purple-800" />
+      <span className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+        AI Resume Builder
+      </span>
+    </Link>
 
-          <div className="flex items-center gap-4">
-            {user ? (
-              <button
-                onClick={() => navigate("/dashboard")}
-                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:opacity-90 transition"
-              >
-                Hi, {user.user_metadata?.full_name || user.email}
-              </button>
-            ) : (
-              <button
-                onClick={() => navigate("/auth")}
-                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:opacity-90 transition"
-              >
-                Sign Up
-              </button>
-            )}
+    {/* Right Section */}
+    <div className="flex items-center gap-2 sm:gap-4">
+      {user ? (
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="px-2 sm:px-4 py-1 sm:py-2 flex items-center gap-1 sm:gap-2 font-semibold text-gray-700 border rounded-full dark:text-gray-200 hover:shadow-lg hover:shadow-purple-400 transition text-sm sm:text-base"
+        >
+          Hi, {user.user_metadata?.full_name || user.email}
+        </button>
+      ) : (
+        <button
+          onClick={() => navigate("/auth")}
+          className="px-3 sm:px-4 py-1 sm:py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:opacity-90 transition text-sm sm:text-base"
+        >
+          Sign Up
+        </button>
+      )}
 
-            {/* Theme Toggle Button */}
-            <button
-              onClick={toggleTheme}
-              className="px-3 py-2 border rounded-3xl hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-            >
-              {theme === "light" ? "🌙" : "☀️"}
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* Theme Toggle (currently commented out) */}
+      {/* <button
+        onClick={toggleTheme}
+        className="px-2 sm:px-3 py-1 sm:py-2 border rounded-3xl hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+      >
+        {theme === "light" ? "🌙" : "☀️"}
+      </button> */}
+
+      {user ? (
+        <button
+          onClick={handleLogout}
+          className="px-3 sm:px-4 py-1 sm:py-2 border bg-gradient-to-r from-purple-500 to-pink-500 text-white dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition text-sm sm:text-base"
+        >
+          Logout
+        </button>
+      ) : (
+        <p className="hidden"></p>
+      )}
+    </div>
+  </div>
+</header>
+
 
       {/* Hero Section */}
       <section className="container mx-auto px-6 py-20 grid lg:grid-cols-2 gap-12 items-center">
         <div className="space-y-6">
           <span className="inline-block px-4 py-2 bg-purple-100  text-purple-800 dark:bg-purple-800 dark:text-purple-300 rounded-full text-sm font-medium">
-            AI-Powered Resume Creation
+            ⭐ AI-Powered Resume Creation
           </span>
 
           <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
@@ -112,6 +135,7 @@ const Index = () => {
             </button>
             <button
               className="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            // onClick={alert("Examples coming Soon....")}
             >
               View Examples
             </button>

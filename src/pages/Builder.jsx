@@ -1,14 +1,19 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import ResumeForm from "@/components/resume/ResumeForm";
 import ResumePreview from "@/components/resume/ResumePreview";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const Builder = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const previewRef = useRef(null); // reference to preview for PDF
+
   const [resumeData, setResumeData] = useState({
     personalInfo: {
       fullName: "",
@@ -23,17 +28,18 @@ const Builder = () => {
     education: [],
     skills: [],
   });
-  const navigate = useNavigate();
-  const { id } = useParams(); // Resume ID
 
-    const handleLogout = async () => {
-      try {
-        await supabase.auth.signOut();
-        navigate("/auth");
-      } catch (err) {
-        console.error("Logout error:", err);
-      }
-    };
+  const navigate = useNavigate();
+  const { id } = useParams();
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate("/auth");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
 
   // Fetch user and resume
   useEffect(() => {
@@ -45,7 +51,6 @@ const Builder = () => {
       }
       setUser(user);
 
-      // Fetch existing resume if editing
       if (id) {
         const { data, error } = await supabase
           .from("resumes")
@@ -89,8 +94,42 @@ const Builder = () => {
     }
   }, [resumeData, id]);
 
-  const handleDownloadPDF = () => {
-    alert("PDF download will be available soon!");
+  // ✅ Actual PDF download functionality
+  const handleDownloadPDF = async () => {
+    if (!previewRef.current) return;
+    setDownloading(true);
+
+    try {
+      const element = previewRef.current;
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "pt",
+        format: "a4",
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      const imgWidth = pageWidth - 40;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 20, 20, imgWidth, imgHeight);
+
+      pdf.save(
+        `${resumeData.personalInfo.fullName || "My_Resume"}_${new Date().toISOString().split("T")[0]}.pdf`
+      );
+    } catch (error) {
+      console.error("PDF download failed:", error);
+      alert("Failed to download resume. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
   };
 
   if (loading) {
@@ -103,12 +142,11 @@ const Builder = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary to-muted text-gray-900 dark:text-gray-100">
-      {/* <Navbar user={user} /> */}
       <header className="border-b bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <button
             onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-2 text-gray-700  border rounded-full p-2 dark:text-gray-200 hover:bg-purple-400 hover:text-white transition"
+            className="flex items-center gap-2 text-gray-700 border rounded-full p-2 dark:text-gray-200 hover:shadow-lg hover:shadow-purple-400 transition"
           >
             ← Back to Dashboard
           </button>
@@ -123,7 +161,7 @@ const Builder = () => {
               onClick={handleDownloadPDF}
               className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-110 text-white rounded-lg font-medium transition"
             >
-              Download PDF
+              {downloading ? "Generating..." : "Download PDF"}
             </button>
             <button
               onClick={saveResume}
@@ -146,7 +184,9 @@ const Builder = () => {
           <div className="space-y-6">
             <ResumeForm data={resumeData} onChange={setResumeData} />
           </div>
-          <div className="lg:sticky lg:top-24 lg:self-start">
+
+          {/* Wrap Preview for PDF capture */}
+          <div className="lg:sticky lg:top-24 lg:self-start bg-white shadow-lg rounded-lg p-4" ref={previewRef}>
             <ResumePreview data={resumeData} />
           </div>
         </div>

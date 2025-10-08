@@ -176,14 +176,14 @@ const Auth = () => {
             {isSignUp ? (
               <>
                 Already have an account?{" "}
-                <button onClick={() => setIsSignUp(false)} className="text-primary hover:underline font-medium">
+                <button onClick={() => setIsSignUp(false)} className="text-purple-900 hover:underline font-medium">
                   Sign In
                 </button>
               </>
             ) : (
               <>
                 Don't have an account?{" "}
-                <button onClick={() => setIsSignUp(true)} className="text-primary hover:underline font-medium">
+                <button onClick={() => setIsSignUp(true)} className="text-purple-900 hover:underline font-medium">
                   Sign Up
                 </button>
               </>
@@ -192,7 +192,7 @@ const Auth = () => {
 
           {/* Back to home */}
           <div className="mt-4 text-center">
-            <Link to="/" className="text-sm text-muted-foreground hover:text-primary">
+            <Link to="/" className="text-sm text-muted-foreground hover:text-purple-900">
               ← Back to Home
             </Link>
           </div>

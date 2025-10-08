@@ -33,6 +33,7 @@ const ResumePreview = ({ data }) => {
                 </div>
               )}
             </div>
+            
             {(personalInfo.linkedin || personalInfo.github) && (
               <div className="flex flex-wrap justify-center gap-3 text-sm text-muted-foreground mt-2">
                 {personalInfo.linkedin && (

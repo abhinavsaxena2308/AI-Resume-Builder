@@ -137,7 +137,7 @@ const Dashboard = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {resumes.map(resume => (
-              <div key={resume.id} className="border border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:shadow-lg transition">
+              <div key={resume.id} className="border border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:shadow-lg hover:shadow-purple-500 transition">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-purple-500 text-lg">📄</span>
                   {editingId === resume.id ? (
