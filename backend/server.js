@@ -17,9 +17,11 @@ const allowedOrigins = [
 app.use(cors({
   origin: allowedOrigins,
   methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"],
   credentials: true
 }));
 
+app.get("/", (req, res) => res.send("✅ Backend is running!"));
 
 app.use(express.json());  
 
