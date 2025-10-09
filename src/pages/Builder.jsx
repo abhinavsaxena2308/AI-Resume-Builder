@@ -6,14 +6,17 @@ import ResumeForm from "@/components/resume/ResumeForm";
 import ResumePreview from "@/components/resume/ResumePreview";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { Menu, X } from "lucide-react";
 
 const Builder = () => {
+  
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const previewRef = useRef(null); // reference to preview for PDF
 
+  const [menuOpen, setMenuOpen] = useState(false);
   const [resumeData, setResumeData] = useState({
     personalInfo: {
       fullName: "",
@@ -143,41 +146,78 @@ const Builder = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary to-muted text-gray-900 dark:text-gray-100">
       <header className="border-b bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="flex items-center gap-2 text-gray-700 border rounded-full p-2 dark:text-gray-200 hover:shadow-lg hover:shadow-purple-400 transition"
+        >
+          ← Back to Dashboard
+        </button>
+
+        {/* Title */}
+        <h1 className="text-xl font-bold flex items-center gap-2">
+          
+          {saving && <span className="text-sm text-green-600 animate-pulse">Saving...</span>}
+        </h1>
+
+        {/* Desktop Buttons */}
+        <div className="hidden md:flex gap-2">
           <button
-            onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-2 text-gray-700 border rounded-full p-2 dark:text-gray-200 hover:shadow-lg hover:shadow-purple-400 transition"
+            onClick={handleDownloadPDF}
+            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-110 text-white rounded-lg font-medium transition"
           >
-            ← Back to Dashboard
+            {downloading ? "Generating..." : "Download PDF"}
           </button>
-
-          <h1 className="text-xl font-bold flex items-center gap-2">
-            Resume Builder
-            {saving && <span className="text-sm text-green-600 animate-pulse">Saving...</span>}
-          </h1>
-
-          <div className="flex gap-2">
-            <button
-              onClick={handleDownloadPDF}
-              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-110 text-white rounded-lg font-medium transition"
-            >
-              {downloading ? "Generating..." : "Download PDF"}
-            </button>
-            <button
-              onClick={saveResume}
-              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-110 text-white rounded-lg font-medium transition"
-            >
-              Save
-            </button>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-110 text-white rounded-lg font-medium transition"
-            >
-              Logout
-            </button>
-          </div>
+          <button
+            onClick={saveResume}
+            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-110 text-white rounded-lg font-medium transition"
+          >
+            Save
+          </button>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-110 text-white rounded-lg font-medium transition"
+          >
+            Logout
+          </button>
         </div>
-      </header>
+
+        {/* Mobile Menu Toggle */}
+        <button
+          className="md:hidden flex items-center p-2 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* Mobile Dropdown Menu with bounce & scale effect */}
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-out ${
+          menuOpen ? "max-h-96 opacity-100 scale-100" : "max-h-0 opacity-0 scale-95"
+        } bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-t px-4 pb-4 space-y-2 transform origin-top`}
+      >
+        <button
+          onClick={handleDownloadPDF}
+          className="w-full text-left px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium transition transform hover:scale-105"
+        >
+          {downloading ? "Generating..." : "Download PDF"}
+        </button>
+        <button
+          onClick={saveResume}
+          className="w-full text-left px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium transition transform hover:scale-105"
+        >
+          Save
+        </button>
+        <button
+          onClick={handleLogout}
+          className="w-full text-left px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium transition transform hover:scale-105"
+        >
+          Logout
+        </button>
+      </div>
+    </header>
 
       <main className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-2 gap-8">

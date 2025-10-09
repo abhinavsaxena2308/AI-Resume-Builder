@@ -58,7 +58,7 @@ const ResumePreview = ({ data }) => {
           {/* Summary */}
           {summary && (
             <section>
-              <h2 className="text-lg font-semibold text-primary uppercase tracking-wide mb-2">
+              <h2 className="text-lg font-semibold text-purple-600 uppercase tracking-wide mb-2">
                 Professional Summary
               </h2>
               <p className="text-base text-foreground leading-relaxed">{summary}</p>
@@ -68,7 +68,7 @@ const ResumePreview = ({ data }) => {
           {/* Experience */}
           {experience && experience.length > 0 && (
             <section className="mt-6">
-              <h2 className="text-lg font-semibold text-primary uppercase tracking-wide mb-3 border-b border-border pb-1">
+              <h2 className="text-lg font-semibold text-purple-600 uppercase tracking-wide mb-3 border-b border-border pb-1">
                 Work Experience
               </h2>
               <div className="space-y-5">
@@ -91,7 +91,7 @@ const ResumePreview = ({ data }) => {
           {/* Education */}
           {education && education.length > 0 && (
             <section className="mt-6">
-              <h2 className="text-lg font-semibold text-primary uppercase tracking-wide mb-3 border-b border-border pb-1">
+              <h2 className="text-lg font-semibold text-purple-600 uppercase tracking-wide mb-3 border-b border-border pb-1">
                 Education
               </h2>
               <div className="space-y-3">
@@ -111,7 +111,7 @@ const ResumePreview = ({ data }) => {
           {/* Skills */}
           {skills && skills.length > 0 && (
             <section className="mt-6">
-              <h2 className="text-lg font-semibold text-primary uppercase tracking-wide mb-3 border-b border-border pb-1">
+              <h2 className="text-lg font-semibold text-purple-600 uppercase tracking-wide mb-3 border-b border-border pb-1">
                 Skills
               </h2>
               <div className="flex flex-wrap gap-2">

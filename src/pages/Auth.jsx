@@ -6,17 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Loader2} from "lucide-react";
-
-// Google icon as SVG
-const GoogleIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 533.5 544.3" className="h-5 w-5">
-    <path fill="#4285F4" d="M533.5 278.4c0-17.4-1.6-34.1-4.7-50.4H272v95.4h146.9c-6.4 34.8-25.6 64.4-54.7 84.2v69.8h88.4c51.6-47.5 81.9-117.7 81.9-199h-.1z"/>
-    <path fill="#34A853" d="M272 544.3c73.6 0 135.4-24.3 180.6-66.1l-88.4-69.8c-24.6 16.5-56.1 26.2-92.2 26.2-70.8 0-130.8-47.7-152.3-112.2H30.6v70.7C75.7 488.4 168.4 544.3 272 544.3z"/>
-    <path fill="#FBBC05" d="M119.7 325.1c-5.5-16.5-8.6-34.1-8.6-52.1s3.1-35.6 8.6-52.1V150.2H30.6C11.1 188.5 0 228.3 0 272s11.1 83.5 30.6 121.8l89.1-68.7z"/>
-    <path fill="#EA4335" d="M272 107.7c38.8 0 73.6 13.3 101.1 39.5l75.8-75.8C407.4 24.5 345.6 0 272 0 168.4 0 75.7 55.9 30.6 150.2l89.1 68.7c21.5-64.5 81.5-112.2 152.3-112.2z"/>
-  </svg>
-);
+import { FileText, Loader2 } from "lucide-react";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -24,6 +14,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -33,7 +24,6 @@ const Auth = () => {
     });
   }, [navigate]);
 
-  // Standard email/password auth
   const handleAuth = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -60,21 +50,18 @@ const Auth = () => {
     }
   };
 
-  // OAuth login
   const handleOAuthLogin = async (provider) => {
-    setLoading(true);
+    setOauthLoading(provider);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`, // Must match GitHub OAuth app redirect
-        },
+        options: { redirectTo: import.meta.env.VITE_SUPABASE_REDIRECT_URL },
       });
       if (error) throw error;
     } catch (error) {
       toast({ title: "Error", description: error.message || "OAuth login failed", variant: "destructive" });
     } finally {
-      setLoading(false);
+      setOauthLoading("");
     }
   };
 
@@ -84,14 +71,12 @@ const Auth = () => {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div className="h-12 w-12 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-              <FileText className="h-6 w-6 text-primary" />
+              <FileText className="h-6 w-6 text-white" />
             </div>
           </div>
           <CardTitle className="text-2xl">{isSignUp ? "Create Account" : "Welcome Back"}</CardTitle>
           <CardDescription>
-            {isSignUp
-              ? "Start building your perfect resume"
-              : "Sign in to continue building your resume"}
+            {isSignUp ? "Start building your perfect resume" : "Sign in to continue building your resume"}
           </CardDescription>
         </CardHeader>
 
@@ -157,18 +142,22 @@ const Auth = () => {
             <Button
               onClick={() => handleOAuthLogin("github")}
               variant="outline"
-              className="flex-1 justify-center gap-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="flex justify-center items-center gap-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 relative"
+              disabled={oauthLoading !== "" && oauthLoading !== "github"}
             >
-              {/* <LucideGitHub className="h-5 w-5" /> */}
+              {oauthLoading === "github" && <Loader2 className="absolute left-3 h-4 w-4 animate-spin" />}
+              {/* <GitHub className="h-5 w-5" /> */}
               Continue with GitHub
             </Button>
 
             <Button
               onClick={() => handleOAuthLogin("google")}
               variant="outline"
-              className="flex-1 justify-center gap-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="flex justify-center items-center gap-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 relative"
+              disabled={oauthLoading !== "" && oauthLoading !== "google"}
             >
-              {/* <GoogleIcon /> */}
+              {oauthLoading === "google" && <Loader2 className="absolute left-3 h-4 w-4 animate-spin" />}
+              {/* <Google className="h-5 w-5" /> */}
               Continue with Google
             </Button>
           </div>
