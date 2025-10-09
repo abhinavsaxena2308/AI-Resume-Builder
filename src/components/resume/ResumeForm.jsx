@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Sparkles, Trash2, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const ResumeForm = ({ data, onChange }) => {
@@ -101,6 +100,7 @@ const ResumeForm = ({ data, onChange }) => {
     });
   };
 
+  // ✅ UPDATED FUNCTION: Calls your Express backend instead of Supabase Edge Function
   const generateSummary = async () => {
     if (!data.personalInfo.fullName || data.experience.length === 0) {
       toast({
@@ -113,15 +113,21 @@ const ResumeForm = ({ data, onChange }) => {
 
     setIsGenerating(true);
     try {
-      const { data: result, error } = await supabase.functions.invoke("generate-summary", {
-        body: {
+      const response = await fetch("http://localhost:3000/generate-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           name: data.personalInfo.fullName,
           experience: data.experience,
           skills: data.skills,
-        },
+        }),
       });
 
-      if (error) throw error;
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to generate summary");
+      }
 
       onChange({
         ...data,
@@ -160,7 +166,10 @@ const ResumeForm = ({ data, onChange }) => {
                   id={field}
                   value={data.personalInfo[field]}
                   onChange={(e) => handlePersonalInfoChange(field, e.target.value)}
-                  placeholder={field === "fullName" ? "John Doe" : field === "email" ? "john@example.com" : ""}
+                  placeholder={
+                    field === "fullName" ? "John Doe" :
+                    field === "email" ? "john@example.com" : ""
+                  }
                 />
               </div>
             ))}
@@ -178,11 +187,15 @@ const ResumeForm = ({ data, onChange }) => {
             </div>
             <Button
               onClick={generateSummary}
-              disabled={isGenerating} 
+              disabled={isGenerating}
               size="sm"
               className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90"
             >
-              {isGenerating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+              {isGenerating ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4 mr-2" />
+              )}
               Generate with AI
             </Button>
           </div>
@@ -212,7 +225,11 @@ const ResumeForm = ({ data, onChange }) => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {data.experience.length === 0 && <p className="text-muted-foreground text-center py-8">No experience added yet. Click "Add Experience" to get started.</p>}
+          {data.experience.length === 0 && (
+            <p className="text-muted-foreground text-center py-8">
+              No experience added yet. Click "Add Experience" to get started.
+            </p>
+          )}
           {data.experience.map((exp) => (
             <div key={exp.id} className="p-4 border rounded-lg space-y-3">
               <div className="flex justify-between items-start">
@@ -262,7 +279,11 @@ const ResumeForm = ({ data, onChange }) => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {data.education.length === 0 && <p className="text-muted-foreground text-center py-8">No education added yet. Click "Add Education" to get started.</p>}
+          {data.education.length === 0 && (
+            <p className="text-muted-foreground text-center py-8">
+              No education added yet. Click "Add Education" to get started.
+            </p>
+          )}
           {data.education.map((edu) => (
             <div key={edu.id} className="p-4 border rounded-lg space-y-3">
               <div className="flex justify-between items-start">
@@ -310,11 +331,17 @@ const ResumeForm = ({ data, onChange }) => {
             {data.skills.map((skill) => (
               <Badge key={skill} variant="secondary" className="px-3 py-1">
                 {skill}
-                <button onClick={() => removeSkill(skill)} className="ml-2 hover:text-destructive">×</button>
+                <button onClick={() => removeSkill(skill)} className="ml-2 hover:text-destructive">
+                  ×
+                </button>
               </Badge>
             ))}
           </div>
-          {data.skills.length === 0 && <p className="text-muted-foreground text-center py-4">No skills added yet. Add your first skill above.</p>}
+          {data.skills.length === 0 && (
+            <p className="text-muted-foreground text-center py-4">
+              No skills added yet. Add your first skill above.
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
