@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 5000;
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
 app.use(cors({
-  origin: ["http://localhost:5173", "https://your-frontend-domain.com"],
+  origin: ["http://localhost:5173", "https://ai-resume-builder-six-kappa.vercel.app/"],
 }));
 app.use(express.json());
 
