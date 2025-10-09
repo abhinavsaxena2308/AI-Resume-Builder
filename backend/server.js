@@ -8,10 +8,20 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
+// Correct CORS: remove trailing slash from frontend URL
+const allowedOrigins = [
+  "http://localhost:5173", // Vite dev server
+  "https://ai-resume-builder-six-kappa.vercel.app" // Production frontend
+];
+
 app.use(cors({
-  origin: ["http://localhost:5173", "https://ai-resume-builder-six-kappa.vercel.app/"],
+  origin: allowedOrigins,
+  methods: ["GET", "POST"],
+  credentials: true
 }));
-app.use(express.json());
+
+
+app.use(express.json());  
 
 app.post("/generate-summary", async (req, res) => {
   try {
