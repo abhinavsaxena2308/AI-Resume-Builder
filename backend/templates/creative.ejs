@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume - Creative</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #e879f9 0%, #f472b6 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e879f9;
+        }
+        .name {
+            font-size: 32px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #e879f9, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        .contact {
+            font-size: 14px;
+            color: #666;
+        }
+        .section {
+            margin-bottom: 25px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #e879f9, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .summary-section {
+            background: rgba(232, 121, 249, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #e879f9;
+        }
+        .job {
+            background: rgba(244, 114, 182, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #f472b6;
+        }
+        .job-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        .company {
+            font-size: 14px;
+            color: #f472b6;
+            margin-bottom: 5px;
+        }
+        .duration {
+            font-size: 14px;
+            color: #666;
+            background: rgba(232, 121, 249, 0.2);
+            padding: 2px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        .education-section {
+            background: rgba(34, 197, 94, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #22c55e;
+        }
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .skill {
+            background: linear-gradient(135deg, #e879f9, #f472b6);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="name"><%= resumeData.personalInfo.fullName || "Your Name" %></div>
+            <div class="contact">
+                <% if (resumeData.personalInfo) { %>
+                    <% if (resumeData.personalInfo.email) { %>
+                        <%= resumeData.personalInfo.email %>
+                    <% } %>
+                    <% if (resumeData.personalInfo.phone) { %>
+                        | <%= resumeData.personalInfo.phone %>
+                    <% } %>
+                    <% if (resumeData.personalInfo.location) { %>
+                        | <%= resumeData.personalInfo.location %>
+                    <% } %>
+                <% } %>
+            </div>
+            <% if (resumeData.personalInfo && (resumeData.personalInfo.linkedin || resumeData.personalInfo.github)) { %>
+                <div class="contact">
+                    <% if (resumeData.personalInfo.linkedin) { %>
+                        LinkedIn: <%= resumeData.personalInfo.linkedin %>
+                    <% } %>
+                    <% if (resumeData.personalInfo.github) { %>
+                        | GitHub: <%= resumeData.personalInfo.github %>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Summary -->
+        <% if (resumeData.summary) { %>
+            <div class="section">
+                <div class="section-title">Professional Summary</div>
+                <div class="summary-section">
+                    <p><%= resumeData.summary %></p>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- Experience -->
+        <% if (resumeData.experience && resumeData.experience.length > 0) { %>
+            <div class="section">
+                <div class="section-title">Work Experience</div>
+                <% resumeData.experience.forEach(function(exp) { %>
+                    <% if (exp.title && exp.company) { %>
+                        <div class="job">
+                            <div class="job-title"><%= exp.title %></div>
+                            <div class="company"><%= exp.company %></div>
+                            <% if (exp.duration) { %>
+                                <div class="duration"><%= exp.duration %></div>
+                            <% } %>
+                            <% if (exp.description) { %>
+                                <p><%= exp.description %></p>
+                            <% } %>
+                        </div>
+                    <% } %>
+                <% }); %>
+            </div>
+        <% } %>
+
+        <!-- Education -->
+        <% if (resumeData.education && resumeData.education.length > 0) { %>
+            <div class="section">
+                <div class="section-title">Education</div>
+                <div class="education-section">
+                    <% resumeData.education.forEach(function(edu) { %>
+                        <% if (edu.degree && edu.institution) { %>
+                            <div>
+                                <div class="job-title"><%= edu.degree %></div>
+                                <div class="company"><%= edu.institution %></div>
+                                <% if (edu.year) { %>
+                                    <div class="duration"><%= edu.year %></div>
+                                <% } %>
+                            </div>
+                        <% } %>
+                    <% }); %>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- Skills -->
+        <% if (resumeData.skills && resumeData.skills.length > 0) { %>
+            <div class="section">
+                <div class="section-title">Skills</div>
+                <div class="skills">
+                    <% resumeData.skills.forEach(function(skill) { %>
+                        <span class="skill"><%= skill %></span>
+                    <% }); %>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

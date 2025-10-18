@@ -1,12 +1,19 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import ejs from "ejs";
+import puppeteer from "puppeteer";
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Correct CORS: remove trailing slash from frontend URL
 const allowedOrigins = [
@@ -41,19 +48,19 @@ app.post("/generate-summary", async (req, res) => {
     const skillsText = skills.join(", ");
 
     const prompt = `
-    You are a professional resume writer.
-    Write ONE concise, polished, and professional summary (2–3 sentences) for ${name}.
-    Do NOT include any introductory lines (like “Here’s a summary for…”), numbers, or formatting symbols (*, -, **, etc.).
-    Only return the final summary text.
-    
-    Experience:
-    ${experienceText}
-    
-    Skills: ${skillsText}
-    
-    strictly do not inclue this line "Here's a concise and impactful professional summary for ${name}:"
-    
-    `;
+You are a professional resume writer.
+Write ONE concise, polished, and professional summary (2–3 sentences) in FIRST PERSON for ${name}.
+Start the summary with "I am".
+Do NOT use the candidate's name, numbers, or formatting symbols (*, -, **, etc.).
+Only return the final summary text, without any introductory lines.
+
+Experience:
+${experienceText}
+
+Skills:
+${skillsText}
+`;
+
 
     // Gemini API endpoint
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GOOGLE_API_KEY}`;
@@ -84,6 +91,56 @@ app.post("/generate-summary", async (req, res) => {
     res.json({ summary });
   } catch (error) {
     console.error("Error in generate-summary:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/api/generate-pdf", async (req, res) => {
+  try {
+    const { resumeData, template = "modern" } = req.body;
+
+    // Validate template
+    const validTemplates = ["modern", "classic", "creative"];
+    if (!validTemplates.includes(template)) {
+      return res.status(400).json({ error: "Invalid template specified" });
+    }
+
+    // Render EJS template
+    const templatePath = join(__dirname, "templates", `${template}.ejs`);
+    const html = await ejs.renderFile(templatePath, { resumeData });
+
+    // Launch Puppeteer
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    });
+
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: "networkidle0" });
+
+    // Generate PDF
+    const pdfBuffer = await page.pdf({
+      format: "A4",
+      printBackground: true,
+      margin: {
+        top: "1cm",
+        right: "1cm",
+        bottom: "1cm",
+        left: "1cm"
+      }
+    });
+
+    await browser.close();
+
+    // Set response headers
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${resumeData.personalInfo?.fullName || 'Resume'}.pdf"`);
+
+    // Send PDF buffer
+    res.send(pdfBuffer);
+
+  } catch (error) {
+    console.error("Error generating PDF:", error);
     res.status(500).json({ error: error.message });
   }
 });

@@ -4,9 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import ResumeForm from "@/components/resume/ResumeForm";
 import ResumePreview from "@/components/resume/ResumePreview";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import TemplateSelector from "@/components/ResumeTemplates/TemplateSelector";
+import TemplateModern from "@/components/ResumeTemplates/TemplateModern";
+import TemplateClassic from "@/components/ResumeTemplates/TemplateClassic";
+import TemplateCreative from "@/components/ResumeTemplates/TemplateCreative";
+import DownloadResume from "@/components/DownloadResume";
 import { Menu, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Palette } from "lucide-react";
 
 const Builder = () => {
   
@@ -14,7 +19,20 @@ const Builder = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const previewRef = useRef(null); // reference to preview for PDF
+  const [selectedTemplate, setSelectedTemplate] = useState("modern");
+
+  // Load selected template from localStorage
+  useEffect(() => {
+    const savedTemplate = localStorage.getItem("selectedTemplate");
+    if (savedTemplate) {
+      setSelectedTemplate(savedTemplate);
+    }
+  }, []);
+
+  // Save selected template to localStorage
+  useEffect(() => {
+    localStorage.setItem("selectedTemplate", selectedTemplate);
+  }, [selectedTemplate]);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [resumeData, setResumeData] = useState({
@@ -97,36 +115,50 @@ const Builder = () => {
     }
   }, [resumeData, id]);
 
-  // ✅ Actual PDF download functionality
+  // PDF download functionality using backend
   const handleDownloadPDF = async () => {
-    if (!previewRef.current) return;
     setDownloading(true);
 
+    const urls = [
+      `${import.meta.env.VITE_BACKEND_URL}/api/generate-pdf`, // Production URL
+      `http://localhost:3000/api/generate-pdf` // Localhost fallback
+    ];
+
+    let response;
+    for (const url of urls) {
+      try {
+        response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ resumeData, template: selectedTemplate }),
+        });
+
+        if (response.ok) {
+          break; // Success, exit loop
+        }
+      } catch (error) {
+        // If this URL fails, try the next one
+        console.warn(`Failed to fetch from ${url}, trying next...`);
+      }
+    }
+
+    if (!response || !response.ok) {
+      setDownloading(false);
+      alert("Failed to generate PDF from both production and local servers.");
+      return;
+    }
+
     try {
-      const element = previewRef.current;
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        backgroundColor: "#ffffff",
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "pt",
-        format: "a4",
-      });
-
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-
-      const imgWidth = pageWidth - 40;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      pdf.addImage(imgData, "PNG", 20, 20, imgWidth, imgHeight);
-
-      pdf.save(
-        `${resumeData.personalInfo.fullName || "My_Resume"}_${new Date().toISOString().split("T")[0]}.pdf`
-      );
+      // Create a blob from the response and trigger download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${resumeData.personalInfo.fullName || "Resume"}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     } catch (error) {
       console.error("PDF download failed:", error);
       alert("Failed to download resume. Please try again.");
@@ -225,9 +257,21 @@ const Builder = () => {
             <ResumeForm data={resumeData} onChange={setResumeData} />
           </div>
 
-          {/* Wrap Preview for PDF capture */}
-          <div className="lg:sticky lg:top-24 lg:self-start bg-card shadow-lg rounded-lg p-4" ref={previewRef}>
-            <ResumePreview data={resumeData} />
+          {/* Preview */}
+          <div className="lg:sticky lg:top-24 lg:self-start bg-card shadow-lg rounded-lg p-4">
+            <TemplateSelector
+              selectedTemplate={selectedTemplate}
+              onSelect={setSelectedTemplate}
+            />
+            {selectedTemplate === "modern" && <TemplateModern {...resumeData} />}
+            {selectedTemplate === "classic" && <TemplateClassic {...resumeData} />}
+            {selectedTemplate === "creative" && <TemplateCreative {...resumeData} />}
+
+            {/* Download Button */}
+            <DownloadResume
+              resumeData={resumeData}
+              selectedTemplate={selectedTemplate}
+            />
           </div>
         </div>
       </main>
