@@ -144,7 +144,7 @@ const Builder = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary to-muted text-gray-900 dark:text-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary to-muted text-gray-900 dark:bg-gray-900 dark:text-gray-100">
       <header className="border-b bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm sticky top-0 z-10">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         {/* Back Button */}
@@ -165,19 +165,19 @@ const Builder = () => {
         <div className="hidden md:flex gap-2">
           <button
             onClick={handleDownloadPDF}
-            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-110 text-white rounded-lg font-medium transition"
+            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-110 hover:opacity-90 text-white rounded-lg font-medium transition"
           >
             {downloading ? "Generating..." : "Download PDF"}
           </button>
           <button
             onClick={saveResume}
-            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-110 text-white rounded-lg font-medium transition"
+            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-110 hover:opacity-90 text-white rounded-lg font-medium transition"
           >
             Save
           </button>
           <button
             onClick={handleLogout}
-            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-110 text-white rounded-lg font-medium transition"
+            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-110 hover:opacity-90 text-white rounded-lg font-medium transition"
           >
             Logout
           </button>
@@ -200,19 +200,19 @@ const Builder = () => {
       >
         <button
           onClick={handleDownloadPDF}
-          className="w-full text-left px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium transition transform hover:scale-105"
+          className="w-full text-left px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium transition transform hover:scale-105 hover:opacity-90"
         >
           {downloading ? "Generating..." : "Download PDF"}
         </button>
         <button
           onClick={saveResume}
-          className="w-full text-left px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium transition transform hover:scale-105"
+          className="w-full text-left px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium transition transform hover:scale-105 hover:opacity-90"
         >
           Save
         </button>
         <button
           onClick={handleLogout}
-          className="w-full text-left px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium transition transform hover:scale-105"
+          className="w-full text-left px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium transition transform hover:scale-105 hover:opacity-90"
         >
           Logout
         </button>
@@ -226,7 +226,7 @@ const Builder = () => {
           </div>
 
           {/* Wrap Preview for PDF capture */}
-          <div className="lg:sticky lg:top-24 lg:self-start bg-white shadow-lg rounded-lg p-4" ref={previewRef}>
+          <div className="lg:sticky lg:top-24 lg:self-start bg-card shadow-lg rounded-lg p-4" ref={previewRef}>
             <ResumePreview data={resumeData} />
           </div>
         </div>

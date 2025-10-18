@@ -134,7 +134,7 @@ const Index = () => {
             </button>
             <button
               className="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-              // onClick={alert("Examples coming Soon....")}
+              onClick={() => navigate("/examples")}
             >
               View Examples
             </button>
@@ -146,7 +146,7 @@ const Index = () => {
           <img
             src={heroImage}
             alt="Resume Builder Interface"
-            className="relative rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-600"
+            className="relative rounded-2xl shadow-2xl border border-gray-200 dark:bg-black dark:border-gray-600"
           />
         </div>
       </section>

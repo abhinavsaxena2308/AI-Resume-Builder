@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dasboard";
 import Index from "./pages/index";
 import Builder from "./pages/Builder";
+import ViewExamples from "./pages/ViewExamples";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/builder/:id" element={<Builder />} />
+          <Route path="/examples" element={<ViewExamples />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

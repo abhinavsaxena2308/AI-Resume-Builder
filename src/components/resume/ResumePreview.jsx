@@ -5,7 +5,7 @@ const ResumePreview = ({ data }) => {
   const { personalInfo, summary, experience, education, skills } = data;
 
   return (
-    <Card className="shadow-2xl border border-border rounded-xl bg-white dark:bg-gray-900" id="resume-preview">
+    <Card className="shadow-2xl border border-border rounded-xl bg-white " id="resume-preview">
       <CardContent className="p-10">
         <div className="text-gray-800 dark:text-gray-100">
           {/* Header */}

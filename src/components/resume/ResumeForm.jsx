@@ -323,7 +323,7 @@ const ResumeForm = ({ data, onChange }) => {
               onKeyPress={(e) => e.key === "Enter" && addSkill()}
               placeholder="Add a skill..."
             />
-            <Button onClick={addSkill} size="sm" className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+            <Button onClick={addSkill} size="sm" className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90 transition">
               <Plus className="h-4 w-4 " />
             </Button>
           </div>
