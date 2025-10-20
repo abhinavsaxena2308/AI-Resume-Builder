@@ -53,8 +53,8 @@ resume-builder/
 │   ├── index.css
 │   └── main.jsx
 │
-├── resume-backend/
-│   └── index.js
+├── backend/
+│   └── server.js
 │
 ├── .env
 ├── tailwind.config.js
@@ -75,32 +75,47 @@ cd resume-builder
 
 ---
 
-### 2️⃣ Backend Setup
+### 2️⃣ Environment Setup
 
-```bash
-cd resume-backend
-npm install express cors node-fetch dotenv
+Before running the application, you need to set up environment variables for both frontend and backend.
+
+#### Backend Environment (.env in backend/ directory)
+```env
+GOOGLE_API_KEY=your_actual_google_api_key_here
+PORT=3000
 ```
 
-Create a `.env` file in `resume-backend` directory:
+#### Frontend Environment (.env in root directory)
 ```env
-GOOGLE_API_KEY=your_google_api_key_here
+VITE_BACKEND_URL=http://localhost:3000
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
+```
+
+For detailed environment setup instructions, see [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md).
+
+---
+
+### 3️⃣ Backend Setup
+
+```bash
+cd backend
+npm install
 ```
 
 Run the backend:
 ```bash
-node index.js
+npm start
 ```
 ✅ Backend will start at `http://localhost:3000`
 
 ---
 
-### 3️⃣ Frontend Setup
+### 4️⃣ Frontend Setup
 
 ```bash
 cd ../
 npm install
-npm install lucide-react
 npm run dev
 ```
 
@@ -110,7 +125,7 @@ npm run dev
 
 ## 📡 API Endpoint
 
-### POST `/generate-summary`
+### POST `/api/generate-summary`
 
 **Request Body:**
 ```json
@@ -144,8 +159,11 @@ Your preference is automatically saved in local storage for the next visit.
 | Variable | Description |
 |-----------|-------------|
 | `GOOGLE_API_KEY` | Your Google Generative Language API key |
+| `VITE_BACKEND_URL` | Backend API base URL |
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key |
 
-> ⚠️ Keep `.env` private — **never commit it to GitHub**.
+> ⚠️ Keep `.env` files private — **never commit them to GitHub**.
 
 ---
 
@@ -153,7 +171,7 @@ Your preference is automatically saved in local storage for the next visit.
 
 1. User inputs data → name, experience, and skills  
 2. Frontend sends a request to Express backend  
-3. Backend calls Google’s Generative Language API (`text-bison-001`)  
+3. Backend calls Google's Generative Language API (`text-bison-001`)  
 4. API returns a personalized, professional resume summary  
 5. Frontend displays the AI-generated output beautifully
 
@@ -183,7 +201,7 @@ Your preference is automatically saved in local storage for the next visit.
   }
   ```
 
-✅ You’ll get a response like:
+✅ You'll get a response like:
 ```json
 {
   "summary": "Abhinav is a dedicated NCC cadet with exceptional leadership and communication skills."
@@ -198,7 +216,3 @@ This project is licensed under the **MIT License**.
 Feel free to use and modify it as per your needs.
 
 ---
-
-
-
-⭐ **Star this repo** if you like it — it keeps the motivation high!

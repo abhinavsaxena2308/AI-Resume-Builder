@@ -6,6 +6,9 @@ import puppeteer from "puppeteer";
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
+// Import the new route
+import geminiSuggestionsRoute from "./routes/geminiSuggestions.js";
+
 dotenv.config();
 
 const app = express();
@@ -18,7 +21,8 @@ const __dirname = dirname(__filename);
 // Correct CORS: remove trailing slash from frontend URL
 const allowedOrigins = [
   "http://localhost:5173", // Vite dev server
-  "https://ai-resume-builder-six-kappa.vercel.app" // Production frontend
+  "https://ai-resume-builder-six-kappa.vercel.app", // Production frontend
+  "https://ai-resume-builder-h11a.onrender.com" // Add the Render URL
 ];
 
 app.use(cors({
@@ -30,7 +34,31 @@ app.use(cors({
 
 app.get("/", (req, res) => res.send("✅ Backend is running!"));
 
+// Test route to verify routing is working
+app.get("/api/test", (req, res) => {
+  res.json({ message: "Test route is working!" });
+});
+
+// IMPORTANT: Add this before route definitions
 app.use(express.json());  
+
+// Register the new route
+console.log("Registering /api/gemini-suggestions route");
+app.use("/api/gemini-suggestions", geminiSuggestionsRoute);
+
+// Add a catch-all route for debugging 404 errors (but only for paths that don't match any other routes)
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/gemini-suggestions')) {
+    console.log("Gemini suggestions route not found:", req.method, req.path);
+    return res.status(404).json({ 
+      error: "Route not found", 
+      method: req.method,
+      path: req.path,
+      message: "The requested endpoint does not exist"
+    });
+  }
+  next();
+});
 
 app.post("/generate-summary", async (req, res) => {
   try {
@@ -62,7 +90,7 @@ ${skillsText}
 `;
 
 
-    // Gemini API endpoint
+    // Gemini API endpoint - using gemini-2.5-flash model as suggested
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GOOGLE_API_KEY}`;
 
     // Call Gemini API
@@ -147,4 +175,6 @@ app.post("/api/generate-pdf", async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`✅ Gemini AI Resume Backend running at http://localhost:${PORT}`);
+  console.log(`📝 Test route available at http://localhost:${PORT}/api/test`);
+  console.log(`🤖 Gemini suggestions route available at http://localhost:${PORT}/api/gemini-suggestions`);
 });

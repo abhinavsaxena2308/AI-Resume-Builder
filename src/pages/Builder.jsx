@@ -1,14 +1,15 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import ResumeForm from "@/components/resume/ResumeForm";
+import EnhancedResumeForm from "@/components/EnhancedResumeForm";
 import ResumePreview from "@/components/resume/ResumePreview";
 import TemplateSelector from "@/components/ResumeTemplates/TemplateSelector";
 import TemplateModern from "@/components/ResumeTemplates/TemplateModern";
 import TemplateClassic from "@/components/ResumeTemplates/TemplateClassic";
 import TemplateCreative from "@/components/ResumeTemplates/TemplateCreative";
 import DownloadResume from "@/components/DownloadResume";
-import { Menu, X } from "lucide-react";
+import AiSuggestionsPopup from "@/components/AiSuggestionsPopup";
+import { Menu, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useToast } from "@/hooks/use-toast";
@@ -21,6 +22,9 @@ const Builder = () => {
   const [saving, setSaving] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState("modern");
+  const [aiSuggestions, setAiSuggestions] = useState(null);
+  const [userType, setUserType] = useState("");
+  const [isSuggestionsPopupOpen, setIsSuggestionsPopupOpen] = useState(false);
 
   // Load selected template from localStorage
   useEffect(() => {
@@ -36,7 +40,9 @@ const Builder = () => {
   }, [selectedTemplate]);
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [resumeData, setResumeData] = useState({
+  
+  // Initialize resume data with proper structure
+  const initialResumeData = {
     personalInfo: {
       fullName: "",
       email: "",
@@ -48,8 +54,19 @@ const Builder = () => {
     summary: "",
     experience: [],
     education: [],
-    skills: [],
-  });
+    projects: [],
+    certifications: [],
+    skills: {
+      frontend: [],
+      backend: [],
+      databases: [],
+      cloud: [],
+      tools: [],
+      other: []
+    },
+  };
+
+  const [resumeData, setResumeData] = useState(initialResumeData);
 
   const navigate = useNavigate();
   const { id } = useParams();
@@ -87,7 +104,31 @@ const Builder = () => {
             variant: "destructive"
           });
         } else {
-          setResumeData(data.content || resumeData);
+          // Ensure the loaded data has the correct structure
+          const loadedData = data.content || { ...initialResumeData };
+          
+          // Make sure all sections exist
+          if (!loadedData.personalInfo) loadedData.personalInfo = { ...initialResumeData.personalInfo };
+          if (!loadedData.summary) loadedData.summary = "";
+          if (!loadedData.experience) loadedData.experience = [];
+          if (!loadedData.education) loadedData.education = [];
+          if (!loadedData.projects) loadedData.projects = [];
+          if (!loadedData.certifications) loadedData.certifications = [];
+          
+          // Make sure skills are in the correct format
+          if (!loadedData.skills || Array.isArray(loadedData.skills)) {
+            // Convert old skills format to new grouped format
+            const newSkills = { ...initialResumeData.skills };
+            
+            // If it was an array, put all skills in the first category
+            if (Array.isArray(loadedData.skills)) {
+              newSkills.frontend = [...loadedData.skills];
+            }
+            
+            loadedData.skills = newSkills;
+          }
+          
+          setResumeData(loadedData);
         }
       }
       setLoading(false);
@@ -206,6 +247,60 @@ const Builder = () => {
     }
   };
 
+  const handleApplySuggestions = (section, content) => {
+    switch (section) {
+      case "summarySuggestion":
+        setResumeData(prev => ({
+          ...prev,
+          summary: content,
+        }));
+        toast({
+          title: "Summary Updated",
+          description: "Suggested summary has been applied to your resume.",
+        });
+        break;
+      case "recommendedSkills":
+        // Add all recommended skills that aren't already present
+        const currentSkills = resumeData.skills.frontend || [];
+        const newSkills = content.filter(skill => !currentSkills.includes(skill));
+        if (newSkills.length > 0) {
+          setResumeData(prev => ({
+            ...prev,
+            skills: {
+              ...prev.skills,
+              frontend: [...currentSkills, ...newSkills],
+            }
+          }));
+          toast({
+            title: "Skills Added",
+            description: `${newSkills.length} new skills added to your resume.`,
+          });
+        } else {
+          toast({
+            title: "No New Skills",
+            description: "All recommended skills are already in your resume.",
+          });
+        }
+        break;
+      default:
+        toast({
+          title: "Not Implemented",
+          description: `Applying ${section} is not yet supported.`,
+        });
+    }
+  };
+
+  // Check if resume is complete before allowing AI suggestions
+  const isResumeComplete = () => {
+    const { personalInfo, experience = [], education = [] } = resumeData;
+    return (
+      personalInfo?.fullName &&
+      personalInfo?.email &&
+      experience.length > 0 &&
+      education.length > 0
+    );
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -216,7 +311,15 @@ const Builder = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary to-muted text-gray-900 dark:text-gray-100">
-      <header className="border-b border-border bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm sticky top-0 z-10">
+      {/* AI Suggestions Popup */}
+      <AiSuggestionsPopup
+        isOpen={isSuggestionsPopupOpen}
+        onClose={() => setIsSuggestionsPopupOpen(false)}
+        resumeData={resumeData}
+        onApplySuggestions={handleApplySuggestions}
+      />
+      
+      <header className="border-b border-border bg-white/50 dark:bg-black/50 backdrop-blur-sm sticky top-0 z-10">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         {/* Back Button */}
         <button
@@ -226,11 +329,17 @@ const Builder = () => {
           ← Back to Dashboard
         </button>
 
-        {/* Title */}
-        <h1 className="text-xl font-bold flex items-center gap-2">
-          
-          {saving && <span className="text-sm text-green-600 animate-pulse">Saving...</span>}
-        </h1>
+        {/* Get Suggestions Button */}
+        <div className="absolute left-1/2 transform -translate-x-1/2">
+          <Button
+            onClick={() => setIsSuggestionsPopupOpen(true)}
+            disabled={!isResumeComplete()}
+            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:opacity-90 flex items-center gap-2"
+          >
+            <Sparkles className="h-4 w-4" />
+            Get Suggestions
+          </Button>
+        </div>
 
         {/* Desktop Buttons */}
         <div className="hidden md:flex gap-2">
@@ -269,6 +378,16 @@ const Builder = () => {
           menuOpen ? "max-h-96 opacity-100 scale-100" : "max-h-0 opacity-0 scale-95"
         } bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-t border-border px-4 pb-4 space-y-2 transform origin-top`}
       >
+        <div className="py-2">
+          <Button
+            onClick={() => setIsSuggestionsPopupOpen(true)}
+            disabled={!isResumeComplete()}
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:opacity-90 flex items-center gap-2"
+          >
+            <Sparkles className="h-4 w-4" />
+            Get Suggestions
+          </Button>
+        </div>
         <button
           onClick={handleDownloadPDF}
           className="w-full text-left px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium transition transform hover:scale-105 hover:opacity-90"
@@ -293,7 +412,12 @@ const Builder = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-2 gap-8">
           <div className="space-y-6">
-            <ResumeForm data={resumeData} onChange={setResumeData} />
+            <EnhancedResumeForm 
+              data={resumeData} 
+              onChange={setResumeData} 
+              aiSuggestions={aiSuggestions}
+              userType={userType}
+            />
           </div>
 
           {/* Preview */}

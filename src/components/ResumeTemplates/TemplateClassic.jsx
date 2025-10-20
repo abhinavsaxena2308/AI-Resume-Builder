@@ -7,9 +7,14 @@ const TemplateClassic = ({
   summary,
   experience,
   education,
+  projects,
+  certifications,
   skills
 }) => {
   const { theme } = useTheme();
+  
+  // Flatten skills object into a single array for display
+  const flattenedSkills = Object.values(skills || {}).flat();
   
   return (
     <Card className="shadow-xl border border-border rounded-lg bg-card text-card-foreground max-w-4xl mx-auto">
@@ -92,6 +97,29 @@ const TemplateClassic = ({
             </section>
           )}
 
+          {/* Projects */}
+          {projects && projects.length > 0 && (
+            <section className="mb-6">
+              <h2 className="text-lg font-semibold text-foreground uppercase tracking-wide mb-3 border-b border-border pb-1">
+                Projects
+              </h2>
+              <div className="space-y-4">
+                {projects.map((project) => (
+                  <div key={project.id}>
+                    <div className="flex justify-between items-start mb-1">
+                      <h3 className="font-bold text-base text-foreground">{project.name}</h3>
+                      <span className="text-sm text-muted-foreground">{project.date}</span>
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground mb-2">{project.technologies}</p>
+                    <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+                      {project.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Education */}
           {education && education.length > 0 && (
             <section className="mb-6">
@@ -112,14 +140,34 @@ const TemplateClassic = ({
             </section>
           )}
 
+          {/* Certifications */}
+          {certifications && certifications.length > 0 && (
+            <section className="mb-6">
+              <h2 className="text-lg font-semibold text-foreground uppercase tracking-wide mb-3 border-b border-border pb-1">
+                Certifications
+              </h2>
+              <div className="space-y-3">
+                {certifications.map((cert) => (
+                  <div key={cert.id} className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-bold text-foreground text-base">{cert.name}</h3>
+                      <p className="text-sm text-muted-foreground">{cert.issuer}</p>
+                    </div>
+                    <span className="text-sm text-muted-foreground">{cert.date}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Skills */}
-          {skills && skills.length > 0 && (
+          {flattenedSkills && flattenedSkills.length > 0 && (
             <section className="mb-6">
               <h2 className="text-lg font-semibold text-foreground uppercase tracking-wide mb-3 border-b border-border pb-1">
                 Skills
               </h2>
               <div className="flex flex-wrap gap-2">
-                {skills.map((skill, index) => (
+                {flattenedSkills.map((skill, index) => (
                   <span
                     key={index}
                     className="px-3 py-1 bg-muted text-foreground rounded-full text-sm font-medium"
@@ -136,7 +184,9 @@ const TemplateClassic = ({
             !summary &&
             (!experience || experience.length === 0) &&
             (!education || education.length === 0) &&
-            (!skills || skills.length === 0) && (
+            (!projects || projects.length === 0) &&
+            (!certifications || certifications.length === 0) &&
+            (!flattenedSkills || flattenedSkills.length === 0) && (
               <div className="text-center py-20">
                 <p className="text-muted-foreground text-sm">
                   Your resume preview will appear here as you fill in the form.

@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dasboard";
 import Index from "./pages/index";
 import Builder from "./pages/Builder";
 import ViewExamples from "./pages/ViewExamples";
+import TestAiFeature from "./pages/TestAiFeature";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ThemeToggle from "./components/ThemeToggle";
 
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/builder/:id" element={<Builder />} />
             <Route path="/examples" element={<ViewExamples />} />
+            <Route path="/test-ai" element={<TestAiFeature />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
