@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Palette, Eye } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const TemplateSelector = ({ selectedTemplate, onSelect }) => {
+  const { theme } = useTheme();
+
   const templates = [
     {
       id: "modern",
@@ -32,7 +35,7 @@ const TemplateSelector = ({ selectedTemplate, onSelect }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-3">
-        <Palette className="h-5 w-5 text-purple-600" />
+        <Palette className="h-5 w-5 text-purple-600 dark:text-purple-400" />
         <span className="font-medium text-gray-700 dark:text-gray-300">Choose Template</span>
       </div>
 
@@ -45,60 +48,78 @@ const TemplateSelector = ({ selectedTemplate, onSelect }) => {
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
             <Card
-              className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                selectedTemplate === template.id
-                  ? "ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/20"
-                  : "hover:bg-gray-50 dark:hover:bg-gray-800"
-              }`}
+              className={`cursor-pointer transition-all duration-200 hover:shadow-lg border 
+                ${
+                  selectedTemplate === template.id
+                    ? "border-purple-500 ring-2 ring-purple-500"
+                    : "border-border"
+                }
+                ${
+                  theme === "dark"
+                    ? "bg-black text-white hover:bg-gray-900"
+                    : "bg-white text-gray-900 hover:bg-gray-50"
+                }
+              `}
               onClick={() => onSelect(template.id)}
             >
-            <CardContent className="p-4">
-              <div className="space-y-3">
-                {/* Template Name */}
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-lg capitalize">{template.name}</h3>
-                  {selectedTemplate === template.id && (
-                    <Badge variant="default" className="bg-purple-600">
-                      Selected
-                    </Badge>
-                  )}
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  {/* Template Name */}
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-lg capitalize text-foreground">
+                      {template.name}
+                    </h3>
+                    {selectedTemplate === template.id && (
+                      <Badge
+                        variant="default"
+                        className="bg-purple-600 dark:bg-purple-700 text-white"
+                      >
+                        Selected
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {template.description}
+                  </p>
+
+                  {/* Color Indicator */}
+                  <div
+                    className={`w-full h-2 rounded-full bg-gradient-to-r ${
+                      template.color === "blue"
+                        ? "from-blue-200 to-blue-600 dark:from-blue-400 dark:to-blue-800"
+                        : template.color === "gray"
+                        ? "from-gray-400 to-gray-600 dark:from-gray-500 dark:to-gray-700"
+                        : "from-purple-400 to-pink-400 dark:from-purple-500 dark:to-pink-500"
+                    }`}
+                  />
+
+                  {/* Mini Preview Text */}
+                  <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+                    {template.preview}
+                  </div>
+
+                  {/* Select Button */}
+                  <Button
+                    variant={selectedTemplate === template.id ? "default" : "outline"}
+                    size="sm"
+                    className={`w-full ${
+                      selectedTemplate === template.id
+                        ? "bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800"
+                        : "border-border hover:bg-accent dark:hover:bg-gray-700"
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelect(template.id);
+                    }}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    {selectedTemplate === template.id ? "Current" : "Preview"}
+                  </Button>
                 </div>
-
-                {/* Description */}
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {template.description}
-                </p>
-
-                {/* Color Indicator */}
-                <div className={`w-full h-2 rounded-full bg-gradient-to-r ${
-                  template.color === "blue"
-                    ? "from-blue-400 to-blue-600"
-                    : template.color === "gray"
-                    ? "from-gray-400 to-gray-600"
-                    : "from-purple-400 to-pink-400"
-                }`} />
-
-                {/* Mini Preview Text */}
-                <div className="text-xs text-gray-500 dark:text-gray-400 italic">
-                  {template.preview}
-                </div>
-
-                {/* Select Button */}
-                <Button
-                  variant={selectedTemplate === template.id ? "default" : "outline"}
-                  size="sm"
-                  className="w-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSelect(template.id);
-                  }}
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  {selectedTemplate === template.id ? "Current" : "Preview"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
           </motion.div>
         ))}
       </div>

@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, handleAuthError } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Loader2 } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -17,6 +18,7 @@ const Auth = () => {
   const [oauthLoading, setOauthLoading] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { theme } = useTheme();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -34,12 +36,24 @@ const Auth = () => {
           password,
           options: { data: { full_name: fullName }, emailRedirectTo: `${window.location.origin}/` },
         });
-        if (error) throw error;
+        if (error) {
+          if (error.message.includes('Invalid Refresh Token')) {
+            handleAuthError(error);
+            return;
+          }
+          throw error;
+        }
         toast({ title: "Success!", description: "Account created. Please sign in." });
         setIsSignUp(false);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          if (error.message.includes('Invalid Refresh Token')) {
+            handleAuthError(error);
+            return;
+          }
+          throw error;
+        }
         toast({ title: "Welcome!", description: "Signed in successfully." });
         navigate("/dashboard");
       }
@@ -57,7 +71,13 @@ const Auth = () => {
         provider,
         options: { redirectTo: import.meta.env.VITE_SUPABASE_REDIRECT_URL },
       });
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('Invalid Refresh Token')) {
+          handleAuthError(error);
+          return;
+        }
+        throw error;
+      }
     } catch (error) {
       toast({ title: "Error", description: error.message || "OAuth login failed", variant: "destructive" });
     } finally {
@@ -67,14 +87,14 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md border-border/50 shadow-xl">
+      <Card className="w-full max-w-md border-border/50 shadow-xl bg-card text-card-foreground">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div className="h-12 w-12 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
               <FileText className="h-6 w-6 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl">{isSignUp ? "Create Account" : "Welcome Back"}</CardTitle>
+          <CardTitle className="text-2xl text-foreground">{isSignUp ? "Create Account" : "Welcome Back"}</CardTitle>
           <CardDescription>
             {isSignUp ? "Start building your perfect resume" : "Sign in to continue building your resume"}
           </CardDescription>
@@ -85,7 +105,7 @@ const Auth = () => {
           <form onSubmit={handleAuth} className="space-y-4">
             {isSignUp && (
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="fullName" className="text-foreground">Full Name</Label>
                 <Input
                   id="fullName"
                   type="text"
@@ -93,11 +113,12 @@ const Auth = () => {
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="John Doe"
                   required
+                  className="bg-background text-foreground border-border"
                 />
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-foreground">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -105,10 +126,11 @@ const Auth = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
+                className="bg-background text-foreground border-border"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-foreground">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -117,6 +139,7 @@ const Auth = () => {
                 placeholder="••••••••"
                 minLength={6}
                 required
+                className="bg-background text-foreground border-border"
               />
             </div>
             <Button
@@ -142,7 +165,7 @@ const Auth = () => {
             <Button
               onClick={() => handleOAuthLogin("github")}
               variant="outline"
-              className="flex justify-center items-center gap-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 relative"
+              className="flex justify-center items-center gap-2 border-border hover:bg-accent relative"
               disabled={oauthLoading !== "" && oauthLoading !== "github"}
             >
               {oauthLoading === "github" && <Loader2 className="absolute left-3 h-4 w-4 animate-spin" />}
@@ -153,7 +176,7 @@ const Auth = () => {
             <Button
               onClick={() => handleOAuthLogin("google")}
               variant="outline"
-              className="flex justify-center items-center gap-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 relative"
+              className="flex justify-center items-center gap-2 border-border hover:bg-accent relative"
               disabled={oauthLoading !== "" && oauthLoading !== "google"}
             >
               {oauthLoading === "google" && <Loader2 className="absolute left-3 h-4 w-4 animate-spin" />}
@@ -167,14 +190,14 @@ const Auth = () => {
             {isSignUp ? (
               <>
                 Already have an account?{" "}
-                <button onClick={() => setIsSignUp(false)} className="text-purple-900 hover:underline font-medium">
+                <button onClick={() => setIsSignUp(false)} className="text-purple-900 dark:text-purple-400 hover:underline font-medium">
                   Sign In
                 </button>
               </>
             ) : (
               <>
                 Don't have an account?{" "}
-                <button onClick={() => setIsSignUp(true)} className="text-purple-900 hover:underline font-medium">
+                <button onClick={() => setIsSignUp(true)} className="text-purple-900 dark:text-purple-400 hover:underline font-medium">
                   Sign Up
                 </button>
               </>
@@ -183,7 +206,7 @@ const Auth = () => {
 
           {/* Back to home */}
           <div className="mt-4 text-center">
-            <Link to="/" className="text-sm text-muted-foreground hover:text-purple-900">
+            <Link to="/" className="text-sm text-muted-foreground hover:text-purple-900 dark:hover:text-purple-400">
               ← Back to Home
             </Link>
           </div>

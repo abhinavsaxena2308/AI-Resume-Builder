@@ -1,0 +1,31 @@
+/* Additional styling for the theme toggle button */
+.theme-toggle-btn {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease-in-out;
+  border: 1px solid hsl(var(--border));
+}
+
+.theme-toggle-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+.dark .theme-toggle-btn {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border));
+}
+
+.dark .theme-toggle-btn:hover {
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  background-color: hsl(var(--accent));
+}
+
+/* Ensure proper contrast for icons in both modes */
+.theme-toggle-btn svg {
+  transition: color 0.2s ease-in-out;
+}
+
+.dark .theme-toggle-btn svg {
+  color: hsl(var(--foreground));
+}

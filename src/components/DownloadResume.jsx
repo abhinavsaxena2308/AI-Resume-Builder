@@ -2,9 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const DownloadResume = ({ resumeData, selectedTemplate }) => {
   const [isDownloading, setIsDownloading] = useState(false);
+  const { theme } = useTheme();
 
   const handleDownload = async () => {
     if (!resumeData || !selectedTemplate) {
@@ -15,20 +17,44 @@ const DownloadResume = ({ resumeData, selectedTemplate }) => {
     setIsDownloading(true);
 
     try {
-      const response = await fetch("http://localhost:3000/api/generate-pdf", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          resumeData,
-          template: selectedTemplate,
-        }),
-      });
+      // Try multiple endpoints for PDF generation
+      const urls = [
+        `${import.meta.env.VITE_BACKEND_URL}/api/generate-pdf`, // Production URL
+        "http://localhost:3000/api/generate-pdf" // Local development URL
+      ];
+
+      let response;
+      let success = false;
+
+      for (const url of urls) {
+        try {
+          response = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              resumeData,
+              template: selectedTemplate,
+            }),
+          });
+
+          if (response.ok) {
+            success = true;
+            break;
+          }
+        } catch (error) {
+          console.warn(`Failed to connect to ${url}, trying next...`);
+        }
+      }
+
+      if (!success || !response) {
+        throw new Error("Unable to connect to PDF generation service. Please ensure the backend server is running.");
+      }
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to generate PDF");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `PDF generation failed with status ${response.status}`);
       }
 
       // Convert response to blob
@@ -38,7 +64,7 @@ const DownloadResume = ({ resumeData, selectedTemplate }) => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "My_Resume.pdf";
+      link.download = `${resumeData.personalInfo?.fullName || "Resume"}.pdf`;
       document.body.appendChild(link);
       link.click();
 

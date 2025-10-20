@@ -1,7 +1,6 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
 import ResumeForm from "@/components/resume/ResumeForm";
 import ResumePreview from "@/components/resume/ResumePreview";
 import TemplateSelector from "@/components/ResumeTemplates/TemplateSelector";
@@ -11,10 +10,12 @@ import TemplateCreative from "@/components/ResumeTemplates/TemplateCreative";
 import DownloadResume from "@/components/DownloadResume";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Palette } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useToast } from "@/hooks/use-toast";
 
 const Builder = () => {
-  
+  const { theme } = useTheme();
+  const { toast } = useToast();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -80,7 +81,11 @@ const Builder = () => {
           .single();
 
         if (error) {
-          alert("Failed to load resume.");
+          toast({
+            title: "Error",
+            description: "Failed to load resume.",
+            variant: "destructive"
+          });
         } else {
           setResumeData(data.content || resumeData);
         }
@@ -108,8 +113,16 @@ const Builder = () => {
         .eq("id", id);
 
       if (error) throw error;
+      toast({
+        title: "Success",
+        description: "Resume saved successfully."
+      });
     } catch (error) {
-      alert("Failed to save resume");
+      toast({
+        title: "Error",
+        description: "Failed to save resume",
+        variant: "destructive"
+      });
     } finally {
       setSaving(false);
     }
@@ -125,6 +138,8 @@ const Builder = () => {
     ];
 
     let response;
+    let success = false;
+
     for (const url of urls) {
       try {
         response = await fetch(url, {
@@ -134,6 +149,7 @@ const Builder = () => {
         });
 
         if (response.ok) {
+          success = true;
           break; // Success, exit loop
         }
       } catch (error) {
@@ -142,9 +158,24 @@ const Builder = () => {
       }
     }
 
-    if (!response || !response.ok) {
+    if (!success || !response) {
       setDownloading(false);
-      alert("Failed to generate PDF from both production and local servers.");
+      toast({
+        title: "Error",
+        description: "Unable to connect to PDF generation service. Please ensure the backend server is running.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!response.ok) {
+      setDownloading(false);
+      const errorData = await response.json().catch(() => ({}));
+      toast({
+        title: "Error",
+        description: errorData.error || "Failed to generate PDF from both production and local servers.",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -159,9 +190,17 @@ const Builder = () => {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+      toast({
+        title: "Success",
+        description: "PDF downloaded successfully!"
+      });
     } catch (error) {
       console.error("PDF download failed:", error);
-      alert("Failed to download resume. Please try again.");
+      toast({
+        title: "Error",
+        description: "Failed to download resume. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setDownloading(false);
     }
@@ -176,13 +215,13 @@ const Builder = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary to-muted text-gray-900 dark:bg-gray-900 dark:text-gray-100">
-      <header className="border-b bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm sticky top-0 z-10">
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary to-muted text-gray-900 dark:text-gray-100">
+      <header className="border-b border-border bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm sticky top-0 z-10">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         {/* Back Button */}
         <button
           onClick={() => navigate("/dashboard")}
-          className="flex items-center gap-2 text-gray-700 border rounded-full p-2 dark:text-gray-200 hover:shadow-lg hover:shadow-purple-400 transition"
+          className="flex items-center gap-2 text-gray-700 border rounded-full p-2 dark:text-gray-200 dark:border-gray-700 hover:shadow-lg hover:shadow-purple-400 dark:hover:shadow-purple-600 transition"
         >
           ← Back to Dashboard
         </button>
@@ -228,7 +267,7 @@ const Builder = () => {
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ease-out ${
           menuOpen ? "max-h-96 opacity-100 scale-100" : "max-h-0 opacity-0 scale-95"
-        } bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-t px-4 pb-4 space-y-2 transform origin-top`}
+        } bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-t border-border px-4 pb-4 space-y-2 transform origin-top`}
       >
         <button
           onClick={handleDownloadPDF}
@@ -258,7 +297,7 @@ const Builder = () => {
           </div>
 
           {/* Preview */}
-          <div className="lg:sticky lg:top-24 lg:self-start bg-card shadow-lg rounded-lg p-4">
+          <div className="lg:sticky lg:top-24 lg:self-start bg-card shadow-lg rounded-lg p-4 border border-border">
             <TemplateSelector
               selectedTemplate={selectedTemplate}
               onSelect={setSelectedTemplate}

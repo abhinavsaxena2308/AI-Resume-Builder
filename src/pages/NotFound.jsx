@@ -1,8 +1,10 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const NotFound = () => {
   const location = useLocation();
+  const { theme } = useTheme();
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);

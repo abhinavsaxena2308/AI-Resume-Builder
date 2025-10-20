@@ -12,5 +12,16 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: true,
   },
 });
+
+// Add a function to handle session refresh errors
+export const handleAuthError = (error) => {
+  console.error('Supabase Auth Error:', error);
+  if (error.message.includes('Refresh Token Not Found')) {
+    // Clear local storage and redirect to login
+    localStorage.clear();
+    window.location.href = '/auth';
+  }
+};

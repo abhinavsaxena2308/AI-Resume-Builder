@@ -1,11 +1,30 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import ResumePreview from "@/components/resume/ResumePreview";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const ViewExamples = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  const [user, setUser] = useState(null);
+
+  // Load Supabase user session
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) setUser(session.user);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) setUser(session.user);
+      else setUser(null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Sample resume data for examples
   const exampleResumes = [
@@ -85,7 +104,7 @@ const ViewExamples = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navbar />
+      <Navbar user={user} />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -96,7 +115,7 @@ const ViewExamples = () => {
             Get inspired by these professionally crafted resume examples
           </p>
           <Button
-            onClick={() => navigate("/auth")}
+            onClick={() => navigate(user ? "/dashboard" : "/auth")}
             className="bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90 text-white px-8 py-3 text-lg"
           >
             Create Your Own Resume
@@ -112,15 +131,15 @@ const ViewExamples = () => {
                   Example {index + 1}: {resume.personalInfo.fullName}
                 </h2>
                 <Button
-                  onClick={() => navigate("/auth")}
+                  onClick={() => navigate(user ? "/dashboard" : "/auth")}
                   variant="outline"
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 border-border hover:bg-accent"
                 >
                   <Eye className="h-4 w-4" />
                   Use Template
                 </Button>
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-border">
                 <ResumePreview data={resume} />
               </div>
             </div>
@@ -136,7 +155,7 @@ const ViewExamples = () => {
             Use our AI-powered builder to create a professional resume in minutes
           </p>
           <Button
-            onClick={() => navigate("/auth")}
+            onClick={() => navigate(user ? "/dashboard" : "/auth")}
             className="bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90 text-white px-8 py-3 text-lg"
           >
             Get Started Now

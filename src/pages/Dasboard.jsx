@@ -1,31 +1,60 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, handleAuthError } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import { FileText } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const [session, setSession] = useState(null);
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  const { toast } = useToast();
 
   // Track which resume is being edited
   const [editingId, setEditingId] = useState(null);
   const [tempTitle, setTempTitle] = useState("");
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (!session) navigate("/auth");
-    });
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          handleAuthError(error);
+          return;
+        }
+        
+        if (!session) {
+          navigate("/auth");
+          return;
+        }
+        
+        setSession(session);
+      } catch (err) {
+        console.error("Session check error:", err);
+        navigate("/auth");
+      }
+    };
+
+    checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (!session) navigate("/auth");
+      if (session) {
+        setSession(session);
+      } else {
+        navigate("/auth");
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, [navigate]);
 
   useEffect(() => {
@@ -39,10 +68,22 @@ const Dashboard = () => {
         .select("id, title, created_at, updated_at")
         .order("updated_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('Invalid Refresh Token')) {
+          handleAuthError(error);
+          return;
+        }
+        throw error;
+      }
+      
       setResumes(data || []);
     } catch (error) {
-      alert("Failed to load resumes");
+      toast({
+        title: "Error",
+        description: "Failed to load resumes. Please try logging in again.",
+        variant: "destructive"
+      });
+      console.error("Fetch resumes error:", error);
     } finally {
       setLoading(false);
     }
@@ -57,10 +98,22 @@ const Dashboard = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('Invalid Refresh Token')) {
+          handleAuthError(error);
+          return;
+        }
+        throw error;
+      }
+      
       navigate(`/builder/${data.id}`);
     } catch (error) {
-      alert("Failed to create resume");
+      toast({
+        title: "Error",
+        description: "Failed to create resume. Please try again.",
+        variant: "destructive"
+      });
+      console.error("Create resume error:", error);
     }
   };
 
@@ -68,10 +121,27 @@ const Dashboard = () => {
     if (!confirm("Are you sure you want to delete this resume?")) return;
     try {
       const { error } = await supabase.from("resumes").delete().eq("id", id);
-      if (error) throw error;
+      
+      if (error) {
+        if (error.message.includes('Invalid Refresh Token')) {
+          handleAuthError(error);
+          return;
+        }
+        throw error;
+      }
+      
       setResumes(resumes.filter(r => r.id !== id));
+      toast({
+        title: "Success",
+        description: "Resume deleted successfully."
+      });
     } catch (err) {
-      alert("Failed to delete resume");
+      toast({
+        title: "Error",
+        description: "Failed to delete resume. Please try again.",
+        variant: "destructive"
+      });
+      console.error("Delete resume error:", err);
     }
   };
 
@@ -79,19 +149,35 @@ const Dashboard = () => {
     if (!tempTitle.trim()) return;
     try {
       const { error } = await supabase.from("resumes").update({ title: tempTitle }).eq("id", id);
-      if (error) throw error;
+      
+      if (error) {
+        if (error.message.includes('Invalid Refresh Token')) {
+          handleAuthError(error);
+          return;
+        }
+        throw error;
+      }
 
       setResumes(resumes.map(r => r.id === id ? { ...r, title: tempTitle } : r));
       setEditingId(null);
       setTempTitle("");
+      toast({
+        title: "Success",
+        description: "Resume title updated."
+      });
     } catch (error) {
-      alert("Failed to rename resume");
+      toast({
+        title: "Error",
+        description: "Failed to rename resume. Please try again.",
+        variant: "destructive"
+      });
+      console.error("Save title error:", error);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-gray-50 dark:bg-black">
         <Navbar user={session?.user} />
         <div className="flex items-center justify-center h-[80vh]">
           <div className="w-8 h-8 border-4 border-gray-300 border-t-purple-500 rounded-full animate-spin"></div>
@@ -101,7 +187,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <div className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100">
       <Navbar user={session?.user} />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
@@ -119,7 +205,7 @@ const Dashboard = () => {
         </div>
 
         {resumes.length === 0 ? (
-          <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-12 text-center">
+          <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-12 text-center bg-card">
             <div className="flex justify-center mb-4">
               <div className="h-16 w-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white flex items-center justify-center">
                 <FileText/>
@@ -137,7 +223,7 @@ const Dashboard = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {resumes.map(resume => (
-              <div key={resume.id} className="border border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:shadow-lg hover:shadow-purple-500 transition">
+              <div key={resume.id} className="border border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:shadow-lg hover:shadow-purple-500 dark:hover:shadow-purple-700 transition bg-card">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-purple-500 text-lg">📄</span>
                   {editingId === resume.id ? (
@@ -147,7 +233,7 @@ const Dashboard = () => {
                       onChange={(e) => setTempTitle(e.target.value)}
                       onBlur={() => saveTitle(resume.id)}
                       onKeyDown={(e) => e.key === "Enter" && saveTitle(resume.id)}
-                      className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm flex-1"
+                      className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm flex-1 bg-background text-foreground"
                       autoFocus
                     />
                   ) : (

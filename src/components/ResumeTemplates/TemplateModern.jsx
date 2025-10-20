@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Mail, Phone, MapPin, Linkedin, Github } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const TemplateModern = ({
   personalInfo,
@@ -8,18 +9,20 @@ const TemplateModern = ({
   education,
   skills
 }) => {
+  const { theme } = useTheme();
+  
   return (
-    <Card className="shadow-2xl border border-border rounded-xl bg-white max-w-4xl mx-auto">
+    <Card className="shadow-2xl border border-border rounded-xl bg-card text-card-foreground max-w-4xl mx-auto">
       <CardContent className="p-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Header & Summary */}
           <div className="space-y-6">
             {/* Header */}
-            <div className="text-center pb-6 border-b-2 border-blue-200">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <div className="text-center pb-6 border-b-2 border-blue-200 dark:border-blue-800">
+              <h1 className="text-3xl font-bold text-foreground mb-2">
                 {personalInfo.fullName || "Your Name"}
               </h1>
-              <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600">
+              <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
                 {personalInfo.email && (
                   <div className="flex items-center gap-1">
                     <Mail className="h-4 w-4 text-blue-500" />
@@ -41,7 +44,7 @@ const TemplateModern = ({
               </div>
 
               {(personalInfo.linkedin || personalInfo.github) && (
-                <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600 mt-2">
+                <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground mt-2">
                   {personalInfo.linkedin && (
                     <div className="flex items-center gap-1">
                       <Linkedin className="h-4 w-4 text-blue-600" />
@@ -50,7 +53,7 @@ const TemplateModern = ({
                   )}
                   {personalInfo.github && (
                     <div className="flex items-center gap-1">
-                      <Github className="h-4 w-4 text-gray-700" />
+                      <Github className="h-4 w-4 text-gray-700 dark:text-gray-300" />
                       <span>{personalInfo.github}</span>
                     </div>
                   )}
@@ -61,10 +64,10 @@ const TemplateModern = ({
             {/* Summary */}
             {summary && (
               <section>
-                <h2 className="text-lg font-semibold text-blue-600 uppercase tracking-wide mb-2 border-b border-blue-200 pb-1">
+                <h2 className="text-lg font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-2 border-b border-blue-200 dark:border-blue-800 pb-1">
                   Professional Summary
                 </h2>
-                <p className="text-sm text-gray-700 leading-relaxed">{summary}</p>
+                <p className="text-sm text-foreground leading-relaxed">{summary}</p>
               </section>
             )}
           </div>
@@ -74,18 +77,18 @@ const TemplateModern = ({
             {/* Experience */}
             {experience && experience.length > 0 && (
               <section>
-                <h2 className="text-lg font-semibold text-blue-600 uppercase tracking-wide mb-3 border-b border-blue-200 pb-1">
+                <h2 className="text-lg font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-3 border-b border-blue-200 dark:border-blue-800 pb-1">
                   Work Experience
                 </h2>
                 <div className="space-y-4">
                   {experience.map((exp) => (
-                    <div key={exp.id} className="border-l-4 border-blue-500 pl-4">
+                    <div key={exp.id} className="border-l-4 border-blue-500 dark:border-blue-400 pl-4">
                       <div className="flex justify-between items-start mb-1">
-                        <h3 className="font-bold text-base text-gray-900">{exp.title}</h3>
-                        <span className="text-sm text-gray-600">{exp.duration}</span>
+                        <h3 className="font-bold text-base text-foreground">{exp.title}</h3>
+                        <span className="text-sm text-muted-foreground">{exp.duration}</span>
                       </div>
-                      <p className="text-sm font-medium text-blue-600 mb-2">{exp.company}</p>
-                      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                      <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-2">{exp.company}</p>
+                      <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
                         {exp.description}
                       </p>
                     </div>
@@ -97,17 +100,17 @@ const TemplateModern = ({
             {/* Education */}
             {education && education.length > 0 && (
               <section>
-                <h2 className="text-lg font-semibold text-blue-600 uppercase tracking-wide mb-3 border-b border-blue-200 pb-1">
+                <h2 className="text-lg font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-3 border-b border-blue-200 dark:border-blue-800 pb-1">
                   Education
                 </h2>
                 <div className="space-y-3">
                   {education.map((edu) => (
                     <div key={edu.id} className="flex justify-between items-start">
                       <div>
-                        <h3 className="font-bold text-gray-900 text-base">{edu.degree}</h3>
-                        <p className="text-sm text-gray-600">{edu.institution}</p>
+                        <h3 className="font-bold text-foreground text-base">{edu.degree}</h3>
+                        <p className="text-sm text-muted-foreground">{edu.institution}</p>
                       </div>
-                      <span className="text-sm text-gray-600">{edu.year}</span>
+                      <span className="text-sm text-muted-foreground">{edu.year}</span>
                     </div>
                   ))}
                 </div>
@@ -117,14 +120,14 @@ const TemplateModern = ({
             {/* Skills */}
             {skills && skills.length > 0 && (
               <section>
-                <h2 className="text-lg font-semibold text-blue-600 uppercase tracking-wide mb-3 border-b border-blue-200 pb-1">
+                <h2 className="text-lg font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-3 border-b border-blue-200 dark:border-blue-800 pb-1">
                   Skills
                 </h2>
                 <div className="flex flex-wrap gap-2">
                   {skills.map((skill, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+                      className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium"
                     >
                       {skill}
                     </span>
@@ -142,7 +145,7 @@ const TemplateModern = ({
           (!education || education.length === 0) &&
           (!skills || skills.length === 0) && (
             <div className="text-center py-20">
-              <p className="text-gray-500 text-sm">
+              <p className="text-muted-foreground text-sm">
                 Your resume preview will appear here as you fill in the form.
               </p>
             </div>

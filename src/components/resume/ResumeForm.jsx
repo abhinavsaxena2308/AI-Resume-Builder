@@ -7,11 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Sparkles, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const ResumeForm = ({ data, onChange }) => {
   const [newSkill, setNewSkill] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
+  const { theme } = useTheme();
 
   const handlePersonalInfoChange = (field, value) => {
     onChange({
@@ -152,7 +154,7 @@ const ResumeForm = ({ data, onChange }) => {
   return (
     <div className="space-y-6">
       {/* Personal Information */}
-      <Card>
+      <Card className="bg-card text-card-foreground border-border">
         <CardHeader>
           <CardTitle>Personal Information</CardTitle>
           <CardDescription>Your contact details and basic info</CardDescription>
@@ -170,6 +172,7 @@ const ResumeForm = ({ data, onChange }) => {
                     field === "fullName" ? "John Doe" :
                     field === "email" ? "john@example.com" : ""
                   }
+                  className="bg-background text-foreground border-border"
                 />
               </div>
             ))}
@@ -178,7 +181,7 @@ const ResumeForm = ({ data, onChange }) => {
       </Card>
 
       {/* Professional Summary */}
-      <Card>
+      <Card className="bg-card text-card-foreground border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -206,12 +209,13 @@ const ResumeForm = ({ data, onChange }) => {
             onChange={(e) => onChange({ ...data, summary: e.target.value })}
             placeholder="A brief professional summary highlighting your experience and goals..."
             rows={4}
+            className="bg-background text-foreground border-border"
           />
         </CardContent>
       </Card>
 
       {/* Work Experience */}
-      <Card>
+      <Card className="bg-card text-card-foreground border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -231,7 +235,7 @@ const ResumeForm = ({ data, onChange }) => {
             </p>
           )}
           {data.experience.map((exp) => (
-            <div key={exp.id} className="p-4 border rounded-lg space-y-3">
+            <div key={exp.id} className="p-4 border rounded-lg space-y-3 bg-background border-border">
               <div className="flex justify-between items-start">
                 <h4 className="font-medium">Experience Entry</h4>
                 <Button onClick={() => removeExperience(exp.id)} size="sm" variant="ghost" className="text-destructive">
@@ -248,12 +252,14 @@ const ResumeForm = ({ data, onChange }) => {
                         onChange={(e) => updateExperience(exp.id, field, e.target.value)}
                         placeholder={`Enter ${field}...`}
                         rows={field === "description" ? 3 : 1}
+                        className="bg-background text-foreground border-border"
                       />
                     ) : (
                       <Input
                         value={exp[field]}
                         onChange={(e) => updateExperience(exp.id, field, e.target.value)}
                         placeholder={`Enter ${field}...`}
+                        className="bg-background text-foreground border-border"
                       />
                     )}
                   </div>
@@ -265,7 +271,7 @@ const ResumeForm = ({ data, onChange }) => {
       </Card>
 
       {/* Education */}
-      <Card>
+      <Card className="bg-card text-card-foreground border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -285,7 +291,7 @@ const ResumeForm = ({ data, onChange }) => {
             </p>
           )}
           {data.education.map((edu) => (
-            <div key={edu.id} className="p-4 border rounded-lg space-y-3">
+            <div key={edu.id} className="p-4 border rounded-lg space-y-3 bg-background border-border">
               <div className="flex justify-between items-start">
                 <h4 className="font-medium">Education Entry</h4>
                 <Button onClick={() => removeEducation(edu.id)} size="sm" variant="ghost" className="text-destructive">
@@ -300,6 +306,7 @@ const ResumeForm = ({ data, onChange }) => {
                       value={edu[field]}
                       onChange={(e) => updateEducation(edu.id, field, e.target.value)}
                       placeholder={`Enter ${field}...`}
+                      className="bg-background text-foreground border-border"
                     />
                   </div>
                 ))}
@@ -310,7 +317,7 @@ const ResumeForm = ({ data, onChange }) => {
       </Card>
 
       {/* Skills */}
-      <Card>
+      <Card className="bg-card text-card-foreground border-border">
         <CardHeader>
           <CardTitle>Skills</CardTitle>
           <CardDescription>Your technical and soft skills</CardDescription>
@@ -322,6 +329,7 @@ const ResumeForm = ({ data, onChange }) => {
               onChange={(e) => setNewSkill(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && addSkill()}
               placeholder="Add a skill..."
+              className="bg-background text-foreground border-border"
             />
             <Button onClick={addSkill} size="sm" className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90 transition">
               <Plus className="h-4 w-4 " />
@@ -329,7 +337,7 @@ const ResumeForm = ({ data, onChange }) => {
           </div>
           <div className="flex flex-wrap gap-2">
             {data.skills.map((skill) => (
-              <Badge key={skill} variant="secondary" className="px-3 py-1">
+              <Badge key={skill} variant="secondary" className="px-3 py-1 bg-secondary text-secondary-foreground">
                 {skill}
                 <button onClick={() => removeSkill(skill)} className="ml-2 hover:text-destructive">
                   ×
