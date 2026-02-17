@@ -1,23 +1,14 @@
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase, handleAuthError } from "@/integrations/supabase/client";
+import { auth, handleAuthError } from "@/integrations/firebase/client";
+import { signOut } from "firebase/auth";
 import { FileText } from "lucide-react";
-import { useTheme } from "@/contexts/ThemeContext";
 
 const Navbar = ({ user }) => {
   const navigate = useNavigate();
-  const { theme } = useTheme();
 
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        if (error.message.includes('Invalid Refresh Token')) {
-          handleAuthError(error);
-          return;
-        }
-        throw error;
-      }
+      await signOut(auth);
       navigate("/");
     } catch (err) {
       console.error("Logout error:", err);

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase, handleAuthError } from "@/integrations/supabase/client";
+import { db, handleAuthError, getCurrentUser, onAuthStateChange } from "@/integrations/firebase/client";
+import { collection, query, where, orderBy, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp } from "firebase/firestore";
 import Navbar from "@/components/Navbar";
 import { FileText } from "lucide-react";
-import { useTheme } from "@/contexts/ThemeContext";
 import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
@@ -11,7 +11,6 @@ const Dashboard = () => {
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { theme } = useTheme();
   const { toast } = useToast();
 
   // Track which resume is being edited
@@ -21,19 +20,14 @@ const Dashboard = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const user = await getCurrentUser();
         
-        if (error) {
-          handleAuthError(error);
-          return;
-        }
-        
-        if (!session) {
+        if (!user) {
           navigate("/auth");
           return;
         }
         
-        setSession(session);
+        setSession({ user });
       } catch (err) {
         console.error("Session check error:", err);
         navigate("/auth");
@@ -42,18 +36,16 @@ const Dashboard = () => {
 
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        setSession(session);
+    const unsubscribe = onAuthStateChange((user) => {
+      if (user) {
+        setSession({ user });
       } else {
         navigate("/auth");
       }
     });
 
     return () => {
-      if (subscription) {
-        subscription.unsubscribe();
-      }
+      unsubscribe();
     };
   }, [navigate]);
 
@@ -63,21 +55,26 @@ const Dashboard = () => {
 
   const fetchResumes = async () => {
     try {
-      const { data, error } = await supabase
-        .from("resumes")
-        .select("id, title, created_at, updated_at")
-        .order("updated_at", { ascending: false });
-
-      if (error) {
-        if (error.message.includes('Invalid Refresh Token')) {
-          handleAuthError(error);
-          return;
-        }
-        throw error;
-      }
+      if (!session?.user) return;
       
-      setResumes(data || []);
+      const resumesRef = collection(db, "resumes");
+      const q = query(
+        resumesRef,
+        where("user_id", "==", session.user.uid),
+        orderBy("updated_at", "desc")
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const resumesData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        created_at: doc.data().created_at?.toDate?.()?.toISOString() || doc.data().created_at,
+        updated_at: doc.data().updated_at?.toDate?.()?.toISOString() || doc.data().updated_at,
+      }));
+      
+      setResumes(resumesData);
     } catch (error) {
+      handleAuthError(error);
       toast({
         title: "Error",
         description: "Failed to load resumes. Please try logging in again.",
@@ -91,23 +88,21 @@ const Dashboard = () => {
 
   const createNewResume = async () => {
     try {
-      const now = new Date().toISOString();
-      const { data, error } = await supabase
-        .from("resumes")
-        .insert([{ user_id: session.user.id, title: "New Resume", created_at: now, updated_at: now }])
-        .select()
-        .single();
-
-      if (error) {
-        if (error.message.includes('Invalid Refresh Token')) {
-          handleAuthError(error);
-          return;
-        }
-        throw error;
-      }
+      if (!session?.user) return;
       
-      navigate(`/builder/${data.id}`);
+      const now = Timestamp.now();
+      const resumeData = {
+        user_id: session.user.uid,
+        title: "New Resume",
+        created_at: now,
+        updated_at: now,
+      };
+      
+      const docRef = await addDoc(collection(db, "resumes"), resumeData);
+      
+      navigate(`/builder/${docRef.id}`);
     } catch (error) {
+      handleAuthError(error);
       toast({
         title: "Error",
         description: "Failed to create resume. Please try again.",
@@ -120,15 +115,7 @@ const Dashboard = () => {
   const deleteResume = async (id) => {
     if (!confirm("Are you sure you want to delete this resume?")) return;
     try {
-      const { error } = await supabase.from("resumes").delete().eq("id", id);
-      
-      if (error) {
-        if (error.message.includes('Invalid Refresh Token')) {
-          handleAuthError(error);
-          return;
-        }
-        throw error;
-      }
+      await deleteDoc(doc(db, "resumes", id));
       
       setResumes(resumes.filter(r => r.id !== id));
       toast({
@@ -136,6 +123,7 @@ const Dashboard = () => {
         description: "Resume deleted successfully."
       });
     } catch (err) {
+      handleAuthError(err);
       toast({
         title: "Error",
         description: "Failed to delete resume. Please try again.",
@@ -148,15 +136,10 @@ const Dashboard = () => {
   const saveTitle = async (id) => {
     if (!tempTitle.trim()) return;
     try {
-      const { error } = await supabase.from("resumes").update({ title: tempTitle }).eq("id", id);
-      
-      if (error) {
-        if (error.message.includes('Invalid Refresh Token')) {
-          handleAuthError(error);
-          return;
-        }
-        throw error;
-      }
+      await updateDoc(doc(db, "resumes", id), {
+        title: tempTitle,
+        updated_at: Timestamp.now(),
+      });
 
       setResumes(resumes.map(r => r.id === id ? { ...r, title: tempTitle } : r));
       setEditingId(null);
@@ -166,6 +149,7 @@ const Dashboard = () => {
         description: "Resume title updated."
       });
     } catch (error) {
+      handleAuthError(error);
       toast({
         title: "Error",
         description: "Failed to rename resume. Please try again.",

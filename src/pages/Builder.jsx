@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { auth, db, getCurrentUser } from "@/integrations/firebase/client";
+import { doc, getDoc, updateDoc, Timestamp } from "firebase/firestore";
+import { signOut } from "firebase/auth";
 import EnhancedResumeForm from "@/components/EnhancedResumeForm";
-import ResumePreview from "@/components/resume/ResumePreview";
 import TemplateSelector from "@/components/ResumeTemplates/TemplateSelector";
 import TemplateModern from "@/components/ResumeTemplates/TemplateModern";
 import TemplateClassic from "@/components/ResumeTemplates/TemplateClassic";
@@ -11,11 +12,9 @@ import DownloadResume from "@/components/DownloadResume";
 import AiSuggestionsPopup from "@/components/AiSuggestionsPopup";
 import { Menu, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/contexts/ThemeContext";
 import { useToast } from "@/hooks/use-toast";
 
 const Builder = () => {
-  const { theme } = useTheme();
   const { toast } = useToast();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -73,7 +72,7 @@ const Builder = () => {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
+      await signOut(auth);
       navigate("/auth");
     } catch (err) {
       console.error("Logout error:", err);
@@ -83,27 +82,38 @@ const Builder = () => {
   // Fetch user and resume
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (!user || error) {
+      const user = await getCurrentUser();
+      if (!user) {
         navigate("/auth");
         return;
       }
       setUser(user);
 
       if (id) {
-        const { data, error } = await supabase
-          .from("resumes")
-          .select("content")
-          .eq("id", id)
-          .single();
-
-        if (error) {
-          toast({
-            title: "Error",
-            description: "Failed to load resume.",
-            variant: "destructive"
-          });
-        } else {
+        try {
+          const resumeDoc = await getDoc(doc(db, "resumes", id));
+          
+          if (!resumeDoc.exists()) {
+            toast({
+              title: "Error",
+              description: "Resume not found.",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+          
+          const data = resumeDoc.data();
+          // Ownership check: users can only view/edit their own resumes
+          if (data?.user_id && data.user_id !== user.uid) {
+            toast({
+              title: "Access denied",
+              description: "You don't have permission to access this resume.",
+              variant: "destructive",
+            });
+            navigate("/dashboard");
+            return;
+          }
           // Ensure the loaded data has the correct structure
           const loadedData = data.content || { ...initialResumeData };
           
@@ -129,45 +139,58 @@ const Builder = () => {
           }
           
           setResumeData(loadedData);
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Failed to load resume.",
+            variant: "destructive"
+          });
+          console.error("Error loading resume:", error);
         }
       }
       setLoading(false);
     };
 
     checkUser();
-  }, [id, navigate]);
+  }, [id, navigate, toast]);
 
-  // Auto-save every 5 seconds
-  useEffect(() => {
-    if (!id) return;
-    const interval = setInterval(() => saveResume(), 5000);
-    return () => clearInterval(interval);
-  }, [resumeData, id]);
-
-  const saveResume = useCallback(async () => {
+  const saveResume = useCallback(async ({ showToast = false } = {}) => {
     if (!id) return;
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from("resumes")
-        .update({ content: resumeData, updated_at: new Date().toISOString() })
-        .eq("id", id);
-
-      if (error) throw error;
-      toast({
-        title: "Success",
-        description: "Resume saved successfully."
+      await updateDoc(doc(db, "resumes", id), {
+        content: resumeData,
+        updated_at: Timestamp.now(),
       });
+      
+      if (showToast) {
+        toast({
+          title: "Success",
+          description: "Resume saved successfully.",
+        });
+      }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save resume",
-        variant: "destructive"
-      });
+      if (showToast) {
+        toast({
+          title: "Error",
+          description: "Failed to save resume",
+          variant: "destructive",
+        });
+      }
+      console.error("Save resume error:", error);
     } finally {
       setSaving(false);
     }
-  }, [resumeData, id]);
+  }, [resumeData, id, toast]);
+
+  // Debounced auto-save (reduces writes + avoids toast spam)
+  useEffect(() => {
+    if (!id) return;
+    const timeout = setTimeout(() => {
+      void saveResume({ showToast: false });
+    }, 1200);
+    return () => clearTimeout(timeout);
+  }, [resumeData, id, saveResume]);
 
   // PDF download functionality using backend
   const handleDownloadPDF = async () => {
@@ -350,7 +373,7 @@ const Builder = () => {
             {downloading ? "Generating..." : "Download PDF"}
           </button>
           <button
-            onClick={saveResume}
+            onClick={() => saveResume({ showToast: true })}
             className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-110 hover:opacity-90 text-white rounded-lg font-medium transition"
           >
             Save
@@ -395,7 +418,7 @@ const Builder = () => {
           {downloading ? "Generating..." : "Download PDF"}
         </button>
         <button
-          onClick={saveResume}
+          onClick={() => saveResume({ showToast: true })}
           className="w-full text-left px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium transition transform hover:scale-105 hover:opacity-90"
         >
           Save

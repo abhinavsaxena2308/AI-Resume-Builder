@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import ResumePreview from "@/components/resume/ResumePreview";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { getCurrentUser, onAuthStateChange } from "@/integrations/firebase/client";
 import { useTheme } from "@/contexts/ThemeContext";
 
 const ViewExamples = () => {
@@ -12,18 +12,18 @@ const ViewExamples = () => {
   const { theme } = useTheme();
   const [user, setUser] = useState(null);
 
-  // Load Supabase user session
+  // Load Firebase user session
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) setUser(session.user);
+    getCurrentUser().then((user) => {
+      if (user) setUser(user);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) setUser(session.user);
+    const unsubscribe = onAuthStateChange((user) => {
+      if (user) setUser(user);
       else setUser(null);
     });
 
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, []);
 
   // Sample resume data for examples

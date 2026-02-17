@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase, handleAuthError } from "@/integrations/supabase/client";
+import { auth, handleAuthError, getCurrentUser } from "@/integrations/firebase/client";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, updateProfile } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,8 +22,8 @@ const Auth = () => {
   const { theme } = useTheme();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/dashboard");
+    getCurrentUser().then((user) => {
+      if (user) navigate("/dashboard");
     });
   }, [navigate]);
 
@@ -31,33 +32,20 @@ const Auth = () => {
     setLoading(true);
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { data: { full_name: fullName }, emailRedirectTo: `${window.location.origin}/` },
-        });
-        if (error) {
-          if (error.message.includes('Invalid Refresh Token')) {
-            handleAuthError(error);
-            return;
-          }
-          throw error;
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        // Update profile with full name
+        if (fullName) {
+          await updateProfile(userCredential.user, { displayName: fullName });
         }
         toast({ title: "Success!", description: "Account created. Please sign in." });
         setIsSignUp(false);
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          if (error.message.includes('Invalid Refresh Token')) {
-            handleAuthError(error);
-            return;
-          }
-          throw error;
-        }
+        await signInWithEmailAndPassword(auth, email, password);
         toast({ title: "Welcome!", description: "Signed in successfully." });
         navigate("/dashboard");
       }
     } catch (error) {
+      handleAuthError(error);
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
@@ -67,18 +55,20 @@ const Auth = () => {
   const handleOAuthLogin = async (provider) => {
     setOauthLoading(provider);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: { redirectTo: import.meta.env.VITE_SUPABASE_REDIRECT_URL },
-      });
-      if (error) {
-        if (error.message.includes('Invalid Refresh Token')) {
-          handleAuthError(error);
-          return;
-        }
-        throw error;
+      let authProvider;
+      if (provider === "google") {
+        authProvider = new GoogleAuthProvider();
+      } else if (provider === "github") {
+        authProvider = new GithubAuthProvider();
+      } else {
+        throw new Error("Unsupported provider");
       }
+      
+      await signInWithPopup(auth, authProvider);
+      toast({ title: "Success!", description: "Signed in successfully." });
+      navigate("/dashboard");
     } catch (error) {
+      handleAuthError(error);
       toast({ title: "Error", description: error.message || "OAuth login failed", variant: "destructive" });
     } finally {
       setOauthLoading("");

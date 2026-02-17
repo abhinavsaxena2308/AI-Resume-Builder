@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-image.png";
-import { supabase } from "@/integrations/supabase/client";
+import { auth, getCurrentUser, onAuthStateChange } from "@/integrations/firebase/client";
+import { signOut } from "firebase/auth";
 import { useTheme } from "@/contexts/ThemeContext";
-import Navbar from "@/components/Navbar";
 import { FileText } from "lucide-react";
 
 const Index = () => {
@@ -13,7 +13,7 @@ const Index = () => {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
+      await signOut(auth);
       navigate("/");
     } catch (err) {
       console.error("Logout error:", err);
@@ -21,16 +21,16 @@ const Index = () => {
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) setUser(session.user);
+    getCurrentUser().then((user) => {
+      if (user) setUser(user);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) setUser(session.user);
+    const unsubscribe = onAuthStateChange((user) => {
+      if (user) setUser(user);
       else setUser(null);
     });
 
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, []);
 
   return (
@@ -62,7 +62,7 @@ const Index = () => {
         <>
           {/* User Name */}
           <button onClick={() => navigate("/dashboard")} className="flex items-center gap-1 sm:gap-2 text-gray-700 border rounded-full px-2 py-1 sm:px-3 sm:py-2 text-sm sm:text-base dark:text-gray-200 dark:border-gray-700 hover:shadow-lg hover:shadow-purple-400 dark:hover:shadow-purple-600 transition">
-            Hi, {user.user_metadata?.full_name }
+            Hi, {user.displayName || user.email}
           </button>
 
           {/* Logout Button */}
