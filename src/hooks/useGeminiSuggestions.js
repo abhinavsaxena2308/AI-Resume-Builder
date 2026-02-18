@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE_URL } from "@/services/api";
 
 const useGeminiSuggestions = () => {
   const [loading, setLoading] = useState(false);
@@ -19,13 +20,8 @@ const useGeminiSuggestions = () => {
         throw new Error("Resume data is required");
       }
       
-      // Determine the base URL based on environment
-      const isProduction = import.meta.env.PROD;
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 
-                        (isProduction ? 'your_production_backend_url' : 'http://localhost:3000');
-      
       // Build the full URL for the API endpoint
-      const url = `${backendUrl}/api/gemini-suggestions`;
+      const url = `${API_BASE_URL}/api/gemini-suggestions`;
       
       console.log("Attempting to fetch suggestions from:", url);
       console.log("Environment:", isProduction ? "Production" : "Development");

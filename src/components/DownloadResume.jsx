@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
+import { API_BASE_URL } from "@/services/api";
 
 const DownloadResume = ({ resumeData, selectedTemplate }) => {
   const [isDownloading, setIsDownloading] = useState(false);
@@ -17,38 +18,25 @@ const DownloadResume = ({ resumeData, selectedTemplate }) => {
     setIsDownloading(true);
 
     try {
-      // Try multiple endpoints for PDF generation
-      const urls = [
-        `${import.meta.env.VITE_BACKEND_URL}/api/generate-pdf`, // Production URL
-        "http://localhost:3000/api/generate-pdf" // Local development URL
-      ];
-
+      const apiUrl = `${API_BASE_URL}/api/generate-pdf`;
       let response;
-      let success = false;
 
-      for (const url of urls) {
-        try {
-          response = await fetch(url, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              resumeData,
-              template: selectedTemplate,
-            }),
-          });
-
-          if (response.ok) {
-            success = true;
-            break;
-          }
-        } catch (error) {
-          console.warn(`Failed to connect to ${url}, trying next...`);
-        }
+      try {
+        response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            resumeData,
+            template: selectedTemplate,
+          }),
+        });
+      } catch (error) {
+        console.warn(`Failed to connect to ${url}`, error);
       }
 
-      if (!success || !response) {
+      if (!response) {
         throw new Error("Unable to connect to PDF generation service. Please ensure the backend server is running.");
       }
 

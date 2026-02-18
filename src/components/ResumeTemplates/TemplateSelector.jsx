@@ -78,13 +78,9 @@ const TemplateSelector = ({ selectedTemplate, onSelect }) => {
                       </Badge>
                     )}
                   </div>
-
-                  {/* Description */}
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     {template.description}
                   </p>
-
-                  {/* Color Indicator */}
                   <div
                     className={`w-full h-2 rounded-full bg-gradient-to-r ${
                       template.color === "blue"

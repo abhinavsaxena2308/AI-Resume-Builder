@@ -130,6 +130,9 @@ const Index = () => {
           <img
             src={heroImage}
             alt="Resume Builder Interface"
+            decoding="async"
+            fetchpriority="high"
+            loading="eager"
             className={`relative rounded-2xl shadow-2xl border ${
               theme === "light"
                 ? "border-gray-200 bg-white"

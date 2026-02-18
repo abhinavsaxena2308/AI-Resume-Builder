@@ -31,16 +31,37 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      const trimmedEmail = email.trim();
+      const trimmedPassword = password;
+      const trimmedFullName = fullName.trim();
+
+      if (!trimmedEmail || !trimmedPassword) {
+        toast({ title: "Error", description: "Email and password are required.", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
+      if (trimmedPassword.length < 6) {
+        toast({ title: "Error", description: "Password must be at least 6 characters.", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
+      if (isSignUp && !trimmedFullName) {
+        toast({ title: "Error", description: "Full name is required.", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
       if (isSignUp) {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        // Update profile with full name
-        if (fullName) {
-          await updateProfile(userCredential.user, { displayName: fullName });
+        const userCredential = await createUserWithEmailAndPassword(auth, trimmedEmail, trimmedPassword);
+        if (trimmedFullName) {
+          await updateProfile(userCredential.user, { displayName: trimmedFullName });
         }
         toast({ title: "Success!", description: "Account created. Please sign in." });
         setIsSignUp(false);
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, trimmedEmail, trimmedPassword);
         toast({ title: "Welcome!", description: "Signed in successfully." });
         navigate("/dashboard");
       }

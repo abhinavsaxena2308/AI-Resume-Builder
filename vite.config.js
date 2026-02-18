@@ -5,13 +5,14 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  envDir: './backend',
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
     },
   },
   server: {
-    port: 3000, // Using port 3000 to avoid permission issues
+    port: 5173, // Using port 3000 to avoid permission issues
     host: 'localhost', // Explicitly use localhost (resolves to IPv4 on Windows)
     strictPort: false, // Allow Vite to try next available port if 3000 is taken
   },

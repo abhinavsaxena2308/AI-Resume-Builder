@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Sparkles, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useTheme } from "@/contexts/ThemeContext";
 import AiSuggestionsPopup from "@/components/AiSuggestionsPopup";
 
 const EnhancedResumeForm = ({ data, onChange, aiSuggestions, userType }) => {
@@ -15,21 +14,7 @@ const EnhancedResumeForm = ({ data, onChange, aiSuggestions, userType }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeSuggestions, setActiveSuggestions] = useState({}); // Track which suggestions are active
   const { toast } = useToast();
-  const { theme } = useTheme();
-
-  // Debugging: Log when aiSuggestions change
-  useEffect(() => {
-    console.log("AI Suggestions updated:", aiSuggestions);
-  }, [aiSuggestions]);
-
-  // Debugging: Log when data changes
-  useEffect(() => {
-    console.log("Resume data updated:", data);
-    console.log("Skills in data:", data.skills);
-  }, [data]);
-
-  // Define skill categories based on user type
-  const getSkillCategories = () => {
+  const skillCategories = useMemo(() => {
     if (userType === "Coder") {
       return [
         { id: "frontend", name: "Frontend" },
@@ -64,24 +49,24 @@ const EnhancedResumeForm = ({ data, onChange, aiSuggestions, userType }) => {
         { id: "other", name: "Other" }
       ];
     }
-  };
+  }, [userType]);
 
   // Initialize skills structure if it doesn't exist or is in old format
-  const initializeSkills = (skillsData) => {
+  const initializeSkills = useCallback((skillsData) => {
     // Handle case where skillsData is undefined or null
     if (!skillsData) {
       skillsData = [];
     }
     
     // Check if skills is already in the new grouped format
-    if (typeof skillsData === 'object' && !Array.isArray(skillsData)) {
+    if (typeof skillsData === "object" && !Array.isArray(skillsData)) {
       // Check if it has the expected category keys
-      const categories = getSkillCategories();
-      const hasCategories = categories.some(cat => skillsData.hasOwnProperty(cat.id));
+      const categories = skillCategories;
+      const hasCategories = categories.some((cat) => skillsData.hasOwnProperty(cat.id));
       if (hasCategories) {
         // Ensure all categories exist even if empty
         const validatedSkills = { ...skillsData };
-        categories.forEach(category => {
+        categories.forEach((category) => {
           if (!validatedSkills.hasOwnProperty(category.id)) {
             validatedSkills[category.id] = [];
           }
@@ -93,9 +78,9 @@ const EnhancedResumeForm = ({ data, onChange, aiSuggestions, userType }) => {
     // If it's an array (old format) or doesn't have categories, convert it
     if (Array.isArray(skillsData)) {
       // Convert old array format to new grouped format
-      const categories = getSkillCategories();
+      const categories = skillCategories;
       const newSkills = {};
-      categories.forEach(category => {
+      categories.forEach((category) => {
         newSkills[category.id] = [];
       });
       // Put all existing skills in the first category
@@ -106,16 +91,16 @@ const EnhancedResumeForm = ({ data, onChange, aiSuggestions, userType }) => {
     }
     
     // If it's not an array and not in the correct format, initialize empty structure
-    const categories = getSkillCategories();
+    const categories = skillCategories;
     const newSkills = {};
-    categories.forEach(category => {
+    categories.forEach((category) => {
       newSkills[category.id] = [];
     });
     return newSkills;
-  };
+  }, [skillCategories]);
 
   // Ensure data has the correct structure
-  const ensureDataStructure = (resumeData) => {
+  const ensureDataStructure = useCallback((resumeData) => {
     const updatedData = { ...resumeData };
     
     // Ensure all required sections exist with proper defaults
@@ -154,10 +139,10 @@ const EnhancedResumeForm = ({ data, onChange, aiSuggestions, userType }) => {
     updatedData.skills = initializeSkills(updatedData.skills);
     
     return updatedData;
-  };
+  }, [initializeSkills]);
 
   // Get the properly structured data
-  const structuredData = ensureDataStructure(data);
+  const structuredData = useMemo(() => ensureDataStructure(data), [data, ensureDataStructure]);
 
   const handlePersonalInfoChange = (field, value) => {
     onChange({
@@ -297,7 +282,6 @@ const EnhancedResumeForm = ({ data, onChange, aiSuggestions, userType }) => {
 
   // Skills section
   const addSkill = () => {
-    console.log("Adding skill:", newSkill);
     if (newSkill.name.trim()) {
       const categorySkills = structuredData.skills[newSkill.category] || [];
       // Check if skill already exists in this category to prevent duplicates
@@ -306,7 +290,6 @@ const EnhancedResumeForm = ({ data, onChange, aiSuggestions, userType }) => {
           ...structuredData.skills,
           [newSkill.category]: [...categorySkills, newSkill.name.trim()],
         };
-        console.log("Updated skills:", updatedSkills);
         onChange({
           ...structuredData,
           skills: updatedSkills,
@@ -335,7 +318,6 @@ const EnhancedResumeForm = ({ data, onChange, aiSuggestions, userType }) => {
 
   // Handle AI suggestion actions
   const handleAcceptSuggestion = (section, field, suggestionText, itemId = null) => {
-    console.log("Accepting suggestion:", section, field, suggestionText);
     // Apply the suggestion
     if (section === "summary" && field === "summarySuggestion") {
       onChange({ ...structuredData, summary: suggestionText });
@@ -345,7 +327,7 @@ const EnhancedResumeForm = ({ data, onChange, aiSuggestions, userType }) => {
       });
     } else if (section === "skills" && field === "recommendedSkills" && Array.isArray(suggestionText)) {
       // For grouped skills, we'll distribute them based on user type
-      const categories = getSkillCategories();
+      const categories = skillCategories;
       const updatedSkills = { ...structuredData.skills };
       
       suggestionText.forEach((skill, index) => {
@@ -368,19 +350,17 @@ const EnhancedResumeForm = ({ data, onChange, aiSuggestions, userType }) => {
     }
     
     // Close the suggestion popup
-    const suggestionKey = `${section}-${field}-${itemId || 'general'}`;
-    setActiveSuggestions(prev => ({
+    const suggestionKey = `${section}-${field}-${itemId || "general"}`;
+    setActiveSuggestions((prev) => ({
       ...prev,
       [suggestionKey]: false
     }));
   };
 
   const handleDiscardSuggestion = (section, field, itemId = null) => {
-    console.log("Discarding suggestion:", section, field);
-    
     // Close the suggestion popup
-    const suggestionKey = `${section}-${field}-${itemId || 'general'}`;
-    setActiveSuggestions(prev => ({
+    const suggestionKey = `${section}-${field}-${itemId || "general"}`;
+    setActiveSuggestions((prev) => ({
       ...prev,
       [suggestionKey]: false
     }));
@@ -401,8 +381,8 @@ const EnhancedResumeForm = ({ data, onChange, aiSuggestions, userType }) => {
 
   // Toggle suggestion visibility
   const toggleSuggestion = (section, field, itemId = null) => {
-    const suggestionKey = `${section}-${field}-${itemId || 'general'}`;
-    setActiveSuggestions(prev => ({
+    const suggestionKey = `${section}-${field}-${itemId || "general"}`;
+    setActiveSuggestions((prev) => ({
       ...prev,
       [suggestionKey]: !prev[suggestionKey]
     }));
@@ -460,42 +440,33 @@ const EnhancedResumeForm = ({ data, onChange, aiSuggestions, userType }) => {
   // Get suggestion for a specific field
   const getSuggestion = useCallback((section, field, itemId = null) => {
     if (!aiSuggestions) {
-      console.log("No AI suggestions available");
       return null;
     }
-
-    console.log("Getting suggestion for:", section, field);
-    console.log("Available suggestions:", aiSuggestions);
 
     // For summary suggestion
     if (section === "summary" && field === "summarySuggestion") {
       const suggestion = aiSuggestions.summarySuggestion;
-      console.log("Summary suggestion:", suggestion);
       return suggestion;
     }
 
     // For skills
     if (section === "skills" && field === "recommendedSkills") {
       const suggestion = aiSuggestions.recommendedSkills;
-      console.log("Skills suggestion:", suggestion);
       return suggestion;
     }
 
     // For experience bullets
     if (section === "experience" && field === "enhancedBullets") {
       const suggestion = aiSuggestions.enhancedBullets?.experience;
-      console.log("Experience bullets suggestion:", suggestion);
       return suggestion;
     }
 
     // For project bullets
     if (section === "projects" && field === "enhancedBullets") {
       const suggestion = aiSuggestions.enhancedBullets?.projects;
-      console.log("Projects bullets suggestion:", suggestion);
       return suggestion;
     }
 
-    console.log("No matching suggestion found for:", section, field);
     return null;
   }, [aiSuggestions]);
 
@@ -892,7 +863,7 @@ const EnhancedResumeForm = ({ data, onChange, aiSuggestions, userType }) => {
                 onChange={(e) => setNewSkill({ ...newSkill, category: e.target.value })}
                 className="w-full bg-background text-foreground border border-border rounded-md p-2"
               >
-                {getSkillCategories().map((category) => (
+                {skillCategories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
                   </option>
@@ -907,7 +878,7 @@ const EnhancedResumeForm = ({ data, onChange, aiSuggestions, userType }) => {
           
           {/* Display skills by category */}
           <div className="space-y-4 mt-4">
-            {getSkillCategories().map((category) => {
+            {skillCategories.map((category) => {
               const categorySkills = structuredData.skills[category.id] || [];
               return categorySkills.length > 0 ? (
                 <div key={category.id} className="space-y-2">

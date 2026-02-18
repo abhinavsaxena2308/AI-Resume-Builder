@@ -8,6 +8,8 @@ import { dirname, join } from 'path';
 
 // Import the new route
 import geminiSuggestionsRoute from "./routes/geminiSuggestions.js";
+import resumeRoutes from "./routes/resumes.js";
+import verifyToken from "./middleware/auth.js";
 
 dotenv.config();
 
@@ -18,35 +20,33 @@ const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Correct CORS: remove trailing slash from frontend URL
 const allowedOrigins = [
-  "http://localhost:5173", // Vite dev server
-  "https://ai-resume-builder-six-kappa.vercel.app", // Production frontend
-  "https://ai-resume-builder-h11a.onrender.com" // Add the Render URL
+  "http://localhost:5173", 
+  "https://ai-resume-builder-six-kappa.vercel.app",
+  "https://ai-resume-builder-h11a.onrender.com"
 ];
 
 app.use(cors({
   origin: allowedOrigins,
-  methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
 
 app.get("/", (req, res) => res.send("✅ Backend is running!"));
 
-// Test route to verify routing is working
 app.get("/api/test", (req, res) => {
   res.json({ message: "Test route is working!" });
 });
 
-// IMPORTANT: Add this before route definitions
 app.use(express.json());  
 
-// Register the new route
 console.log("Registering /api/gemini-suggestions route");
 app.use("/api/gemini-suggestions", geminiSuggestionsRoute);
 
-// Add a catch-all route for debugging 404 errors (but only for paths that don't match any other routes)
+console.log("Registering /api/resumes route", !!verifyToken, !!resumeRoutes);
+app.use("/api/resumes", verifyToken, resumeRoutes);
+
 app.use((req, res, next) => {
   if (req.path.startsWith('/api/gemini-suggestions')) {
     console.log("Gemini suggestions route not found:", req.method, req.path);

@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { db, handleAuthError, getCurrentUser, onAuthStateChange } from "@/integrations/firebase/client";
+import { auth, db, handleAuthError, getCurrentUser, onAuthStateChange } from "@/integrations/firebase/client";
 import { collection, query, where, orderBy, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp } from "firebase/firestore";
 import Navbar from "@/components/Navbar";
 import { FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { resumeApi } from "@/services/api";
 
 const Dashboard = () => {
   const [session, setSession] = useState(null);
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -57,21 +59,7 @@ const Dashboard = () => {
     try {
       if (!session?.user) return;
       
-      const resumesRef = collection(db, "resumes");
-      const q = query(
-        resumesRef,
-        where("user_id", "==", session.user.uid),
-        orderBy("updated_at", "desc")
-      );
-      
-      const querySnapshot = await getDocs(q);
-      const resumesData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        created_at: doc.data().created_at?.toDate?.()?.toISOString() || doc.data().created_at,
-        updated_at: doc.data().updated_at?.toDate?.()?.toISOString() || doc.data().updated_at,
-      }));
-      
+      const resumesData = await resumeApi.listByUser();
       setResumes(resumesData);
     } catch (error) {
       handleAuthError(error);
@@ -88,19 +76,49 @@ const Dashboard = () => {
 
   const createNewResume = async () => {
     try {
-      if (!session?.user) return;
-      
-      const now = Timestamp.now();
-      const resumeData = {
-        user_id: session.user.uid,
-        title: "New Resume",
-        created_at: now,
-        updated_at: now,
+      const currentUser = session?.user || auth.currentUser;
+      if (!currentUser) {
+        toast({
+          title: "Session expired",
+          description: "Please sign in again to create a resume.",
+          variant: "destructive"
+        });
+        navigate("/auth");
+        return;
+      }
+      if (isCreating) return;
+      setIsCreating(true);
+
+      const initialContent = {
+        personalInfo: {
+          fullName: currentUser.displayName || "",
+          email: currentUser.email || "",
+          phone: "",
+          location: "",
+          linkedin: "",
+          github: "",
+        },
+        summary: "",
+        experience: [],
+        education: [],
+        projects: [],
+        certifications: [],
+        skills: {
+          frontend: [],
+          backend: [],
+          databases: [],
+          cloud: [],
+          tools: [],
+          other: []
+        }
       };
       
-      const docRef = await addDoc(collection(db, "resumes"), resumeData);
+      const result = await resumeApi.create("New Resume", initialContent, {
+        template: "modern", // Default template
+        creation_method: "dashboard"
+      });
       
-      navigate(`/builder/${docRef.id}`);
+      navigate(`/builder/${result.resumeId}`);
     } catch (error) {
       handleAuthError(error);
       toast({
@@ -109,13 +127,15 @@ const Dashboard = () => {
         variant: "destructive"
       });
       console.error("Create resume error:", error);
+    } finally {
+      setIsCreating(false);
     }
   };
 
   const deleteResume = async (id) => {
     if (!confirm("Are you sure you want to delete this resume?")) return;
     try {
-      await deleteDoc(doc(db, "resumes", id));
+      await resumeApi.delete(id);
       
       setResumes(resumes.filter(r => r.id !== id));
       toast({
@@ -136,10 +156,8 @@ const Dashboard = () => {
   const saveTitle = async (id) => {
     if (!tempTitle.trim()) return;
     try {
-      await updateDoc(doc(db, "resumes", id), {
-        title: tempTitle,
-        updated_at: Timestamp.now(),
-      });
+      // Pass null for content to only update title
+      await resumeApi.update(id, null, { title: tempTitle });
 
       setResumes(resumes.map(r => r.id === id ? { ...r, title: tempTitle } : r));
       setEditingId(null);
@@ -182,9 +200,10 @@ const Dashboard = () => {
           </div>
           <button
             onClick={createNewResume}
-            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:opacity-90 transition"
+            disabled={isCreating}
+            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            + New Resume
+            {isCreating ? "Creating..." : "+ New Resume"}
           </button>
         </div>
 
@@ -199,9 +218,10 @@ const Dashboard = () => {
             <p className="text-gray-500 dark:text-gray-400 mb-4">Create your first resume to get started</p>
             <button
               onClick={createNewResume}
-              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:opacity-90 transition"
+              disabled={isCreating}
+              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              + Create Resume
+              {isCreating ? "Creating..." : "+ Create Resume"}
             </button>
           </div>
         ) : (

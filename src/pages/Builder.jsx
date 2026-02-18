@@ -1,9 +1,9 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { auth, db, getCurrentUser } from "@/integrations/firebase/client";
-import { doc, getDoc, updateDoc, Timestamp } from "firebase/firestore";
+import { auth, getCurrentUser } from "@/integrations/firebase/client";
 import { signOut } from "firebase/auth";
 import EnhancedResumeForm from "@/components/EnhancedResumeForm";
+import { resumeApi, API_BASE_URL } from "@/services/api";
 import TemplateSelector from "@/components/ResumeTemplates/TemplateSelector";
 import TemplateModern from "@/components/ResumeTemplates/TemplateModern";
 import TemplateClassic from "@/components/ResumeTemplates/TemplateClassic";
@@ -66,6 +66,9 @@ const Builder = () => {
   };
 
   const [resumeData, setResumeData] = useState(initialResumeData);
+  const lastSavedSnapshotRef = useRef(null);
+  const savingRef = useRef(false);
+  const serializedResumeData = useMemo(() => JSON.stringify(resumeData), [resumeData]);
 
   const navigate = useNavigate();
   const { id } = useParams();
@@ -91,9 +94,9 @@ const Builder = () => {
 
       if (id) {
         try {
-          const resumeDoc = await getDoc(doc(db, "resumes", id));
+          const data = await resumeApi.getById(id);
           
-          if (!resumeDoc.exists()) {
+          if (!data) {
             toast({
               title: "Error",
               description: "Resume not found.",
@@ -103,7 +106,6 @@ const Builder = () => {
             return;
           }
           
-          const data = resumeDoc.data();
           // Ownership check: users can only view/edit their own resumes
           if (data?.user_id && data.user_id !== user.uid) {
             toast({
@@ -137,7 +139,7 @@ const Builder = () => {
             
             loadedData.skills = newSkills;
           }
-          
+          lastSavedSnapshotRef.current = JSON.stringify(loadedData);
           setResumeData(loadedData);
         } catch (error) {
           toast({
@@ -154,14 +156,38 @@ const Builder = () => {
     checkUser();
   }, [id, navigate, toast]);
 
-  const saveResume = useCallback(async ({ showToast = false } = {}) => {
+  const saveResume = useCallback(async ({ showToast = false, skipIfUnchanged = true } = {}) => {
     if (!id) return;
+    if (skipIfUnchanged && lastSavedSnapshotRef.current === serializedResumeData) {
+      if (showToast) {
+        toast({
+          title: "No changes",
+          description: "Resume is already up to date.",
+        });
+      }
+      return;
+    }
+    if (savingRef.current) return;
+    savingRef.current = true;
     setSaving(true);
     try {
-      await updateDoc(doc(db, "resumes", id), {
-        content: resumeData,
-        updated_at: Timestamp.now(),
-      });
+      const saveWithRetry = async (attempt = 0) => {
+        try {
+          await resumeApi.update(id, resumeData, { 
+            template: selectedTemplate,
+            last_edited_section: "unknown" // Could track this
+          });
+        } catch (error) {
+          if (attempt < 2) {
+            await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+            return saveWithRetry(attempt + 1);
+          }
+          throw error;
+        }
+      };
+
+      await saveWithRetry();
+      lastSavedSnapshotRef.current = serializedResumeData;
       
       if (showToast) {
         toast({
@@ -179,50 +205,44 @@ const Builder = () => {
       }
       console.error("Save resume error:", error);
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
-  }, [resumeData, id, toast]);
+  }, [resumeData, id, toast, serializedResumeData]);
 
   // Debounced auto-save (reduces writes + avoids toast spam)
   useEffect(() => {
     if (!id) return;
     const timeout = setTimeout(() => {
-      void saveResume({ showToast: false });
+      void saveResume({ showToast: false, skipIfUnchanged: true });
     }, 1200);
     return () => clearTimeout(timeout);
-  }, [resumeData, id, saveResume]);
+  }, [serializedResumeData, id, saveResume]);
 
   // PDF download functionality using backend
   const handleDownloadPDF = async () => {
     setDownloading(true);
 
-    const urls = [
-      `${import.meta.env.VITE_BACKEND_URL}/api/generate-pdf`, // Production URL
-      `http://localhost:3000/api/generate-pdf` // Localhost fallback
-    ];
+    const url = `${API_BASE_URL}/api/generate-pdf`;
 
     let response;
     let success = false;
 
-    for (const url of urls) {
-      try {
-        response = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ resumeData, template: selectedTemplate }),
-        });
+    try {
+      response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resumeData, template: selectedTemplate }),
+      });
 
-        if (response.ok) {
-          success = true;
-          break; // Success, exit loop
-        }
-      } catch (error) {
-        // If this URL fails, try the next one
-        console.warn(`Failed to fetch from ${url}, trying next...`);
+      if (response.ok) {
+        success = true;
       }
+    } catch (error) {
+      console.warn(`Failed to fetch from ${url}`, error);
     }
 
-    if (!success || !response) {
+    if (!response) {
       setDownloading(false);
       toast({
         title: "Error",
