@@ -21,6 +21,8 @@ try {
   console.warn("Could not load Firebase service account credentials. Falling back to application default credentials.", error.message);
 }
 
+console.log("Service account loaded:", serviceAccount ? `Project: ${serviceAccount.project_id}, Email: ${serviceAccount.client_email}` : "Using application default credentials");
+
 let dbInstance;
 
 try {

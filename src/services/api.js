@@ -1,16 +1,46 @@
-import { auth } from "@/integrations/firebase/client";
+import { auth, getCurrentUser } from "@/integrations/firebase/client";
+import { onAuthStateChanged } from "firebase/auth";
 
 export const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? "https://ai-resume-builder-h11a.onrender.com" : "http://localhost:3000");
+
+// Wait for auth to be ready and get the current user
+const waitForAuth = () => {
+  return new Promise((resolve) => {
+    // If already have a user, resolve immediately
+    if (auth.currentUser) {
+      resolve(auth.currentUser);
+      return;
+    }
+    
+    // Otherwise wait for auth state to be determined
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribe();
+      resolve(user);
+    });
+  });
+};
 
 const getAuthHeaders = async () => {
   const headers = {
     "Content-Type": "application/json",
   };
-  const user = auth.currentUser;
+  
+  // Wait for auth to be ready
+  const user = await waitForAuth();
+  
   if (user) {
-    const token = await user.getIdToken();
-    headers["Authorization"] = `Bearer ${token}`;
+    try {
+      // Force refresh token to ensure it's valid
+      const token = await user.getIdToken(true);
+      headers["Authorization"] = `Bearer ${token}`;
+      console.log("Auth token obtained successfully");
+    } catch (error) {
+      console.error("Failed to get auth token:", error);
+    }
+  } else {
+    console.warn("No authenticated user found");
   }
+  
   return headers;
 };
 
@@ -62,10 +92,26 @@ export const resumeApi = {
   // List user resumes
   listByUser: async () => {
     const headers = await getAuthHeaders();
+    
+    // Check if we have auth token
+    if (!headers["Authorization"]) {
+      console.error("No auth token available - user may not be logged in");
+      throw new Error("Not authenticated. Please log in again.");
+    }
+    
     const response = await fetch(`${API_BASE_URL}/api/resumes`, {
       headers,
     });
-    if (!response.ok) throw new Error("Failed to list resumes");
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`API Error (${response.status}):`, errorText);
+      
+      if (response.status === 403) {
+        throw new Error("Authentication failed. Please log in again.");
+      }
+      throw new Error(`Failed to list resumes: ${response.status}`);
+    }
     return response.json();
   },
 
