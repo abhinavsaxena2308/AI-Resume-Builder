@@ -28,6 +28,8 @@ const CareerTips = () => {
       title: "Define Your Target Role",
       description:
         "Clarify the role, level, and industry you are aiming for so your resume, projects, and networking all point in the same direction.",
+      imageAlt: "AI-generated illustration of a professional mapping out career goals",
+      imageSrc: "https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg",
       items: [
         "Shortlist 3–5 target job titles",
         "Collect 5–10 job descriptions to analyze patterns",
@@ -39,6 +41,8 @@ const CareerTips = () => {
       title: "Show Impact, Not Tasks",
       description:
         "Translate your experience into measurable outcomes that recruiters and hiring managers can quickly understand.",
+      imageAlt: "AI-generated illustration of measurable career achievements and metrics",
+      imageSrc: "https://images.pexels.com/photos/1181400/pexels-photo-1181400.jpeg",
       items: [
         "Use action verbs and quantify results where possible",
         "Focus on impact, scale, and complexity of your work",
@@ -50,6 +54,8 @@ const CareerTips = () => {
       title: "Tailor For Every Application",
       description:
         "Adapt your resume to each opportunity while keeping a strong, reusable base version in the builder.",
+      imageAlt: "AI-generated illustration of tailoring a resume for different roles",
+      imageSrc: "https://images.pexels.com/photos/1181395/pexels-photo-1181395.jpeg",
       items: [
         "Mirror keywords from the job description naturally",
         "Reorder sections to surface the most relevant experience",
@@ -61,6 +67,8 @@ const CareerTips = () => {
       title: "Optimize For Recruiter Time",
       description:
         "Most resumes get a quick scan first. Make yours easy to parse and visually consistent.",
+      imageAlt: "AI-generated illustration showing time-saving resume review",
+      imageSrc: "https://images.pexels.com/photos/1181393/pexels-photo-1181393.jpeg",
       items: [
         "Keep layout clean with clear hierarchy and whitespace",
         "Use consistent date formats, headings, and bullet styles",
@@ -72,6 +80,8 @@ const CareerTips = () => {
       title: "Leverage AI Assistance",
       description:
         "Use the AI resume builder to generate strong first drafts, then refine with your domain knowledge.",
+      imageAlt: "AI-generated illustration of AI assisting with resume writing",
+      imageSrc: "https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg",
       items: [
         "Generate tailored summaries for different target roles",
         "Ask AI to rephrase bullets for clarity and impact",
@@ -116,8 +126,19 @@ const CareerTips = () => {
           {tipSections.map((tip) => (
             <article
               key={tip.title}
-              className="h-full rounded-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/60 dark:border-gray-800/60 shadow-sm hover:shadow-md transition-shadow flex flex-col"
+              className="h-full rounded-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/60 dark:border-gray-800/60 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col overflow-hidden"
             >
+              <div className="relative w-full h-40 sm:h-48 overflow-hidden">
+                <img
+                  src={tip.imageSrc}
+                  alt={tip.imageAlt}
+                  loading="lazy"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              </div>
               <div className="p-6 flex-1 flex flex-col">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2.5 rounded-xl bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300">
@@ -174,4 +195,3 @@ const CareerTips = () => {
 };
 
 export default CareerTips;
-

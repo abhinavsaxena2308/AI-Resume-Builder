@@ -117,6 +117,9 @@ const InterviewTips = () => {
                   alt={section.imageAlt}
                   loading="lazy"
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
                 />
               </div>
               <div className="p-6 flex-1 flex flex-col">
@@ -172,4 +175,3 @@ const InterviewTips = () => {
 };
 
 export default InterviewTips;
-
