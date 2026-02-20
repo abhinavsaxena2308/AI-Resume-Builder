@@ -813,7 +813,7 @@ const Index = () => {
               © {new Date().getFullYear()} AI Resume Builder. All rights reserved.
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
-              Made with <Heart className="w-4 h-4 text-red-500 fill-red-500" /> by{" "}
+              Made by{" "}
               <a
                 href="https://github.com/abhinavsaxena2308"
                 target="_blank"
