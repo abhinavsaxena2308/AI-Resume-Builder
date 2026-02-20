@@ -3,9 +3,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ThemeToggle from "./components/ThemeToggle";
+import Footer from "@/components/Footer";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,30 @@ const RouteLoading = () => (
   </div>
 );
 
+const AppRoutes = () => {
+  const location = useLocation();
+  const hideFooter = location.pathname.includes("/builder");
+
+  return (
+    <>
+      <Suspense fallback={<RouteLoading />}>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/builder/:id" element={<Builder />} />
+          <Route path="/examples" element={<ViewExamples />} />
+          <Route path="/career-tips" element={<CareerTips />} />
+          <Route path="/interview-tips" element={<InterviewTips />} />
+          <Route path="/test-ai" element={<TestAiFeature />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+      {!hideFooter && <Footer />}
+    </>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
@@ -33,19 +58,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <ThemeToggle />
-          <Suspense fallback={<RouteLoading />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/builder/:id" element={<Builder />} />
-              <Route path="/examples" element={<ViewExamples />} />
-              <Route path="/career-tips" element={<CareerTips />} />
-              <Route path="/interview-tips" element={<InterviewTips />} />
-              <Route path="/test-ai" element={<TestAiFeature />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
+          <AppRoutes />
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>

@@ -4,21 +4,19 @@ import heroImage from "@/assets/hero-image.png";
 import { auth, getCurrentUser, onAuthStateChange } from "@/integrations/firebase/client";
 import { signOut } from "firebase/auth";
 import { useTheme } from "@/contexts/ThemeContext";
-import { 
-  FileText, 
-  Sparkles, 
-  Zap, 
-  Target, 
-  Eye, 
-  Download, 
-  CheckCircle2, 
+import {
+  FileText,
+  Sparkles,
+  Zap,
+  Target,
+  Eye,
+  Download,
+  CheckCircle2,
   ArrowRight,
   Star,
   Users,
   Award,
-  Briefcase,
-  Github,
-  Heart
+  Briefcase
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -552,7 +550,7 @@ const Index = () => {
           className="text-center mb-16"
         >
           <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-full text-sm font-medium mb-4">
-            <Heart className="w-4 h-4" />
+            {/* <Heart className="w-4 h-4" /> */}
             Loved by Users
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
@@ -739,100 +737,6 @@ const Index = () => {
           </div>
         </motion.div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-200/50 dark:border-gray-800/50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
-        <div className="container mx-auto px-6 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-            {/* Brand */}
-            <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  AI Resume
-                </span>
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Build professional resumes with AI assistance. Land your dream job faster.
-              </p>
-              <div className="flex items-center gap-3">
-                <a
-                  href="https://github.com/abhinavsaxena2308/AI-Resume-Builder"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
-                >
-                  <Github className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                </a>
-              </div>
-            </div>
-
-            {/* Product Links */}
-            <div>
-              <h4 className="font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li><button onClick={() => navigate("/examples")} className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Templates</button></li>
-                <li><button onClick={() => navigate(user ? "/dashboard" : "/auth")} className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Resume Builder</button></li>
-                <li><button onClick={() => navigate("/examples")} className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Examples</button></li>
-              </ul>
-            </div>
-
-            {/* Resources Links */}
-            <div>
-              <h4 className="font-semibold mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li>
-                  <button
-                    onClick={() => navigate("/career-tips")}
-                    className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-                  >
-                    Career Tips
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate("/interview-tips")}
-                    className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-                  >
-                    Interview Guide
-                  </button>
-                </li>
-                <li><span className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">Resume Tips</span></li>
-              </ul>
-            </div>
-
-            {/* Company Links */}
-            <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li><span className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">About Us</span></li>
-                <li><span className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">Privacy Policy</span></li>
-                <li><span className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">Terms of Service</span></li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Bottom bar */}
-          <div className="pt-8 border-t border-gray-200/50 dark:border-gray-800/50 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              © {new Date().getFullYear()} AI Resume Builder. All rights reserved.
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
-              Made by{" "}
-              <a
-                href="https://github.com/abhinavsaxena2308"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-purple-600 dark:text-purple-400 hover:underline"
-              >
-                Abhinav Saxena
-              </a>
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };
