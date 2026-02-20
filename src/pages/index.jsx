@@ -74,7 +74,7 @@ const Index = () => {
       </div>
 
       {/* Header */}
-      <header className="position-fixed w-full bg-white/80 dark:bg-black/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200/50 dark:border-gray-800/50">
+      <header className="fixed top-0 left-0 w-full bg-white/80 dark:bg-black/80 backdrop-blur-md z-50 border-b border-gray-200/50 dark:border-gray-800/50">
         <div className="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -144,7 +144,7 @@ const Index = () => {
 
 
       {/* Hero Section */}
-      <section className="relative container mx-auto px-6 py-16 lg:py-24">
+      <section className="relative container mx-auto px-6 mt-20 py-16 lg:py-24">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
@@ -783,7 +783,14 @@ const Index = () => {
             <div>
               <h4 className="font-semibold mb-4">Resources</h4>
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li><span className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">Career Tips</span></li>
+                <li>
+                  <button
+                    onClick={() => navigate("/career-tips")}
+                    className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                  >
+                    Career Tips
+                  </button>
+                </li>
                 <li><span className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">Interview Guide</span></li>
                 <li><span className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">Resume Tips</span></li>
               </ul>
