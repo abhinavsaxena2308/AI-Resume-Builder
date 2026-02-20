@@ -6,6 +6,14 @@ import { FileText } from "lucide-react";
 const Navbar = ({ user }) => {
   const navigate = useNavigate();
 
+  const handleBack = () => {
+    if (user) {
+      navigate("/dashboard");
+    } else {
+      navigate("/");
+    }
+  };
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -17,12 +25,11 @@ const Navbar = ({ user }) => {
   };
 
   return (
-    <header className="w-full bg-white dark:bg-black shadow-md sticky top-0 z-50 border-b border-border">
+    <header className="fixed top-0 left-0 w-full bg-white dark:bg-black shadow-md z-50 border-b border-border">
       <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex justify-between items-center">
-        {/* Left Section */}
         <div
           className="flex items-center cursor-pointer"
-          onClick={() => navigate("/")}
+          onClick={handleBack}
         >
           <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg flex items-center justify-center text-purple-800 dark:text-purple-400 font-bold">
             <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -32,13 +39,12 @@ const Navbar = ({ user }) => {
           </span>
         </div>
 
-        {/* Right Section */}
         <nav className="flex items-center space-x-2 sm:space-x-4">
           <button
-            onClick={() => navigate("/")}
+            onClick={handleBack}
             className="flex items-center gap-1 sm:gap-2 text-gray-700 border rounded-full px-2 py-1 sm:px-3 sm:py-2 text-sm sm:text-base dark:text-gray-200 dark:border-gray-700 hover:shadow-lg hover:shadow-purple-400 dark:hover:shadow-purple-600 transition"
           >
-            ← Back to Home
+            {user ? "← Dashboard" : "← Back to Home"}
           </button>
 
           {user ? (
