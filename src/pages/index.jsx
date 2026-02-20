@@ -791,7 +791,14 @@ const Index = () => {
                     Career Tips
                   </button>
                 </li>
-                <li><span className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">Interview Guide</span></li>
+                <li>
+                  <button
+                    onClick={() => navigate("/interview-tips")}
+                    className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                  >
+                    Interview Guide
+                  </button>
+                </li>
                 <li><span className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">Resume Tips</span></li>
               </ul>
             </div>

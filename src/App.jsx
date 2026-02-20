@@ -15,6 +15,7 @@ const Dashboard = lazy(() => import("./pages/Dasboard"));
 const Builder = lazy(() => import("./pages/Builder"));
 const ViewExamples = lazy(() => import("./pages/ViewExamples"));
 const CareerTips = lazy(() => import("./pages/CareerTips"));
+const InterviewTips = lazy(() => import("./pages/InterviewTips"));
 const TestAiFeature = lazy(() => import("./pages/TestAiFeature"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/builder/:id" element={<Builder />} />
               <Route path="/examples" element={<ViewExamples />} />
               <Route path="/career-tips" element={<CareerTips />} />
+              <Route path="/interview-tips" element={<InterviewTips />} />
               <Route path="/test-ai" element={<TestAiFeature />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
