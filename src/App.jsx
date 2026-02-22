@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ThemeToggle from "./components/ThemeToggle";
 import Footer from "@/components/Footer";
+import BackgroundEffects from "@/components/BackgroundEffects";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const AppRoutes = () => {
 
   return (
     <>
+      <BackgroundEffects />
       <Suspense fallback={<RouteLoading />}>
         <Routes>
           <Route path="/" element={<Index />} />
