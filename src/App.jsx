@@ -8,6 +8,8 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import ThemeToggle from "./components/ThemeToggle";
 import Footer from "@/components/Footer";
 import BackgroundEffects from "@/components/BackgroundEffects";
+import ScrollToTop from "@/components/ScrollToTop";
+import { AnimatePresence, motion } from "framer-motion";
 
 const queryClient = new QueryClient();
 const Index = lazy(() => import("./pages/index"));
@@ -28,27 +30,41 @@ const RouteLoading = () => (
   </div>
 );
 
+const PageTransition = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 15 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -15 }}
+    transition={{ duration: 0.3, ease: "easeInOut" }}
+  >
+    {children}
+  </motion.div>
+);
+
 const AppRoutes = () => {
   const location = useLocation();
   const hideFooter = location.pathname.includes("/builder");
 
   return (
     <>
+      <ScrollToTop />
       <BackgroundEffects />
       <Suspense fallback={<RouteLoading />}>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/builder/:id" element={<Builder />} />
-          <Route path="/examples" element={<ViewExamples />} />
-          <Route path="/career-tips" element={<CareerTips />} />
-          <Route path="/interview-tips" element={<InterviewTips />} />
-          <Route path="/test-ai" element={<TestAiFeature />} />
-          <Route path="/resume-page" element={<ResumePage />} />
-          <Route path="/about-us" element={<AboutUs />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<PageTransition><Index /></PageTransition>} />
+            <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
+            <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
+            <Route path="/builder/:id" element={<PageTransition><Builder /></PageTransition>} />
+            <Route path="/examples" element={<PageTransition><ViewExamples /></PageTransition>} />
+            <Route path="/career-tips" element={<PageTransition><CareerTips /></PageTransition>} />
+            <Route path="/interview-tips" element={<PageTransition><InterviewTips /></PageTransition>} />
+            <Route path="/test-ai" element={<PageTransition><TestAiFeature /></PageTransition>} />
+            <Route path="/resume-page" element={<PageTransition><ResumePage /></PageTransition>} />
+            <Route path="/about-us" element={<PageTransition><AboutUs /></PageTransition>} />
+            <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+          </Routes>
+        </AnimatePresence>
       </Suspense>
       {!hideFooter && <Footer />}
     </>
