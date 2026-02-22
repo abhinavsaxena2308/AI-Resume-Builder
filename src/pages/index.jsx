@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-image.png";
+import premiumOfferImg from "@/assets/premium.png";
 import { auth, getCurrentUser, onAuthStateChange } from "@/integrations/firebase/client";
 import { signOut } from "firebase/auth";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -17,9 +18,11 @@ import {
   Star,
   Users,
   Award,
-  Briefcase
+  Briefcase,
+  Gift,
+  X
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -48,7 +51,111 @@ const Index = () => {
     return () => unsubscribe();
   }, []);
 
-  // Animation variants
+  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  useEffect(() => {
+    const hasSeenModal = sessionStorage.getItem("hasSeenPremiumModal");
+    if (!hasSeenModal) {
+      const timer = setTimeout(() => {
+        setIsPremiumModalOpen(true);
+        sessionStorage.setItem("hasSeenPremiumModal", "true");
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleGetPremium = () => {
+    setIsSuccess(true);
+    setTimeout(() => {
+      setIsPremiumModalOpen(false);
+      // Reset after close animation if needed
+    }, 2000);
+  };
+
+  const PremiumOfferModal = () => (
+    <AnimatePresence>
+      {isPremiumModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => !isSuccess && setIsPremiumModalOpen(false)}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          />
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            className="relative w-full max-w-lg bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-2xl border border-purple-500/30 overflow-hidden"
+          >
+            {/* Background Glow */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 blur-3xl -translate-y-1/2 translate-x-1/2" />
+
+            {!isSuccess ? (
+              <>
+                <button
+                  onClick={() => setIsPremiumModalOpen(false)}
+                  className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                <div className="text-center">
+                  <div className="relative mb-6 group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-xl group-hover:blur-2xl transition-all rounded-3xl" />
+                    <img
+                      src={premiumOfferImg}
+                      alt="Premium Offer"
+                      className="relative w-full h-48 object-cover rounded-2xl shadow-lg border border-white/10"
+                    />
+                    <div className="absolute -bottom-4 right-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-purple-500/20">
+                      <Gift className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                    </div>
+                  </div>
+
+                  <h2 className="text-3xl font-extrabold mb-3 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    Premium Gift!
+                  </h2>
+
+                  <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg leading-relaxed">
+                    Unlock our most advanced AI features and ATS-premium layouts for <span className="font-bold text-green-500 underline decoration-green-500/30">FREE</span> for your first 3 resumes!
+                  </p>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleGetPremium}
+                    className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl font-bold text-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all"
+                  >
+                    Claim My Premium Access
+                  </motion.button>
+
+                  <p className="mt-4 text-xs text-gray-400">
+                    No credit card required • Limited time offer
+                  </p>
+                </div>
+              </>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-10"
+              >
+                <div className="w-20 h-20 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <CheckCircle2 className="w-10 h-10 text-green-600 dark:text-green-400" />
+                </div>
+                <h3 className="text-2xl font-bold mb-2">Successfully Activated!</h3>
+                <p className="text-gray-500 dark:text-gray-400">Your account has been upgraded to Premium.</p>
+              </motion.div>
+            )}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -65,6 +172,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50 dark:from-gray-950 dark:via-black dark:to-purple-950 text-gray-900 dark:text-gray-100 overflow-hidden">
+      <PremiumOfferModal />
       {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
