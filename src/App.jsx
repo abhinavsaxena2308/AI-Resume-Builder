@@ -10,7 +10,6 @@ import Footer from "@/components/Footer";
 import BackgroundEffects from "@/components/BackgroundEffects";
 
 const queryClient = new QueryClient();
-
 const Index = lazy(() => import("./pages/index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dasboard"));
