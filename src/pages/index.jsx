@@ -4,6 +4,7 @@ import heroImage from "@/assets/hero-image.png";
 import { auth, getCurrentUser, onAuthStateChange } from "@/integrations/firebase/client";
 import { signOut } from "firebase/auth";
 import { useTheme } from "@/contexts/ThemeContext";
+import Navbar from "@/components/Navbar";
 import {
   FileText,
   Sparkles,
@@ -72,79 +73,13 @@ const Index = () => {
       </div>
 
       {/* Header */}
-      <header className="fixed top-0 left-0 w-full bg-white/80 dark:bg-black/80 backdrop-blur-md z-50 border-b border-gray-200/50 dark:border-gray-800/50">
-        <div className="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center cursor-pointer group"
-            onClick={() => navigate("/")}
-          >
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-purple-500/25 group-hover:shadow-purple-500/40 transition-shadow">
-              <FileText className="w-5 h-5" />
-            </div>
-            <span className="ml-3 text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              AI Resume Builder
-            </span>
-          </motion.div>
-
-          <motion.nav 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3"
-          >
-            {user ? (
-              <>
-                <button 
-                  onClick={() => navigate("/dashboard")} 
-                  className="hidden sm:flex items-center gap-2 text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-                >
-                  Hi, {user.displayName?.split(' ')[0] || user.email?.split('@')[0]}
-                </button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => navigate("/dashboard")}
-                  className="px-4 py-2 border border-purple-500 text-purple-600 dark:text-purple-400 rounded-xl font-medium hover:bg-purple-50 dark:hover:bg-purple-950 transition-colors"
-                >
-                  Dashboard
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleLogout}
-                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-shadow"
-                >
-                  Logout
-                </motion.button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => navigate("/auth")}
-                  className="hidden sm:block text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 transition-colors font-medium"
-                >
-                  Sign In
-                </button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => navigate("/auth")}
-                  className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all"
-                >
-                  Get Started Free
-                </motion.button>
-              </>
-            )}
-          </motion.nav>
-        </div>
-      </header>
+      <Navbar user={user} />
 
 
       {/* Hero Section */}
       <section className="relative container mx-auto px-6 mt-20 py-16 lg:py-24">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -171,7 +106,7 @@ const Index = () => {
             </h1>
 
             <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-xl">
-              Create professional, ATS-friendly resumes with AI assistance. 
+              Create professional, ATS-friendly resumes with AI assistance.
               Stand out from the crowd and land your dream job faster.
             </p>
 
@@ -216,7 +151,7 @@ const Index = () => {
             </div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
@@ -225,7 +160,7 @@ const Index = () => {
             {/* Decorative elements */}
             <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl opacity-20 blur-xl" />
             <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-br from-pink-500 to-purple-500 rounded-2xl opacity-20 blur-xl" />
-            
+
             {/* Main image */}
             <div className="relative">
               <img
@@ -236,7 +171,7 @@ const Index = () => {
                 loading="eager"
                 className="relative rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 bg-white dark:bg-gray-900"
               />
-              
+
               {/* Floating badges */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -278,7 +213,7 @@ const Index = () => {
 
       {/* Stats Section */}
       <section className="relative container mx-auto px-6 py-16">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -308,8 +243,8 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="relative container mx-auto px-6 py-16 lg:py-24">
-        <motion.div 
+      <section id="about" className="relative container mx-auto px-6 py-16 lg:py-24">
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -414,7 +349,7 @@ const Index = () => {
           <div className="absolute top-1/2 right-0 w-96 h-96 bg-pink-500/5 rounded-full translate-x-1/2 -translate-y-1/2" />
         </div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -435,7 +370,7 @@ const Index = () => {
         <div className="relative max-w-5xl mx-auto">
           {/* Connection line for desktop */}
           <div className="hidden lg:block absolute top-32 left-[16%] right-[16%] h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 rounded-full" />
-          
+
           {/* Animated dots on line */}
           <div className="hidden lg:flex absolute top-32 left-[16%] right-[16%] justify-between -translate-y-1/2">
             {[0, 1, 2].map((i) => (
@@ -452,24 +387,24 @@ const Index = () => {
 
           <div className="grid lg:grid-cols-3 gap-8 lg:gap-6">
             {[
-              { 
-                step: "01", 
+              {
+                step: "01",
                 icon: FileText,
-                title: "Enter Your Details", 
+                title: "Enter Your Details",
                 desc: "Fill in your information, experience, and skills. Our smart form guides you through the process.",
                 color: "purple"
               },
-              { 
-                step: "02", 
+              {
+                step: "02",
                 icon: Sparkles,
-                title: "AI Enhancement", 
+                title: "AI Enhancement",
                 desc: "Let our AI polish your content, suggest improvements, and optimize for ATS systems.",
                 color: "pink"
               },
-              { 
-                step: "03", 
+              {
+                step: "03",
                 icon: Download,
-                title: "Download & Apply", 
+                title: "Download & Apply",
                 desc: "Export your professional resume as PDF and start applying to your dream jobs.",
                 color: "purple"
               },
@@ -486,21 +421,21 @@ const Index = () => {
                 {idx < 2 && (
                   <div className="lg:hidden absolute left-1/2 top-full w-0.5 h-8 bg-gradient-to-b from-purple-500 to-pink-500 -translate-x-1/2" />
                 )}
-                
+
                 <div className="group relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 rounded-2xl p-8 hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 h-full">
                   {/* Step number badge */}
                   <div className="absolute -top-4 left-8 px-4 py-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-white text-sm font-bold shadow-lg">
                     Step {item.step}
                   </div>
-                  
+
                   {/* Icon */}
-                  <motion.div 
+                  <motion.div
                     whileHover={{ scale: 1.1, rotate: 5 }}
                     className={`w-16 h-16 rounded-2xl bg-gradient-to-br from-${item.color}-500 to-pink-500 flex items-center justify-center text-white mb-6 shadow-lg shadow-${item.color}-500/30 group-hover:shadow-${item.color}-500/50 transition-shadow`}
                   >
                     <item.icon className="w-8 h-8" />
                   </motion.div>
-                  
+
                   {/* Content */}
                   <h3 className="text-xl font-bold mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                     {item.title}
@@ -508,7 +443,7 @@ const Index = () => {
                   <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                     {item.desc}
                   </p>
-                  
+
                   {/* Arrow indicator */}
                   <div className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white dark:bg-gray-800 rounded-full items-center justify-center shadow-lg border border-gray-200 dark:border-gray-700">
                     {idx < 2 && <ArrowRight className="w-3 h-3 text-purple-500" />}
@@ -543,7 +478,7 @@ const Index = () => {
 
       {/* Testimonials Section */}
       <section className="relative container mx-auto px-6 py-16 lg:py-24">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -612,7 +547,7 @@ const Index = () => {
 
       {/* FAQ Section */}
       <section className="relative container mx-auto px-6 py-16 lg:py-24">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -683,11 +618,11 @@ const Index = () => {
         >
           {/* Background gradient */}
           <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-[length:200%_auto] animate-gradient" />
-          
+
           {/* Decorative elements */}
           <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2" />
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/10 rounded-full translate-x-1/2 translate-y-1/2" />
-          
+
           <div className="relative p-12 md:p-16 text-center text-white">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -699,14 +634,14 @@ const Index = () => {
                 <Sparkles className="w-4 h-4" />
                 Start for Free Today
               </div>
-              
+
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
                 Ready to Land Your Dream Job?
               </h2>
               <p className="text-lg md:text-xl text-white/90 mb-8">
                 Join thousands of successful job seekers who built their winning resumes with AI Resume Builder. No credit card required.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <motion.button
                   whileHover={{ scale: 1.02, y: -2 }}
