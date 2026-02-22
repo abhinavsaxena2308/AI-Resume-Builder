@@ -55,7 +55,7 @@ const BackgroundEffects = () => {
         <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
 
             {/* 1. Raindrops Effect */}
-            <div className="absolute inset-0 opacity-[0.15] dark:opacity-[0.2]">
+            <div className="absolute inset-0 opacity-[0.4] dark:opacity-[0.2]">
                 {raindrops.map((drop) => (
                     <motion.div
                         key={`rain-${drop.id}`}
@@ -77,7 +77,7 @@ const BackgroundEffects = () => {
             </div>
 
             {/* 2. Floating Icons Effect */}
-            <div className="absolute inset-0 opacity-[0.05] dark:opacity-[0.08]">
+            <div className="absolute inset-0 opacity-[0.2] dark:opacity-[0.08]">
                 {floatingIcons.map((obj) => (
                     <motion.div
                         key={`icon-${obj.id}`}
