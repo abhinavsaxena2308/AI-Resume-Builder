@@ -60,8 +60,8 @@ const Navbar = ({ user }) => {
   return (
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b ${isScrolled
-          ? "bg-white/80 dark:bg-black/80 backdrop-blur-md border-gray-200/50 dark:border-gray-800/50 shadow-sm py-2"
-          : "bg-white dark:bg-black border-transparent py-4"
+        ? "bg-white/80 dark:bg-black/80 backdrop-blur-md border-gray-200/50 dark:border-gray-800/50 shadow-sm py-2"
+        : "bg-white dark:bg-black border-transparent py-4"
         }`}
     >
       <div className="container mx-auto px-4 md:px-8 flex justify-between items-center">
@@ -80,6 +80,10 @@ const Navbar = ({ user }) => {
 
         {/* Desktop Navigation Center */}
         <nav className="hidden md:flex flex-1 items-center justify-center space-x-2">
+          <NavItem
+            label="Home"
+            onClick={() => handleNavClick("/")}
+          />
           <NavItem
             label="Templates"
             onClick={() => handleNavClick("/examples")}
@@ -185,6 +189,9 @@ const Navbar = ({ user }) => {
             className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 overflow-hidden shadow-xl"
           >
             <div className="px-4 py-6 flex flex-col gap-4">
+              <button onClick={() => handleNavClick("/")} className="text-left text-lg font-medium text-gray-800 dark:text-gray-200">
+                Home
+              </button>
               <button onClick={() => handleNavClick("/examples")} className="text-left text-lg font-medium text-gray-800 dark:text-gray-200">
                 Templates
               </button>
