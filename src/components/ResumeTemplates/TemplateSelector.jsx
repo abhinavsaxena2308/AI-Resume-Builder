@@ -1,124 +1,51 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Palette, Eye } from "lucide-react";
 import { motion } from "framer-motion";
-import { useTheme } from "@/contexts/ThemeContext";
+import { CheckCircle2 } from "lucide-react";
+
+const templates = [
+  {
+    id: "modern",
+    name: "Modern",
+    color: "from-blue-500 to-cyan-500",
+    dot: "bg-blue-500",
+    desc: "Clean & contemporary",
+  },
+  {
+    id: "classic",
+    name: "Classic",
+    color: "from-gray-500 to-slate-600",
+    dot: "bg-gray-500",
+    desc: "Traditional & formal",
+  },
+  {
+    id: "creative",
+    name: "Creative",
+    color: "from-purple-500 to-pink-500",
+    dot: "bg-purple-500",
+    desc: "Vibrant & bold",
+  },
+];
 
 const TemplateSelector = ({ selectedTemplate, onSelect }) => {
-  const { theme } = useTheme();
-
-  const templates = [
-    {
-      id: "modern",
-      name: "Modern",
-      description: "Clean and contemporary design",
-      color: "blue",
-      preview: "Modern template with blue accents and structured layout",
-    },
-    {
-      id: "classic",
-      name: "Classic",
-      description: "Traditional and professional",
-      color: "gray",
-      preview: "Classic template with formal styling and gray tones",
-    },
-    {
-      id: "creative",
-      name: "Creative",
-      description: "Vibrant and eye-catching",
-      color: "purple",
-      preview: "Creative template with colorful gradients and modern flair",
-    },
-  ];
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-3">
-        <Palette className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-        <span className="font-medium text-gray-700 dark:text-gray-300">Choose Template</span>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {templates.map((template) => (
-          <motion.div
-            key={template.id}
-            whileHover={{ scale: 1.05, y: -5 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    <div className="flex gap-2">
+      {templates.map((t) => {
+        const active = selectedTemplate === t.id;
+        return (
+          <button
+            key={t.id}
+            onClick={() => onSelect(t.id)}
+            title={t.desc}
+            className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150 ${active
+                ? "bg-white dark:bg-gray-800 border-purple-400 dark:border-purple-600 text-purple-700 dark:text-purple-300 shadow-sm"
+                : "bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300"
+              }`}
           >
-            <Card
-              className={`cursor-pointer transition-all duration-200 hover:shadow-lg border 
-                ${
-                  selectedTemplate === template.id
-                    ? "border-purple-500 ring-2 ring-purple-500"
-                    : "border-border"
-                }
-                ${
-                  theme === "dark"
-                    ? "bg-black text-white hover:bg-gray-900"
-                    : "bg-white text-gray-900 hover:bg-gray-50"
-                }
-              `}
-              onClick={() => onSelect(template.id)}
-            >
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  {/* Template Name */}
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-lg capitalize text-foreground">
-                      {template.name}
-                    </h3>
-                    {selectedTemplate === template.id && (
-                      <Badge
-                        variant="default"
-                        className="bg-purple-600 dark:bg-purple-700 text-white"
-                      >
-                        Selected
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {template.description}
-                  </p>
-                  <div
-                    className={`w-full h-2 rounded-full bg-gradient-to-r ${
-                      template.color === "blue"
-                        ? "from-blue-200 to-blue-600 dark:from-blue-400 dark:to-blue-800"
-                        : template.color === "gray"
-                        ? "from-gray-400 to-gray-600 dark:from-gray-500 dark:to-gray-700"
-                        : "from-purple-400 to-pink-400 dark:from-purple-500 dark:to-pink-500"
-                    }`}
-                  />
-
-                  {/* Mini Preview Text */}
-                  <div className="text-xs text-gray-500 dark:text-gray-400 italic">
-                    {template.preview}
-                  </div>
-
-                  {/* Select Button */}
-                  <Button
-                    variant={selectedTemplate === template.id ? "default" : "outline"}
-                    size="sm"
-                    className={`w-full ${
-                      selectedTemplate === template.id
-                        ? "bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800"
-                        : "border-border hover:bg-accent dark:hover:bg-gray-700"
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelect(template.id);
-                    }}
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    {selectedTemplate === template.id ? "Current" : "Preview"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+            <span className={`w-2 h-2 rounded-full bg-gradient-to-br ${t.color} shrink-0`} />
+            {t.name}
+            {active && <CheckCircle2 className="w-3 h-3 text-purple-500 ml-0.5" />}
+          </button>
+        );
+      })}
     </div>
   );
 };

@@ -9,24 +9,21 @@ const useGeminiSuggestions = () => {
   const fetchSuggestions = async (userType, resumeData) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Validate input
       if (!userType) {
         throw new Error("User type is required");
       }
-      
+
       if (!resumeData) {
         throw new Error("Resume data is required");
       }
-      
+
       // Build the full URL for the API endpoint
       const url = `${API_BASE_URL}/api/gemini-suggestions`;
-      
-      console.log("Attempting to fetch suggestions from:", url);
-      console.log("Environment:", isProduction ? "Production" : "Development");
-      console.log("User type:", userType);
-      console.log("Resume data:", JSON.stringify(resumeData, null, 2));
+
+      console.log("Fetching suggestions from:", url, "| userType:", userType);
 
       // Make the request
       const response = await fetch(url, {
@@ -38,7 +35,7 @@ const useGeminiSuggestions = () => {
       });
 
       console.log(`Response from ${url}:`, response.status, response.statusText);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`Error response from ${url}:`, errorText);
@@ -47,7 +44,7 @@ const useGeminiSuggestions = () => {
 
       const data = await response.json();
       console.log("Received suggestions:", data);
-      
+
       setSuggestions(data);
       return data;
     } catch (err) {
