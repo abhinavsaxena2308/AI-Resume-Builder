@@ -242,17 +242,17 @@ const Index = () => {
         </motion.div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Section - Bus Topology */}
       <section id="about" className="relative container mx-auto px-6 py-16 lg:py-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-24"
         >
           <span className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium mb-4">
             <Zap className="w-4 h-4" />
-            Powerful Features
+            Core Infrastructure
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
             Why Choose{" "}
@@ -261,83 +261,132 @@ const Index = () => {
             </span>
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Everything you need to create a standout resume that gets you hired.
+            Our engine is built on a high-speed data bus, connecting 6 powerful nodes to construct the ultimate resume network.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[
-            {
-              icon: Sparkles,
-              title: "AI-Powered Writing",
-              desc: "Generate professional summaries and descriptions with AI that understands your career goals.",
-              bgLight: "bg-purple-100",
-              bgDark: "dark:bg-purple-900/40",
-              textLight: "text-purple-600",
-              textDark: "dark:text-purple-400"
-            },
-            {
-              icon: Target,
-              title: "ATS-Optimized",
-              desc: "Our templates are designed to pass Applicant Tracking Systems and reach human recruiters.",
-              bgLight: "bg-green-100",
-              bgDark: "dark:bg-green-900/40",
-              textLight: "text-green-600",
-              textDark: "dark:text-green-400"
-            },
-            {
-              icon: Eye,
-              title: "Real-Time Preview",
-              desc: "See your resume come to life as you type. What you see is exactly what you get.",
-              bgLight: "bg-blue-100",
-              bgDark: "dark:bg-blue-900/40",
-              textLight: "text-blue-600",
-              textDark: "dark:text-blue-400"
-            },
-            {
-              icon: Download,
-              title: "Easy Export",
-              desc: "Download your resume as a PDF with one click. Ready to send to employers instantly.",
-              bgLight: "bg-orange-100",
-              bgDark: "dark:bg-orange-900/40",
-              textLight: "text-orange-600",
-              textDark: "dark:text-orange-400"
-            },
-            {
-              icon: Zap,
-              title: "Lightning Fast",
-              desc: "Create a professional resume in minutes, not hours. Our AI does the heavy lifting.",
-              bgLight: "bg-yellow-100",
-              bgDark: "dark:bg-yellow-900/40",
-              textLight: "text-yellow-600",
-              textDark: "dark:text-yellow-400"
-            },
-            {
-              icon: CheckCircle2,
-              title: "Smart Suggestions",
-              desc: "Get intelligent recommendations for skills, keywords, and content improvements.",
-              bgLight: "bg-pink-100",
-              bgDark: "dark:bg-pink-900/40",
-              textLight: "text-pink-600",
-              textDark: "dark:text-pink-400"
-            },
-          ].map((feature, idx) => (
+        <div className="relative w-fit max-w-5xl mx-auto py-16">
+          {/* Central Bus Line (Horizontal) */}
+          <div className="hidden md:block absolute top-1/2 left-4 right-4 h-2 bg-gray-200 dark:bg-gray-800 rounded-full -translate-y-1/2 shadow-inner overflow-hidden">
+            {/* Data packets flowing across the bus */}
             <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-              whileHover={{ y: -5 }}
-              className="group p-6 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 rounded-2xl hover:shadow-xl hover:shadow-purple-500/10 dark:hover:shadow-purple-500/20 hover:border-purple-200 dark:hover:border-purple-800 transition-all duration-300"
-            >
-              <div className={`inline-flex p-3 rounded-xl mb-4 ${feature.bgLight} ${feature.bgDark} group-hover:scale-110 transition-transform`}>
-                <feature.icon className={`w-6 h-6 ${feature.textLight} ${feature.textDark}`} />
-              </div>
-              <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">{feature.title}</h3>
-              <p className="text-gray-600 dark:text-gray-400">{feature.desc}</p>
-            </motion.div>
-          ))}
+              className="h-full w-32 bg-gradient-to-r from-transparent via-purple-500 to-transparent"
+              animate={{ x: ["-100%", "2000%"] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              className="h-full w-24 bg-gradient-to-r from-transparent via-pink-500 to-transparent absolute top-0"
+              animate={{ x: ["-100%", "2500%"] }}
+              transition={{ duration: 7, repeat: Infinity, ease: "linear", delay: 2.5 }}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-y-16 md:gap-y-24 gap-x-6 md:gap-x-8">
+            {[
+              {
+                icon: Sparkles,
+                title: "AI-Powered Writing",
+                desc: "Generate professional summaries and descriptions.",
+                color: "text-purple-500",
+                border: "border-purple-500",
+                bg: "bg-purple-500"
+              },
+              {
+                icon: Target,
+                title: "ATS-Optimized",
+                desc: "Templates designed to pass Applicant Tracking Systems.",
+                color: "text-green-500",
+                border: "border-green-500",
+                bg: "bg-green-500"
+              },
+              {
+                icon: Eye,
+                title: "Real-Time Preview",
+                desc: "See your resume come to life exactly as you type.",
+                color: "text-blue-500",
+                border: "border-blue-500",
+                bg: "bg-blue-500"
+              },
+              {
+                icon: Download,
+                title: "Easy Export",
+                desc: "Download formatted PDF ready to send to employers.",
+                color: "text-orange-500",
+                border: "border-orange-500",
+                bg: "bg-orange-500"
+              },
+              {
+                icon: Zap,
+                title: "Lightning Fast",
+                desc: "Create a professional resume in minutes, not hours.",
+                color: "text-yellow-500",
+                border: "border-yellow-500",
+                bg: "bg-yellow-500"
+              },
+              {
+                icon: CheckCircle2,
+                title: "Smart Suggestions",
+                desc: "Intelligent recommendations for keywords and content.",
+                color: "text-pink-500",
+                border: "border-pink-500",
+                bg: "bg-pink-500"
+              },
+            ].map((feature, idx) => {
+              const isTop = idx < 3;
+              return (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: isTop ? -30 : 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.6, delay: idx * 0.1 }}
+                  className={`relative flex flex-col items-center ${isTop ? 'md:flex-col-reverse' : 'md:flex-col'}`}
+                >
+                  {/* Vertical Branch Line connecting node to horizontal bus */}
+                  <div
+                    className={`hidden md:block absolute left-1/2 -translate-x-1/2 w-[3px] bg-gradient-to-b ${isTop ? 'from-transparent to-gray-200 dark:to-gray-700' : 'from-gray-200 dark:from-gray-700 to-transparent'}`}
+                    style={{
+                      height: '32px',
+                      [isTop ? 'top' : 'bottom']: '100%',
+                      [isTop ? 'bottom' : 'top']: 'auto'
+                    }}
+                  >
+                    {/* Flowing data on branch */}
+                    <motion.div
+                      className={`absolute left-0 right-0 h-4 bg-gradient-to-b ${isTop ? 'from-transparent to-purple-500' : 'from-purple-500 to-transparent'}`}
+                      animate={isTop ? { top: ["0%", "100%"] } : { top: ["0%", "100%"] }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "linear", delay: idx * 0.3 }}
+                    />
+                  </div>
+
+                  {/* Node connection point on central bus */}
+                  <div
+                    className={`hidden md:block absolute left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border-[3px] border-white dark:border-gray-950 ${feature.bg} z-10 shadow-[0_0_10px_rgba(168,85,247,0.5)]`}
+                    style={{ [isTop ? 'top' : 'bottom']: 'calc(100% + 32px)', marginTop: isTop ? '-6px' : '0', marginBottom: !isTop ? '-6px' : '0' }}
+                  />
+
+                  {/* Main Feature Card */}
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className={`w-full relative z-20 group p-6 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-2xl shadow-xl hover:shadow-2xl border ${feature.border} transition-all duration-300 before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/50 before:to-transparent before:dark:from-white/5 before:dark:to-transparent before:rounded-2xl`}
+                  >
+                    <div className="relative z-10">
+                      <div className={`inline-flex p-3 rounded-xl mb-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm ${feature.color} group-hover:scale-110 transition-transform`}>
+                        <feature.icon className="w-6 h-6" />
+                      </div>
+                      <h3 className="text-lg md:text-xl font-bold mb-2 text-gray-900 dark:text-white transition-colors">
+                        {feature.title}
+                      </h3>
+                      <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                        {feature.desc}
+                      </p>
+                    </div>
+                  </motion.div>
+
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -476,7 +525,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Testimonials Section 
       <section className="relative container mx-auto px-6 py-16 lg:py-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -485,7 +534,6 @@ const Index = () => {
           className="text-center mb-16"
         >
           <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-full text-sm font-medium mb-4">
-            {/* <Heart className="w-4 h-4" /> */}
             Loved by Users
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
@@ -544,6 +592,7 @@ const Index = () => {
           ))}
         </div>
       </section>
+      */}
 
       {/* FAQ Section */}
       <section className="relative container mx-auto px-6 py-16 lg:py-24">
