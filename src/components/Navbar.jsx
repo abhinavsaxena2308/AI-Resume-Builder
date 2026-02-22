@@ -128,7 +128,7 @@ const Navbar = ({ user }) => {
 
           <NavItem
             label="About Us"
-            onClick={() => handleNavClick("/#about")}
+            onClick={() => handleNavClick("/about-us")}
           />
         </nav>
 
@@ -200,7 +200,7 @@ const Navbar = ({ user }) => {
                 <button onClick={() => handleNavClick("/career-tips")} className="text-left text-gray-700 dark:text-gray-300">Career Tips</button>
                 <button onClick={() => handleNavClick("/interview-tips")} className="text-left text-gray-700 dark:text-gray-300">Interview Tips</button>
               </div>
-              <button onClick={() => handleNavClick("/#about")} className="text-left text-lg font-medium text-gray-800 dark:text-gray-200">
+              <button onClick={() => handleNavClick("/about-us")} className="text-left text-lg font-medium text-gray-800 dark:text-gray-200">
                 About Us
               </button>
 
