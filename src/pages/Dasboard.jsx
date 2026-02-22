@@ -1,16 +1,16 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, db, handleAuthError, getCurrentUser, onAuthStateChange } from "@/integrations/firebase/client";
-import { collection, query, where, orderBy, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp } from "firebase/firestore";
+import { auth, handleAuthError, getCurrentUser, onAuthStateChange } from "@/integrations/firebase/client";
 import Navbar from "@/components/Navbar";
-import { 
-  FileText, 
-  Plus, 
-  Search, 
-  Clock, 
-  Sparkles, 
-  Trash2, 
-  Edit3, 
+import {
+  FileText,
+  Plus,
+  Search,
+  Clock,
+  Sparkles,
+  Trash2,
+  Edit3,
+  PenLine,
   MoreVertical,
   Calendar,
   FolderOpen,
@@ -33,11 +33,12 @@ const Dashboard = () => {
   // Track which resume is being edited
   const [editingId, setEditingId] = useState(null);
   const [tempTitle, setTempTitle] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   // Filter resumes based on search
   const filteredResumes = useMemo(() => {
     if (!searchQuery.trim()) return resumes;
-    return resumes.filter(r => 
+    return resumes.filter(r =>
       r.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [resumes, searchQuery]);
@@ -65,12 +66,10 @@ const Dashboard = () => {
     const checkSession = async () => {
       try {
         const user = await getCurrentUser();
-        
         if (!user) {
           navigate("/auth");
           return;
         }
-        
         setSession({ user });
       } catch (err) {
         console.error("Session check error:", err);
@@ -88,9 +87,7 @@ const Dashboard = () => {
       }
     });
 
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, [navigate]);
 
   useEffect(() => {
@@ -100,29 +97,20 @@ const Dashboard = () => {
   const fetchResumes = async (retryCount = 0) => {
     try {
       if (!session?.user) return;
-      
       const resumesData = await resumeApi.listByUser();
       setResumes(resumesData);
     } catch (error) {
       console.error("Fetch resumes error:", error);
-      
-      // Retry once after a short delay (token might need refresh)
       if (retryCount < 1) {
-        console.log("Retrying fetch resumes...");
         setTimeout(() => fetchResumes(retryCount + 1), 1000);
         return;
       }
-      
       handleAuthError(error);
-      
-      // Show more specific error message
-      const errorMessage = error.message.includes("authenticated") 
-        ? "Session expired. Please log in again."
-        : "Failed to load resumes. Please try again.";
-      
       toast({
         title: "Error",
-        description: errorMessage,
+        description: error.message.includes("authenticated")
+          ? "Session expired. Please log in again."
+          : "Failed to load resumes. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -134,11 +122,6 @@ const Dashboard = () => {
     try {
       const currentUser = session?.user || auth.currentUser;
       if (!currentUser) {
-        toast({
-          title: "Session expired",
-          description: "Please sign in again to create a resume.",
-          variant: "destructive"
-        });
         navigate("/auth");
         return;
       }
@@ -168,12 +151,12 @@ const Dashboard = () => {
           other: []
         }
       };
-      
+
       const result = await resumeApi.create("New Resume", initialContent, {
-        template: "modern", // Default template
+        template: "modern",
         creation_method: "dashboard"
       });
-      
+
       navigate(`/builder/${result.resumeId}`);
     } catch (error) {
       handleAuthError(error);
@@ -182,7 +165,6 @@ const Dashboard = () => {
         description: "Failed to create resume. Please try again.",
         variant: "destructive"
       });
-      console.error("Create resume error:", error);
     } finally {
       setIsCreating(false);
     }
@@ -192,7 +174,6 @@ const Dashboard = () => {
     if (!confirm("Are you sure you want to delete this resume?")) return;
     try {
       await resumeApi.delete(id);
-      
       setResumes(resumes.filter(r => r.id !== id));
       toast({
         title: "Success",
@@ -205,35 +186,43 @@ const Dashboard = () => {
         description: "Failed to delete resume. Please try again.",
         variant: "destructive"
       });
-      console.error("Delete resume error:", err);
     }
   };
 
   const saveTitle = async (id) => {
-    if (!tempTitle.trim()) return;
-    try {
-      // Pass null for content to only update title
-      await resumeApi.update(id, null, { title: tempTitle });
+    if (!tempTitle.trim() || isSaving) {
+      setEditingId(null);
+      return;
+    }
 
+    // Check if title actually changed
+    const originalResume = resumes.find(r => r.id === id);
+    if (originalResume && originalResume.title === tempTitle) {
+      setEditingId(null);
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await resumeApi.update(id, null, null, tempTitle);
       setResumes(resumes.map(r => r.id === id ? { ...r, title: tempTitle } : r));
       setEditingId(null);
-      setTempTitle("");
       toast({
         title: "Success",
-        description: "Resume title updated."
+        description: "Resume renamed."
       });
     } catch (error) {
-      handleAuthError(error);
+      console.error("Save title error:", error);
       toast({
         title: "Error",
-        description: "Failed to rename resume. Please try again.",
+        description: "Failed to rename resume.",
         variant: "destructive"
       });
-      console.error("Save title error:", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  // Stats calculations
   const stats = useMemo(() => {
     const now = new Date();
     const thisWeek = resumes.filter(r => {
@@ -267,10 +256,9 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50 dark:from-gray-950 dark:via-black dark:to-purple-950 text-gray-900 dark:text-gray-100 pt-20">
       <Navbar user={session?.user} />
-      
+
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Welcome Section */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
@@ -297,8 +285,7 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
-        {/* Stats Cards */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -315,7 +302,6 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          
           <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/50 dark:border-gray-800/50 shadow-sm">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-green-100 dark:bg-green-900/50 rounded-xl">
@@ -327,7 +313,6 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          
           <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/50 dark:border-gray-800/50 shadow-sm">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-xl">
@@ -341,9 +326,8 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
-        {/* Search & Filter Section */}
         {resumes.length > 0 && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -362,7 +346,6 @@ const Dashboard = () => {
           </motion.div>
         )}
 
-        {/* Resumes Section */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -381,22 +364,15 @@ const Dashboard = () => {
           </div>
 
           {resumes.length === 0 ? (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="relative overflow-hidden border-2 border-dashed border-purple-300 dark:border-purple-800 rounded-2xl p-12 text-center bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm"
             >
-              {/* Decorative elements */}
               <div className="absolute top-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full -translate-x-1/2 -translate-y-1/2" />
               <div className="absolute bottom-0 right-0 w-40 h-40 bg-pink-500/10 rounded-full translate-x-1/2 translate-y-1/2" />
-              
               <div className="relative">
-                <motion.div 
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", delay: 0.2 }}
-                  className="flex justify-center mb-6"
-                >
+                <div className="flex justify-center mb-6">
                   <div className="relative">
                     <div className="h-20 w-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl text-white flex items-center justify-center shadow-lg shadow-purple-500/30">
                       <FileText className="w-10 h-10" />
@@ -405,13 +381,11 @@ const Dashboard = () => {
                       <Sparkles className="w-4 h-4 text-yellow-900" />
                     </div>
                   </div>
-                </motion.div>
-                
+                </div>
                 <h2 className="text-2xl font-bold mb-2">Start Your Journey</h2>
                 <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                  Create your first AI-powered resume and land your dream job. Our smart builder makes it easy!
+                  Create your first AI-powered resume and land your dream job.
                 </p>
-                
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -427,7 +401,7 @@ const Dashboard = () => {
           ) : filteredResumes.length === 0 ? (
             <div className="text-center py-12">
               <Search className="w-12 h-12 text-gray-300 dark:text-gray-700 mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-gray-400">No resumes found matching "{searchQuery}"</p>
+              <p className="text-gray-500 dark:text-gray-400">No resumes found.</p>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -436,16 +410,15 @@ const Dashboard = () => {
                   <motion.div
                     key={resume.id}
                     layout
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ delay: index * 0.05 }}
-                    className="group relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-purple-500/10 dark:hover:shadow-purple-500/20 hover:border-purple-300 dark:hover:border-purple-700 transition-all duration-300"
+                    className="group relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 hover:shadow-xl transition-all"
                   >
-                    {/* Card Header */}
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="p-2.5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl text-white shadow-lg shadow-purple-500/20 group-hover:shadow-purple-500/40 transition-shadow">
+                        <div className="p-2.5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl text-white shadow-lg shadow-purple-500/20">
                           <FileText className="w-5 h-5" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -456,42 +429,46 @@ const Dashboard = () => {
                               onChange={(e) => setTempTitle(e.target.value)}
                               onBlur={() => saveTitle(resume.id)}
                               onKeyDown={(e) => e.key === "Enter" && saveTitle(resume.id)}
-                              className="w-full border-2 border-purple-500 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                              className="w-full border-2 border-purple-500 rounded-lg px-2 py-1 text-sm bg-white dark:bg-gray-800 focus:outline-none"
                               autoFocus
                             />
                           ) : (
                             <h3
-                              className="font-semibold truncate cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                              className="font-semibold truncate cursor-pointer hover:text-purple-600 dark:hover:text-purple-400"
                               onClick={() => {
                                 setEditingId(resume.id);
                                 setTempTitle(resume.title);
                               }}
-                              title="Click to rename"
                             >
                               {resume.title}
                             </h3>
                           )}
                         </div>
+                        {editingId !== resume.id && (
+                          <button
+                            onClick={() => {
+                              setEditingId(resume.id);
+                              setTempTitle(resume.title);
+                            }}
+                            className="p-1.5 text-gray-400 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/50 rounded-lg transition-all"
+                          >
+                            <PenLine className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
 
-                    {/* Card Meta */}
                     <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-5">
                       <Clock className="w-4 h-4" />
-                      <span>Updated {new Date(resume.updated_at).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}</span>
+                      <span>Updated {new Date(resume.updated_at).toLocaleDateString()}</span>
                     </div>
 
-                    {/* Card Actions */}
                     <div className="flex gap-2">
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => navigate(`/builder/${resume.id}`)}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium shadow-md shadow-purple-500/20 hover:shadow-purple-500/40 transition-all"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium shadow-md hover:shadow-lg transition-all"
                       >
                         <Edit3 className="w-4 h-4" />
                         Edit
@@ -500,31 +477,26 @@ const Dashboard = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => deleteResume(resume.id)}
-                        className="p-2.5 border-2 border-red-200 dark:border-red-900 text-red-500 rounded-xl hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-300 dark:hover:border-red-800 transition-all"
-                        title="Delete resume"
+                        className="p-2.5 border-2 border-red-200 dark:border-red-900 text-red-500 rounded-xl hover:bg-red-50 dark:hover:bg-red-950 transition-all"
                       >
                         <Trash2 className="w-5 h-5" />
                       </motion.button>
                     </div>
-
-                    {/* Hover decoration */}
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                   </motion.div>
                 ))}
               </AnimatePresence>
 
-              {/* Create New Card */}
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={createNewResume}
                 disabled={isCreating}
-                className="group border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-600 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 min-h-[200px] transition-all duration-300 hover:bg-purple-50/50 dark:hover:bg-purple-950/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="group border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-purple-400 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 min-h-[180px] transition-all"
               >
                 <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-800 group-hover:bg-purple-100 dark:group-hover:bg-purple-900/50 transition-colors">
-                  <Plus className="w-8 h-8 text-gray-400 group-hover:text-purple-500 transition-colors" />
+                  <Plus className="w-8 h-8 text-gray-400 group-hover:text-purple-500" />
                 </div>
-                <span className="font-medium text-gray-500 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                <span className="font-medium text-gray-500 group-hover:text-purple-600">
                   {isCreating ? "Creating..." : "Create New Resume"}
                 </span>
               </motion.button>

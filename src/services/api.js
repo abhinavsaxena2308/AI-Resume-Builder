@@ -11,7 +11,7 @@ const waitForAuth = () => {
       resolve(auth.currentUser);
       return;
     }
-    
+
     // Otherwise wait for auth state to be determined
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       unsubscribe();
@@ -24,10 +24,10 @@ const getAuthHeaders = async () => {
   const headers = {
     "Content-Type": "application/json",
   };
-  
+
   // Wait for auth to be ready
   const user = await waitForAuth();
-  
+
   if (user) {
     try {
       // Force refresh token to ensure it's valid
@@ -40,7 +40,7 @@ const getAuthHeaders = async () => {
   } else {
     console.warn("No authenticated user found");
   }
-  
+
   return headers;
 };
 
@@ -57,13 +57,19 @@ export const resumeApi = {
     return response.json();
   },
 
-  // Update an existing resume
   update: async (id, content, context, title) => {
     const headers = await getAuthHeaders();
+
+    // Build update object only with present fields
+    const body = {};
+    if (content !== null && content !== undefined) body.content = content;
+    if (context !== null && context !== undefined) body.context = context;
+    if (title !== null && title !== undefined) body.title = title;
+
     const response = await fetch(`${API_BASE_URL}/api/resumes/${id}`, {
       method: "PUT",
       headers,
-      body: JSON.stringify({ content, context, title }),
+      body: JSON.stringify(body),
     });
     if (!response.ok) throw new Error("Failed to update resume");
     return response.json();
@@ -92,21 +98,21 @@ export const resumeApi = {
   // List user resumes
   listByUser: async () => {
     const headers = await getAuthHeaders();
-    
+
     // Check if we have auth token
     if (!headers["Authorization"]) {
       console.error("No auth token available - user may not be logged in");
       throw new Error("Not authenticated. Please log in again.");
     }
-    
+
     const response = await fetch(`${API_BASE_URL}/api/resumes`, {
       headers,
     });
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`API Error (${response.status}):`, errorText);
-      
+
       if (response.status === 403) {
         throw new Error("Authentication failed. Please log in again.");
       }
