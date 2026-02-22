@@ -99,7 +99,17 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-[#050505] overflow-hidden">
+    <div className="flex h-screen bg-gray-50 dark:bg-[#050505] overflow-hidden relative">
+      {/* Mobile Background Image (Only visible on small screens) */}
+      <div className="lg:hidden absolute inset-0 z-0">
+        <img
+          src={authPic}
+          alt="Auth Background Mobile"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
+
       {/* 3/4 Image Section (75%) */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -121,9 +131,9 @@ const Auth = () => {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8 }}
-        className="w-full lg:w-1/4 h-full flex flex-col justify-center p-6 bg-white dark:bg-[#080808] border-l border-gray-100 dark:border-white/5 shadow-2xl z-10 overflow-y-auto"
+        className="w-full lg:w-1/4 h-full flex flex-col justify-center p-6 bg-transparent lg:bg-white lg:dark:bg-[#080808] lg:border-l border-gray-100 dark:border-white/5 lg:shadow-2xl z-10 overflow-y-auto relative"
       >
-        <div className="w-full max-w-sm mx-auto">
+        <div className="w-full max-w-sm mx-auto bg-white/90 dark:bg-black/80 lg:bg-transparent lg:dark:bg-transparent backdrop-blur-md lg:backdrop-blur-none rounded-3xl p-6 lg:p-0 shadow-2xl lg:shadow-none border border-white/20 lg:border-0">
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-purple-600 transition-colors mb-6">
             <ArrowLeft className="h-4 w-4" />
             Back to Home
