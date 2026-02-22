@@ -43,7 +43,7 @@ const PageTransition = ({ children }) => (
 
 const AppRoutes = () => {
   const location = useLocation();
-  const hideFooter = location.pathname.includes("/builder");
+  const hideFooter = location.pathname.startsWith("/builder") || location.pathname.startsWith("/auth");
 
   return (
     <>

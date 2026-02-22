@@ -5,10 +5,12 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithP
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Loader2 } from "lucide-react";
+import { FileText, Loader2, ArrowLeft, Github, Chrome } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { motion, AnimatePresence } from "framer-motion";
+import authPic from "@/assets/auth-pic.png";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -84,7 +86,7 @@ const Auth = () => {
       } else {
         throw new Error("Unsupported provider");
       }
-      
+
       await signInWithPopup(auth, authProvider);
       toast({ title: "Success!", description: "Signed in successfully." });
       navigate("/dashboard");
@@ -97,132 +99,161 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md border-border/50 shadow-xl bg-card text-card-foreground">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-              <FileText className="h-6 w-6 text-white" />
-            </div>
-          </div>
-          <CardTitle className="text-2xl text-foreground">{isSignUp ? "Create Account" : "Welcome Back"}</CardTitle>
-          <CardDescription>
-            {isSignUp ? "Start building your perfect resume" : "Sign in to continue building your resume"}
-          </CardDescription>
-        </CardHeader>
+    <div className="flex h-screen bg-gray-50 dark:bg-[#050505] overflow-hidden">
+      {/* 3/4 Image Section (75%) */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8 }}
+        className="hidden lg:block lg:w-3/4 relative h-full overflow-hidden bg-purple-100 dark:bg-purple-950/20"
+      >
+        <img
+          src={authPic}
+          alt="Authentication Background"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-gray-50 dark:to-[#050505]" />
+        <div className="absolute inset-0 bg-black/5" />
+      </motion.div>
 
-        <CardContent>
-          {/* Email/password form */}
-          <form onSubmit={handleAuth} className="space-y-4">
-            {isSignUp && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-foreground">Full Name</Label>
-                <Input
-                  id="fullName"
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="John Doe"
-                  required
-                  className="bg-background text-foreground border-border"
-                />
+      {/* 1/4 Auth Form Section (25%) */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8 }}
+        className="w-full lg:w-1/4 h-full flex flex-col justify-center p-6 bg-white dark:bg-[#080808] border-l border-gray-100 dark:border-white/5 shadow-2xl z-10 overflow-y-auto"
+      >
+        <div className="w-full max-w-sm mx-auto">
+          <Link to="/" className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-purple-600 transition-colors mb-6">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
+          </Link>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={isSignUp ? "signup" : "signin"}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="mb-6 text-center lg:text-left">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  {isSignUp ? "Join Us" : "Welcome Back"}
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {isSignUp ? "Let's build your standout resume." : "Sign in to access your dashboard."}
+                </p>
               </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
-                className="bg-background text-foreground border-border"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                minLength={6}
-                required
-                className="bg-background text-foreground border-border"
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90 transition"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Please wait...
-                </>
-              ) : isSignUp ? (
-                "Sign Up"
-              ) : (
-                "Sign In"
-              )}
-            </Button>
-          </form>
 
-          {/* OAuth Buttons */}
-          <div className="mt-4 flex flex-col gap-3">
-            <Button
-              onClick={() => handleOAuthLogin("github")}
-              variant="outline"
-              className="flex justify-center items-center gap-2 border-border hover:bg-accent relative"
-              disabled={oauthLoading !== "" && oauthLoading !== "github"}
-            >
-              {oauthLoading === "github" && <Loader2 className="absolute left-3 h-4 w-4 animate-spin" />}
-              {/* <GitHub className="h-5 w-5" /> */}
-              Continue with GitHub
-            </Button>
+              {/* Form */}
+              <form onSubmit={handleAuth} className="space-y-4">
+                {isSignUp && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="fullName" className="text-xs text-gray-700 dark:text-gray-300 font-medium">Full Name</Label>
+                    <Input
+                      id="fullName"
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Abhinav Saxena"
+                      required
+                      className="bg-gray-50 dark:bg-[#111] dark:border-white/10 rounded-xl h-10 text-sm"
+                    />
+                  </div>
+                )}
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className="text-xs text-gray-700 dark:text-gray-300 font-medium">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                    className="bg-gray-50 dark:bg-[#111] dark:border-white/10 rounded-xl h-10 text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="password" className="text-xs text-gray-700 dark:text-gray-300 font-medium">Password</Label>
+                    {!isSignUp && (
+                      <button type="button" className="text-[10px] text-purple-600 hover:underline">Forgot?</button>
+                    )}
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    minLength={6}
+                    required
+                    className="bg-gray-50 dark:bg-[#111] dark:border-white/10 rounded-xl h-10 text-sm"
+                  />
+                </div>
 
-            <Button
-              onClick={() => handleOAuthLogin("google")}
-              variant="outline"
-              className="flex justify-center items-center gap-2 border-border hover:bg-accent relative"
-              disabled={oauthLoading !== "" && oauthLoading !== "google"}
-            >
-              {oauthLoading === "google" && <Loader2 className="absolute left-3 h-4 w-4 animate-spin" />}
-              {/* <Google className="h-5 w-5" /> */}
-              Continue with Google
-            </Button>
-          </div>
+                <Button
+                  type="submit"
+                  className="w-full h-10 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all text-sm"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : isSignUp ? (
+                    "Create Account"
+                  ) : (
+                    "Sign In"
+                  )}
+                </Button>
+              </form>
 
-          {/* Toggle SignIn/SignUp */}
-          <div className="mt-4 text-center text-sm">
-            {isSignUp ? (
-              <>
-                Already have an account?{" "}
-                <button onClick={() => setIsSignUp(false)} className="text-purple-900 dark:text-purple-400 hover:underline font-medium">
-                  Sign In
+              {/* Divider */}
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t dark:border-white/5" />
+                </div>
+                <div className="relative flex justify-center text-[10px] uppercase">
+                  <span className="bg-white dark:bg-[#080808] px-2 text-gray-500 font-medium tracking-widest">Or</span>
+                </div>
+              </div>
+
+              {/* OAuth */}
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  onClick={() => handleOAuthLogin("google")}
+                  variant="outline"
+                  className="h-10 dark:bg-[#111] dark:border-white/10 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-all gap-2 text-xs"
+                  disabled={oauthLoading !== "" && oauthLoading !== "google"}
+                >
+                  <Chrome className="h-3.5 w-3.5" />
+                  Google
+                </Button>
+                <Button
+                  onClick={() => handleOAuthLogin("github")}
+                  variant="outline"
+                  className="h-10 dark:bg-[#111] dark:border-white/10 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-all gap-2 text-xs"
+                  disabled={oauthLoading !== "" && oauthLoading !== "github"}
+                >
+                  <Github className="h-3.5 w-3.5" />
+                  GitHub
+                </Button>
+              </div>
+
+              {/* Toggle */}
+              <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
+                {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+                <button
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-purple-600 font-bold hover:underline"
+                >
+                  {isSignUp ? "Sign In" : "Sign Up"}
                 </button>
-              </>
-            ) : (
-              <>
-                Don't have an account?{" "}
-                <button onClick={() => setIsSignUp(true)} className="text-purple-900 dark:text-purple-400 hover:underline font-medium">
-                  Sign Up
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* Back to home */}
-          <div className="mt-4 text-center">
-            <Link to="/" className="text-sm text-muted-foreground hover:text-purple-900 dark:hover:text-purple-400">
-              ← Back to Home
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+              </p>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </motion.div>
     </div>
   );
 };
