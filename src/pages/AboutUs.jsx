@@ -12,12 +12,16 @@ import {
     Twitter,
     Database,
     BrainCircuit,
-    Laptop
+    Laptop,
+    X,
+    Send
 } from "lucide-react";
 
 const AboutUs = () => {
     const [user, setUser] = useState(null);
     const [activeNode, setActiveNode] = useState(0);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [formData, setFormData] = useState({ name: "", email: "", message: "" });
 
     useEffect(() => {
         getCurrentUser().then((u) => {
@@ -65,6 +69,13 @@ const AboutUs = () => {
             bio: "Making complex systems look effortlessly beautiful.",
         }
     ];
+
+    const handleFormSubmit = (e) => {
+        e.preventDefault();
+        console.log("Contact Form Submitted:", formData);
+        setIsModalOpen(false);
+        setFormData({ name: "", email: "", message: "" });
+    };
 
     // Animations
     const containerVariants = {
@@ -258,8 +269,9 @@ const AboutUs = () => {
 
                             {/* Bottom Mini CTA */}
                             <motion.div
+                                onClick={() => setIsModalOpen(true)}
                                 whileHover={{ scale: 1.01 }}
-                                className="mt-6 p-6 rounded-3xl bg-gradient-to-r from-purple-600 to-pink-600 text-white flex items-center justify-between shadow-lg shadow-purple-500/25 relative overflow-hidden group border border-white/10"
+                                className="mt-6 p-6 rounded-3xl bg-gradient-to-r from-purple-600 to-pink-600 text-white flex items-center justify-between shadow-lg shadow-purple-500/25 relative overflow-hidden group border border-white/10 cursor-pointer"
                             >
                                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay pointer-events-none" />
                                 <div className="relative z-10">
@@ -279,6 +291,86 @@ const AboutUs = () => {
                     </motion.div>
                 </motion.div>
             </div>
+
+            {/* Contact Modal */}
+            <AnimatePresence>
+                {isModalOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-md p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20, opacity: 0 }}
+                            animate={{ scale: 1, y: 0, opacity: 1 }}
+                            exit={{ scale: 0.9, y: 20, opacity: 0 }}
+                            className="bg-white dark:bg-gray-900 w-full max-w-md rounded-3xl overflow-hidden shadow-2xl relative"
+                        >
+                            {/* Modal Header */}
+                            <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 text-white flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-2xl font-bold">Join Our Mission</h2>
+                                    <p className="text-white/80 text-sm mt-1">Let's build something great together.</p>
+                                </div>
+                                <button
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            {/* Modal Body / Form */}
+                            <form onSubmit={handleFormSubmit} className="p-6 flex flex-col gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all dark:text-white"
+                                        placeholder="John Doe"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                                    <input
+                                        type="email"
+                                        required
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all dark:text-white"
+                                        placeholder="john@example.com"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Message</label>
+                                    <textarea
+                                        required
+                                        rows="3"
+                                        value={formData.message}
+                                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all resize-none dark:text-white"
+                                        placeholder="I'd love to join the team as a..."
+                                    />
+                                </div>
+
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    type="submit"
+                                    className="mt-2 w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all"
+                                >
+                                    <Send className="w-4 h-4" />
+                                    Send Message
+                                </motion.button>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
