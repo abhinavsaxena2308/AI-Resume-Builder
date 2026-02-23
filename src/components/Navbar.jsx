@@ -121,6 +121,12 @@ const Navbar = ({ user }) => {
                   >
                     Interview Tips
                   </button>
+                  <button
+                    onClick={() => handleNavClick("/resume-tips")}
+                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                  >
+                    Resume Tips
+                  </button>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -199,6 +205,7 @@ const Navbar = ({ user }) => {
                 <span className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold">Tips</span>
                 <button onClick={() => handleNavClick("/career-tips")} className="text-left text-gray-700 dark:text-gray-300">Career Tips</button>
                 <button onClick={() => handleNavClick("/interview-tips")} className="text-left text-gray-700 dark:text-gray-300">Interview Tips</button>
+                <button onClick={() => handleNavClick("/resume-tips")} className="text-left text-gray-700 dark:text-gray-300">Resume Tips</button>
               </div>
               <button onClick={() => handleNavClick("/about-us")} className="text-left text-lg font-medium text-gray-800 dark:text-gray-200">
                 About Us

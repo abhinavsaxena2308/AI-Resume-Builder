@@ -18,6 +18,7 @@ const Dashboard = lazy(() => import("./pages/Dasboard"));
 const Builder = lazy(() => import("./pages/Builder"));
 const ViewExamples = lazy(() => import("./pages/ViewExamples"));
 const CareerTips = lazy(() => import("./pages/CareerTips"));
+const ResumeTips = lazy(() => import("./pages/ResumeTips"));
 const InterviewTips = lazy(() => import("./pages/InterviewTips"));
 const TestAiFeature = lazy(() => import("./pages/TestAiFeature"));
 const ResumePage = lazy(() => import("./pages/ResumePage"));
@@ -58,6 +59,7 @@ const AppRoutes = () => {
             <Route path="/builder/:id" element={<PageTransition><Builder /></PageTransition>} />
             <Route path="/examples" element={<PageTransition><ViewExamples /></PageTransition>} />
             <Route path="/career-tips" element={<PageTransition><CareerTips /></PageTransition>} />
+            <Route path="/resume-tips" element={<PageTransition><ResumeTips /></PageTransition>} />
             <Route path="/interview-tips" element={<PageTransition><InterviewTips /></PageTransition>} />
             <Route path="/test-ai" element={<PageTransition><TestAiFeature /></PageTransition>} />
             <Route path="/resume-page" element={<PageTransition><ResumePage /></PageTransition>} />
