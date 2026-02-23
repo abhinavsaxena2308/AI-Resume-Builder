@@ -84,9 +84,12 @@ const Footer = () => {
                 </button>
               </li>
               <li>
-                <span className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
+                <button
+                  onClick={() => navigate("/resume-tips")}
+                  className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer"
+                >
                   Resume Tips
-                </span>
+                </button>
               </li>
             </ul>
           </div>
@@ -95,9 +98,12 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <li>
-                <span className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
+                <button
+                  onClick={() => navigate("/about-us")}
+                  className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer"
+                >
                   About Us
-                </span>
+                </button>
               </li>
               <li>
                 <span className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">

@@ -21,7 +21,6 @@ const CareerTips = lazy(() => import("./pages/CareerTips"));
 const ResumeTips = lazy(() => import("./pages/ResumeTips"));
 const InterviewTips = lazy(() => import("./pages/InterviewTips"));
 const TestAiFeature = lazy(() => import("./pages/TestAiFeature"));
-const ResumePage = lazy(() => import("./pages/ResumePage"));
 const AboutUs = lazy(() => import("./pages/AboutUs"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -62,7 +61,6 @@ const AppRoutes = () => {
             <Route path="/resume-tips" element={<PageTransition><ResumeTips /></PageTransition>} />
             <Route path="/interview-tips" element={<PageTransition><InterviewTips /></PageTransition>} />
             <Route path="/test-ai" element={<PageTransition><TestAiFeature /></PageTransition>} />
-            <Route path="/resume-page" element={<PageTransition><ResumePage /></PageTransition>} />
             <Route path="/about-us" element={<PageTransition><AboutUs /></PageTransition>} />
             <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
           </Routes>
