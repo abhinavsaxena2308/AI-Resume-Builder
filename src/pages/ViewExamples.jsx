@@ -62,39 +62,39 @@ const ViewExamples = () => {
     },
     {
       personalInfo: {
-        fullName: "Sarah Connor",
-        email: "sarah.c@email.com",
-        phone: "(555) 987-6543",
-        location: "New York, NY",
-        linkedin: "linkedin.com/in/sarahc",
-        github: "github.com/sarahconnor",
+        fullName: "Abhinav Saxena",
+        email: "abhinav@example.com",
+        phone: "(555) 123-4567",
+        location: "San Francisco, CA",
+        linkedin: "linkedin.com/in/abhinav",
+        github: "github.com/abhinav",
       },
-      summary: "Creative UX/UI Director with a deep passion for minimalist design, accessibility, and translating complex data into beautiful interfaces.",
+      summary: "Innovative Full-Stack Engineer specializing in AI-driven web applications, scalable microservices, and modern UI/UX.",
       experience: [
         {
           id: 1,
-          title: "Design Director",
-          company: "Creative Studio",
-          duration: "2020 - Present",
-          description: "Led the redesign of 5 major enterprise platforms, improving user retention by 45% and accessibility scores to AA standards.",
+          title: "Lead Software Architect",
+          company: "Nexus AI",
+          duration: "2021 - Present",
+          description: "Architected modern LLM-based solutions, scaling the infrastructure to handle 1M+ daily active requests with 99.9% uptime.",
         },
         {
           id: 2,
-          title: "Senior UX Designer",
-          company: "FinTech Solutions",
-          duration: "2017 - 2020",
-          description: "Created wireframes, interactive prototypes, and conducted rigorous A/B testing on multi-million dollar banking apps.",
+          title: "Full Stack Developer",
+          company: "TechFront Inc",
+          duration: "2018 - 2021",
+          description: "Developed and maintained multiple high-traffic client applications using React, Node.js, and PostgreSQL.",
         },
       ],
       education: [
         {
           id: 1,
-          degree: "BFA in Interaction Design",
-          institution: "Rhode Island School of Design",
-          year: "2017",
+          degree: "MS in Computer Science",
+          institution: "Stanford University",
+          year: "2018",
         },
       ],
-      skills: ["Figma", "Design Systems", "User Research", "Prototyping", "Framer", "CSS"],
+      skills: ["React", "Node.js", "Python", "TypeScript", "AWS", "Docker"],
     },
   ];
 
@@ -189,7 +189,7 @@ const ViewExamples = () => {
               <div className="flex items-center justify-between mb-4 px-2">
                 <div>
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                    {index === 0 ? "Software Engineering" : "UX/UI Design"}
+                    {index === 0 ? "Modern Engineer" : "Classic Professional"}
                   </h2>
                   <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
                     <CheckCircle2 className="w-3 h-3 text-green-500" /> ATS Optimized
