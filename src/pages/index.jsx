@@ -186,7 +186,7 @@ const Index = () => {
 
 
       {/* Hero Section */}
-      <section className="relative container mx-auto px-6 mt-20 py-16 lg:py-24">
+      <section className="relative container mx-auto px-6 mt-10 py-12 lg:py-16">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -321,7 +321,7 @@ const Index = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="relative container mx-auto px-6 py-16">
+      <section className="relative container mx-auto px-6 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -352,12 +352,12 @@ const Index = () => {
       </section>
 
       {/* Features Section - Bus Topology */}
-      <section id="about" className="relative container mx-auto px-6 py-16 lg:py-24">
+      <section id="about" className="relative container mx-auto px-6 py-12 lg:py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-24"
+          className="text-center mb-16"
         >
           <span className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium mb-4">
             <Zap className="w-4 h-4" />
@@ -500,7 +500,7 @@ const Index = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="relative container mx-auto px-6 py-16 lg:py-24 overflow-hidden">
+      <section className="relative container mx-auto px-6 py-12 lg:py-16 overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/2 left-0 w-96 h-96 bg-purple-500/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
@@ -704,7 +704,7 @@ const Index = () => {
       */}
 
       {/* FAQ Section */}
-      <section className="relative container mx-auto px-6 py-16 lg:py-24">
+      <section className="relative container mx-auto px-6 py-12 lg:py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -767,7 +767,7 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="relative container mx-auto px-6 py-16 lg:py-24">
+      <section className="relative container mx-auto px-6 py-12 lg:py-16">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
