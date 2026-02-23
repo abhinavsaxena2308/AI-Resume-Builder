@@ -23,6 +23,7 @@ const InterviewTips = lazy(() => import("./pages/InterviewTips"));
 const TestAiFeature = lazy(() => import("./pages/TestAiFeature"));
 const AboutUs = lazy(() => import("./pages/AboutUs"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const RouteLoading = () => (
@@ -64,6 +65,7 @@ const AppRoutes = () => {
             <Route path="/test-ai" element={<PageTransition><TestAiFeature /></PageTransition>} />
             <Route path="/about-us" element={<PageTransition><AboutUs /></PageTransition>} />
             <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
+            <Route path="/terms-of-service" element={<PageTransition><TermsOfService /></PageTransition>} />
             <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
           </Routes>
         </AnimatePresence>
