@@ -8,6 +8,7 @@ import {
     Code2,
     Rocket,
     Github,
+    Instagram,
     Linkedin,
     Twitter,
     Database,
@@ -56,7 +57,7 @@ const AboutUs = () => {
     const teamMembers = [
         {
             name: "Abhinav Saxena",
-            role: "Founder & Lead Engineer",
+            role: "Founder",
             image: "https://avatars.githubusercontent.com/u/124580551?v=4",
             skills: ["React", "AI", "Node.js"],
             bio: "Crafting the future of automated career growth.",
@@ -252,14 +253,14 @@ const AboutUs = () => {
                                             </div>
 
                                             <div className="flex items-center justify-center gap-3">
-                                                <motion.a whileHover={{ scale: 1.2, color: "#a855f7" }} href="#" className="text-gray-400 transition-colors pointer-events-auto">
+                                                <motion.a whileHover={{ scale: 1.2, color: "#a855f7" }} target="_blank" href="https://github.com/abhinavsaxena2308" className="text-gray-400 transition-colors pointer-events-auto">
                                                     <Github className="w-4 h-4" />
                                                 </motion.a>
-                                                <motion.a whileHover={{ scale: 1.2, color: "#ec4899" }} href="#" className="text-gray-400 transition-colors pointer-events-auto">
+                                                <motion.a whileHover={{ scale: 1.2, color: "#ec4899" }} target="_blank" href="https://www.linkedin.com/in/abhinav-saxena-6379a3290/" className="text-gray-400 transition-colors pointer-events-auto">
                                                     <Linkedin className="w-4 h-4" />
                                                 </motion.a>
-                                                <motion.a whileHover={{ scale: 1.2, color: "#3b82f6" }} href="#" className="text-gray-400 transition-colors pointer-events-auto">
-                                                    <Twitter className="w-4 h-4" />
+                                                <motion.a whileHover={{ scale: 1.2, color: "#3b82f6" }} target="_blank" href="https://instagram.com/abhiiiii_2308" className="text-gray-400 transition-colors pointer-events-auto">
+                                                    <Instagram className="w-4 h-4" />
                                                 </motion.a>
                                             </div>
                                         </div>
