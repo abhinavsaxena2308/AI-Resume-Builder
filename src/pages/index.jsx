@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import heroImage from "@/assets/hero-image.png";
+import heroLight from "@/assets/hero-image-light.png";
+import heroDark from "@/assets/hero-image-dark.png";
 import premiumOfferImg from "@/assets/premium.png";
 import { auth, getCurrentUser, onAuthStateChange } from "@/integrations/firebase/client";
 import { signOut } from "firebase/auth";
@@ -272,7 +273,7 @@ const Index = () => {
             {/* Main image */}
             <div className="relative">
               <img
-                src={heroImage}
+                src={theme === 'dark' ? heroDark : heroLight}
                 alt="Resume Builder Interface"
                 decoding="async"
                 fetchpriority="high"
