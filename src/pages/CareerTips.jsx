@@ -137,7 +137,7 @@ const CareerTips = () => {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="text-center py-10"
+          className="text-center py-8"
         >
           <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
             <Lightbulb className="w-4 h-4" />
@@ -168,7 +168,7 @@ const CareerTips = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"
         >
           {tipSections.map((tip, idx) => (
             <motion.article
@@ -214,7 +214,7 @@ const CareerTips = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="relative rounded-[2.5rem] overflow-hidden p-10 mb-20 text-center border border-gray-200/50 dark:border-gray-800/50 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl"
+          className="relative rounded-[2.5rem] overflow-hidden p-8 mb-12 text-center border border-gray-200/50 dark:border-gray-800/50 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-3xl -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-pink-500/10 blur-3xl translate-y-1/2 -translate-x-1/2" />

@@ -116,7 +116,7 @@ const InterviewTips = () => {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="text-center py-10"
+          className="text-center py-8"
         >
           <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
             <Video className="w-4 h-4" />
@@ -128,7 +128,7 @@ const InterviewTips = () => {
             className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-tight"
           >
             Ace Every <br />
-            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
+            <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
               Conversation
             </span>
           </motion.h1>
@@ -147,7 +147,7 @@ const InterviewTips = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12"
         >
           {sections.map((section, idx) => (
             <motion.article
@@ -192,7 +192,7 @@ const InterviewTips = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="relative rounded-[2.5rem] overflow-hidden p-8 mb-16 text-center border border-gray-200/50 dark:border-gray-800/50 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl"
+          className="relative rounded-[2.5rem] overflow-hidden p-8 mb-12 text-center border border-gray-200/50 dark:border-gray-800/50 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl"
         >
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 max-w-4xl mx-auto">
             <div className="text-left">

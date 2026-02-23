@@ -156,7 +156,7 @@ const ResumeTips = () => {
 
             <main className="container relative z-10 mx-auto px-6 max-w-7xl">
                 {/* HERO HEADER */}
-                <section className="text-center py-12 md:py-16">
+                <section className="text-center py-8 md:py-10">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -186,7 +186,7 @@ const ResumeTips = () => {
                 </section>
 
                 {/* TOP LEVEL SECRETS GRID */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                     {resumeTips.map((tip, idx) => (
                         <motion.div
                             key={idx}
@@ -214,7 +214,7 @@ const ResumeTips = () => {
                 </div>
 
                 {/* SECTION BY SECTION GUIDE */}
-                <div className="relative grid lg:grid-cols-[250px_1fr] gap-12 mb-20">
+                <div className="relative grid lg:grid-cols-[250px_1fr] gap-12 mb-12">
                     {/* Navigation Sidebar */}
                     <aside className="hidden lg:block sticky top-24 self-start space-y-2">
                         <h4 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4 px-4">Section Guide</h4>
@@ -223,8 +223,8 @@ const ResumeTips = () => {
                                 key={section.id}
                                 onClick={() => scrollToSection(section.id)}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === section.id
-                                        ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
-                                        : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                    ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
+                                    : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
                                     }`}
                             >
                                 <section.icon className="w-4 h-4" />
@@ -322,7 +322,7 @@ const ResumeTips = () => {
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    className="relative rounded-[3rem] overflow-hidden p-12 text-center bg-gray-900 dark:bg-gray-900/60 border border-gray-800 mb-20 shadow-2xl"
+                    className="relative rounded-[3rem] overflow-hidden p-10 text-center bg-gray-900 dark:bg-gray-900/60 border border-gray-800 mb-12 shadow-2xl"
                 >
                     <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 blur-[100px] -translate-y-1/2 translate-x-1/2" />
                     <div className="relative z-10">
