@@ -45,7 +45,10 @@ const PageTransition = ({ children }) => (
 
 const AppRoutes = () => {
   const location = useLocation();
-  const hideFooter = location.pathname.startsWith("/builder") || location.pathname.startsWith("/auth") || location.pathname.startsWith("*");
+  const knownRoutes = ["/", "/auth", "/dashboard", "/examples", "/career-tips", "/resume-tips", "/interview-tips", "/test-ai", "/about-us", "/privacy-policy", "/terms-of-service"];
+  const isBuilder = location.pathname.startsWith("/builder/");
+  const isKnownRoute = knownRoutes.includes(location.pathname) || isBuilder;
+  const hideFooter = location.pathname.startsWith("/auth") || isBuilder || !isKnownRoute;
 
   return (
     <>
