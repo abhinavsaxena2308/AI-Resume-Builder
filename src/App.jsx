@@ -14,7 +14,7 @@ import { AnimatePresence, motion } from "framer-motion";
 const queryClient = new QueryClient();
 const Index = lazy(() => import("./pages/index"));
 const Auth = lazy(() => import("./pages/Auth"));
-const Dashboard = lazy(() => import("./pages/Dasboard"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Builder = lazy(() => import("./pages/Builder"));
 const ViewExamples = lazy(() => import("./pages/ViewExamples"));
 const CareerTips = lazy(() => import("./pages/CareerTips"));
@@ -45,7 +45,7 @@ const PageTransition = ({ children }) => (
 
 const AppRoutes = () => {
   const location = useLocation();
-  const hideFooter = location.pathname.startsWith("/builder") || location.pathname.startsWith("/auth");
+  const hideFooter = location.pathname.startsWith("/builder") || location.pathname.startsWith("/auth") || location.pathname.startsWith("*");
 
   return (
     <>
