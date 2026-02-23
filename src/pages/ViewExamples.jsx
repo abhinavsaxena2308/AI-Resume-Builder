@@ -9,8 +9,6 @@ import { getCurrentUser, onAuthStateChange } from "@/integrations/firebase/clien
 const ViewExamples = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-
-  // Load Firebase user session
   useEffect(() => {
     getCurrentUser().then((user) => {
       if (user) setUser(user);

@@ -57,17 +57,17 @@ const AboutUs = () => {
         {
             name: "Abhinav Saxena",
             role: "Founder & Lead Engineer",
-            image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Abhinav&backgroundColor=c0aede,b6e3f4",
+            image: "https://avatars.githubusercontent.com/u/124580551?v=4",
             skills: ["React", "AI", "Node.js"],
             bio: "Crafting the future of automated career growth.",
         },
-        {
-            name: "Alex Designer",
-            role: "UX/UI Director",
-            image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex&backgroundColor=ffdfbf,c0aede",
-            skills: ["Figma", "Design", "CSS"],
-            bio: "Making complex systems look effortlessly beautiful.",
-        }
+        // {
+        //     name: "Alex Designer",
+        //     role: "UX/UI Director",
+        //     image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex&backgroundColor=ffdfbf,c0aede",
+        //     skills: ["Figma", "Design", "CSS"],
+        //     bio: "Making complex systems look effortlessly beautiful.",
+        // }
     ];
 
     const handleFormSubmit = (e) => {
@@ -213,39 +213,39 @@ const AboutUs = () => {
                                 The Brains Behind It
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {teamMembers.map((member, idx) => (
+                            <div className="flex flex-col items-center justify-center">
+                                {teamMembers.filter(m => m.name === "Abhinav Saxena").map((member, idx) => (
                                     <motion.div
                                         key={idx}
                                         whileHover={{ y: -8, scale: 1.02 }}
-                                        className="group relative bg-white/60 dark:bg-gray-900/60 backdrop-blur-md border border-gray-200/50 dark:border-gray-800/50 rounded-3xl p-6 shadow-xl shadow-gray-200/20 dark:shadow-black/40 overflow-hidden"
+                                        className="group relative w-full max-w-md bg-white/60 dark:bg-gray-900/60 backdrop-blur-md border border-gray-200/50 dark:border-gray-800/50 rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/20 dark:shadow-black/40 overflow-hidden"
                                     >
                                         {/* Hover Gradient Overlay */}
                                         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                                         {/* Avatar */}
-                                        <div className="relative w-20 h-20 mx-auto mb-4 rounded-full p-1 bg-gradient-to-tr from-purple-500 to-pink-500 overflow-visible">
+                                        <div className="relative w-32 h-32 mx-auto mb-6 rounded-full p-1.5 bg-gradient-to-tr from-purple-500 to-pink-500 overflow-visible shadow-lg shadow-purple-500/20">
                                             <motion.img
                                                 whileHover={{ scale: 1.1, rotate: 5 }}
                                                 src={member.image}
                                                 alt={member.name}
                                                 className="w-full h-full object-cover rounded-full bg-white dark:bg-gray-800"
                                             />
-                                            <div className="absolute -bottom-2 -right-2 bg-green-500 w-5 h-5 rounded-full border-2 border-white dark:border-gray-900" />
+                                            <div className="absolute bottom-1 right-1 bg-green-500 w-6 h-6 rounded-full border-4 border-white dark:border-gray-900 shadow-sm" />
                                         </div>
 
                                         <div className="text-center relative z-10">
-                                            <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-1 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                                            <h3 className="font-bold text-2xl text-gray-900 dark:text-white mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                                                 {member.name}
                                             </h3>
-                                            <p className="text-xs font-medium text-pink-500 mb-3">{member.role}</p>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2 leading-relaxed">
+                                            <p className="text-sm font-semibold text-pink-500 mb-4 tracking-wide uppercase">{member.role}</p>
+                                            <p className="text-base text-gray-500 dark:text-gray-400 mb-6 leading-relaxed">
                                                 {member.bio}
                                             </p>
 
-                                            <div className="flex flex-wrap justify-center gap-1 mb-4 relative z-20">
+                                            <div className="flex flex-wrap justify-center gap-2 mb-6 relative z-20">
                                                 {member.skills.map((skill, sIdx) => (
-                                                    <span key={sIdx} className="text-[10px] px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-md">
+                                                    <span key={sIdx} className="text-xs px-3 py-1.5 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-300 rounded-xl font-medium border border-purple-100 dark:border-purple-800/30">
                                                         {skill}
                                                     </span>
                                                 ))}
