@@ -106,9 +106,12 @@ const Footer = () => {
                 </button>
               </li>
               <li>
-                <span className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
+                <button
+                  onClick={() => navigate("/privacy-policy")}
+                  className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer"
+                >
                   Privacy Policy
-                </span>
+                </button>
               </li>
               <li>
                 <span className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
