@@ -121,7 +121,7 @@ const ViewExamples = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-[#050505] text-gray-900 dark:text-gray-100 overflow-x-hidden pt-20">
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#050505] text-gray-900 dark:text-gray-100 overflow-x-hidden pt-16">
       <Navbar user={user} />
 
       {/* Dynamic Background Elements */}
@@ -138,14 +138,14 @@ const ViewExamples = () => {
         />
       </div>
 
-      <div className="container relative z-10 mx-auto px-6 h-full min-h-[calc(100vh-80px)] flex flex-col py-10">
+      <div className="container relative z-10 mx-auto px-6 h-full min-h-[calc(100vh-80px)] flex flex-col py-8">
 
         {/* HEADER SECTION */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="w-full max-w-4xl mx-auto text-center mb-20 mt-10"
+          className="w-full max-w-4xl mx-auto text-center mb-12 mt-6"
         >
           <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md rounded-full shadow-lg border border-gray-200/50 dark:border-gray-800/50 mb-8">
             <FileText className="w-5 h-5 text-purple-600 dark:text-purple-400" />
@@ -177,7 +177,7 @@ const ViewExamples = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="grid md:grid-cols-2 gap-10 max-w-7xl mx-auto w-full mb-32"
+          className="grid md:grid-cols-2 gap-10 max-w-7xl mx-auto w-full mb-20"
         >
           {exampleResumes.map((resume, index) => (
             <motion.div
@@ -225,7 +225,7 @@ const ViewExamples = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="w-full max-w-4xl mx-auto mb-20 text-center"
+          className="w-full max-w-4xl mx-auto mb-16 text-center"
         >
           <div className="relative p-1 border-2 border-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-[2.5rem] overflow-hidden">
             <div className="absolute inset-0 bg-white dark:bg-black m-[2px] rounded-[2.4rem] z-0" />
