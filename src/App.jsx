@@ -32,6 +32,8 @@ const RouteLoading = () => (
   </div>
 );
 
+const Admin = lazy(() => import("./pages/Admin"));
+
 const PageTransition = ({ children }) => (
   <motion.div
     initial={{ opacity: 0, y: 15 }}
@@ -45,10 +47,10 @@ const PageTransition = ({ children }) => (
 
 const AppRoutes = () => {
   const location = useLocation();
-  const knownRoutes = ["/", "/auth", "/dashboard", "/examples", "/career-tips", "/resume-tips", "/interview-tips", "/test-ai", "/about-us", "/privacy-policy", "/terms-of-service"];
+  const knownRoutes = ["/", "/auth", "/dashboard", "/examples", "/career-tips", "/resume-tips", "/interview-tips", "/test-ai", "/about-us", "/privacy-policy", "/terms-of-service", "/admin"];
   const isBuilder = location.pathname.startsWith("/builder/");
   const isKnownRoute = knownRoutes.includes(location.pathname) || isBuilder;
-  const hideFooter = location.pathname.startsWith("/auth") || isBuilder || !isKnownRoute;
+  const hideFooter = location.pathname.startsWith("/auth") || location.pathname.startsWith("/admin") || isBuilder || !isKnownRoute;
 
   return (
     <>
@@ -69,6 +71,7 @@ const AppRoutes = () => {
             <Route path="/about-us" element={<PageTransition><AboutUs /></PageTransition>} />
             <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
             <Route path="/terms-of-service" element={<PageTransition><TermsOfService /></PageTransition>} />
+            <Route path="/admin" element={<PageTransition><Admin /></PageTransition>} />
             <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
           </Routes>
         </AnimatePresence>
