@@ -63,6 +63,16 @@ const Auth = () => {
         toast({ title: "Success!", description: "Account created. Please sign in." });
         setIsSignUp(false);
       } else {
+        // Admin Credentials check
+        if (trimmedEmail === "resume@admin.com" && trimmedPassword === "resume123") {
+          localStorage.setItem("isAdmin", "true");
+          toast({ title: "Welcome Admin!", description: "Accessing Admin Portal..." });
+          navigate("/admin");
+          return;
+        }
+
+        // Standard user login
+        localStorage.removeItem("isAdmin");
         await signInWithEmailAndPassword(auth, trimmedEmail, trimmedPassword);
         toast({ title: "Welcome!", description: "Signed in successfully." });
         navigate("/dashboard");
@@ -88,6 +98,7 @@ const Auth = () => {
       }
 
       await signInWithPopup(auth, authProvider);
+      localStorage.removeItem("isAdmin");
       toast({ title: "Success!", description: "Signed in successfully." });
       navigate("/dashboard");
     } catch (error) {

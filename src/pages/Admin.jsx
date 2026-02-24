@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
     Users,
     FileText,
@@ -22,7 +23,8 @@ import {
     ArrowRight,
     TrendingUp,
     Mail,
-    Lock
+    Lock,
+    Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,20 +33,29 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
 const Admin = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [activeTab, setActiveTab] = useState("users");
+    const [isVerifying, setIsVerifying] = useState(true);
 
-    const handleLogin = (e) => {
-        e.preventDefault();
-        if (email === "resume@admin.com" && password === "resume123") {
-            setIsLoggedIn(true);
-            toast.success("Welcome back, Admin!");
-        } else {
-            toast.error("Invalid credentials");
-        }
+    const isLoggedIn = localStorage.getItem("isAdmin") === "true";
+
+    useEffect(() => {
+        // Artificial delay for premium feel verification
+        const timer = setTimeout(() => {
+            setIsVerifying(false);
+            if (!isLoggedIn) {
+                toast.error("Unauthorized access. Please login as admin.");
+                navigate("/auth");
+            }
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, [isLoggedIn, navigate]);
+
+    const handleLogout = () => {
+        localStorage.removeItem("isAdmin");
+        toast.success("Logged out from admin portal");
+        navigate("/auth");
     };
 
     const usersData = [
@@ -56,74 +67,13 @@ const Admin = () => {
         { id: "USR-006", name: "Sarah Miller", email: "sarah@example.com", joined: "2024-02-01", plan: "Free", status: "Inactive", resumes: 1 },
     ];
 
-    if (!isLoggedIn) {
+    if (isVerifying || !isLoggedIn) {
         return (
-            <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4 relative overflow-hidden font-sans">
-                {/* Abstract Background Decorations */}
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full" />
-
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="w-full max-w-md"
-                >
-                    <div className="text-center mb-8">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-blue-600 mb-4 shadow-lg shadow-purple-500/20">
-                            <ShieldCheck className="w-8 h-8 text-white" />
-                        </div>
-                        <h1 className="text-3xl font-bold text-white tracking-tight">Admin Portal</h1>
-                        <p className="text-gray-400 mt-2">Manage your AI Resume Builder ecosystem</p>
-                    </div>
-
-                    <Card className="bg-[#141414] border-[#222] shadow-2xl relative z-10">
-                        <CardContent className="pt-8 px-8 pb-10">
-                            <form onSubmit={handleLogin} className="space-y-6">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-300 ml-1">Email Address</label>
-                                    <div className="relative">
-                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                                        <Input
-                                            type="email"
-                                            placeholder="admin@example.com"
-                                            className="bg-[#0f0f0f] border-[#222] text-white pl-10 h-12 focus:ring-purple-500/20 focus:border-purple-500/50 transition-all"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <div className="flex justify-between items-center">
-                                        <label className="text-sm font-medium text-gray-300 ml-1">Password</label>
-                                        <a href="#" className="text-xs text-purple-400 hover:text-purple-300 transition-colors">Forgot password?</a>
-                                    </div>
-                                    <div className="relative">
-                                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                                        <Input
-                                            type="password"
-                                            placeholder="••••••••"
-                                            className="bg-[#0f0f0f] border-[#222] text-white pl-10 h-12 focus:ring-purple-500/20 focus:border-purple-500/50 transition-all"
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                <Button className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold rounded-lg shadow-lg shadow-purple-500/25 border-none transition-all duration-300 group">
-                                    Sign In
-                                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                </Button>
-                            </form>
-                        </CardContent>
-                    </Card>
-
-                    <p className="text-center text-gray-500 mt-8 text-sm">
-                        &copy; 2024 AI Resume Builder. All rights reserved.
-                    </p>
-                </motion.div>
+            <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
+                <div className="text-center space-y-4">
+                    <Loader2 className="w-10 h-10 text-purple-500 animate-spin mx-auto" />
+                    <p className="text-gray-400 font-medium">Verifying administrator access...</p>
+                </div>
             </div>
         );
     }
@@ -137,9 +87,9 @@ const Admin = () => {
       `}>
                 <div className="p-6 flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center shrink-0">
-                        <FileText className="w-5 h-5 text-white" />
+                        <ShieldCheck className="w-5 h-5 text-white" />
                     </div>
-                    {sidebarOpen && <span className="font-bold text-xl tracking-tight text-white uppercase italic">Resume<span className="text-purple-500">AI</span></span>}
+                    {sidebarOpen && <span className="font-bold text-xl tracking-tight text-white uppercase italic">Admin<span className="text-purple-500">Panel</span></span>}
                 </div>
 
                 <nav className="flex-1 px-4 py-4 space-y-1">
@@ -152,7 +102,6 @@ const Admin = () => {
                         {sidebarOpen && <p className="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Management</p>}
                     </div>
 
-                    <SidebarItem icon={<ShieldCheck />} label="Roles" collapsed={!sidebarOpen} />
                     <SidebarItem icon={<TrendingUp />} label="Analytics" collapsed={!sidebarOpen} />
                     <SidebarItem icon={<Settings2 />} label="Config" collapsed={!sidebarOpen} />
                 </nav>
@@ -162,7 +111,7 @@ const Admin = () => {
                     <SidebarItem
                         icon={<LogOut />}
                         label="Logout"
-                        onClick={() => setIsLoggedIn(false)}
+                        onClick={handleLogout}
                         danger
                         collapsed={!sidebarOpen}
                     />
@@ -180,7 +129,7 @@ const Admin = () => {
                         <div className="relative max-w-sm w-full hidden md:block">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                             <Input
-                                placeholder="Search users, resumes, activity..."
+                                placeholder="Search database..."
                                 className="bg-[#111] border-[#222] pl-10 h-9 text-sm focus:ring-purple-500/20"
                             />
                         </div>
@@ -194,8 +143,8 @@ const Admin = () => {
                         <div className="h-8 w-[1px] bg-[#1a1a1a] mx-2" />
                         <div className="flex items-center gap-3 pl-2">
                             <div className="text-right hidden sm:block">
-                                <p className="text-sm font-medium text-white leading-none">Admin User</p>
-                                <p className="text-[11px] text-gray-500 mt-1">Super Admin</p>
+                                <p className="text-sm font-medium text-white leading-none">Super Admin</p>
+                                <p className="text-[11px] text-gray-500 mt-1">Full Access</p>
                             </div>
                             <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex items-center justify-center border border-[#333]">
                                 <User className="w-5 h-5 text-gray-300" />
@@ -206,22 +155,26 @@ const Admin = () => {
 
                 {/* Dashboard Content */}
                 <div className="p-8 space-y-8 max-w-7xl mx-auto w-full">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex flex-col md:flex-row md:items-end justify-between gap-4"
+                    >
                         <div>
-                            <h2 className="text-3xl font-bold text-white tracking-tight">User Management</h2>
-                            <p className="text-gray-400 mt-1">Review and manage all registered users in the system.</p>
+                            <h2 className="text-3xl font-bold text-white tracking-tight">System Users</h2>
+                            <p className="text-gray-400 mt-1">Review and manage your application user base.</p>
                         </div>
                         <div className="flex items-center gap-3">
                             <Button variant="outline" className="bg-[#0a0a0a] border-[#222] text-gray-300 hover:bg-[#111]">
                                 <Download className="w-4 h-4 mr-2" />
-                                Export CSV
+                                Export Data
                             </Button>
                             <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-600/20">
                                 <Plus className="w-4 h-4 mr-2" />
-                                Add User
+                                New Admin
                             </Button>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Stats Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -231,28 +184,22 @@ const Admin = () => {
                         <StatsCard title="Conversion Rate" value="24.8%" change="+2.1%" icon={<TrendingUp className="text-orange-500" />} />
                     </div>
 
-                    {/* Table Area - Inspired by the reference image */}
-                    <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl overflow-hidden shadow-sm">
+                    {/* Table Area */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl overflow-hidden shadow-sm"
+                    >
                         <div className="p-4 border-b border-[#1a1a1a] flex flex-wrap items-center justify-between gap-4 bg-[#0d0d0d]">
                             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                                <TabButton active label="All Users" count="1,284" />
-                                <TabButton label="Active" />
-                                <TabButton label="Inactive" />
-                                <TabButton label="Premium" />
-                                <TabButton label="Pro" />
+                                <TabButton active label="All Members" count="1,284" />
+                                <TabButton label="Subscribed" />
+                                <TabButton label="Free Tier" />
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
-                                    <Input
-                                        placeholder="Search..."
-                                        className="bg-[#111] border-[#222] pl-9 h-9 w-48 text-xs focus:ring-purple-500/20"
-                                    />
-                                </div>
                                 <Button variant="outline" size="sm" className="bg-[#111] border-[#222] text-xs h-9">
                                     <Filter className="w-3.5 h-3.5 mr-2" />
-                                    Filters
-                                    <ChevronDown className="w-3.5 h-3.5 ml-2 opacity-50" />
+                                    Apply Filters
                                 </Button>
                             </div>
                         </div>
@@ -261,13 +208,13 @@ const Admin = () => {
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="bg-[#0d0d0d] text-gray-500 text-[11px] font-bold uppercase tracking-wider">
-                                        <th className="px-6 py-4 border-b border-[#1a1a1a]">User ID</th>
-                                        <th className="px-6 py-4 border-b border-[#1a1a1a]">Customer</th>
-                                        <th className="px-6 py-4 border-b border-[#1a1a1a]">Date Joined</th>
-                                        <th className="px-6 py-4 border-b border-[#1a1a1a]">Plan</th>
+                                        <th className="px-6 py-4 border-b border-[#1a1a1a]">ID</th>
+                                        <th className="px-6 py-4 border-b border-[#1a1a1a]">User Profile</th>
+                                        <th className="px-6 py-4 border-b border-[#1a1a1a]">Joined At</th>
+                                        <th className="px-6 py-4 border-b border-[#1a1a1a]">Tier</th>
                                         <th className="px-6 py-4 border-b border-[#1a1a1a]">Status</th>
-                                        <th className="px-6 py-4 border-b border-[#1a1a1a]">Resumes</th>
-                                        <th className="px-6 py-4 border-b border-[#1a1a1a] text-right">Actions</th>
+                                        <th className="px-6 py-4 border-b border-[#1a1a1a]">Assets</th>
+                                        <th className="px-6 py-4 border-b border-[#1a1a1a] text-right">Menu</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-[#1a1a1a]">
@@ -278,7 +225,7 @@ const Admin = () => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 font-bold text-xs">
+                                                    <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 font-bold text-xs border border-purple-500/20">
                                                         {user.name.charAt(0)}
                                                     </div>
                                                     <div>
@@ -302,12 +249,12 @@ const Admin = () => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-1.5">
-                                                    <span className={`w-1.5 h-1.5 rounded-full ${user.status === "Active" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" : "bg-gray-600"}`} />
+                                                    <span className={`w-1.5 h-1.5 rounded-full ${user.status === "Active" ? "bg-emerald-500" : "bg-gray-600"}`} />
                                                     <span className={`text-[13px] ${user.status === "Active" ? "text-emerald-500" : "text-gray-500"}`}>{user.status}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="text-sm text-gray-400">{user.resumes}</span>
+                                                <span className="text-sm text-gray-400">{user.resumes} Resumes</span>
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-white hover:bg-[#222]">
@@ -320,14 +267,14 @@ const Admin = () => {
                             </table>
                         </div>
 
-                        <div className="p-4 border-t border-[#1a1a1a] flex items-center justify-between text-xs text-gray-500">
-                            <p>Showing 6 of 1,284 results</p>
+                        <div className="p-4 border-t border-[#1a1a1a] flex items-center justify-between text-xs text-gray-500 bg-[#0d0d0d]">
+                            <p>Total {usersData.length} records in this view</p>
                             <div className="flex items-center gap-2">
-                                <Button variant="outline" size="sm" className="h-8 bg-[#111] border-[#222] disabled:opacity-30">Previous</Button>
+                                <Button variant="outline" size="sm" className="h-8 bg-[#111] border-[#222]">Previous</Button>
                                 <Button variant="outline" size="sm" className="h-8 bg-[#111] border-[#222]">Next</Button>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             </main>
         </div>
@@ -344,7 +291,7 @@ const SidebarItem = ({ icon, label, active = false, onClick, danger = false, col
     `}
     >
         <div className={`shrink-0 ${active ? "text-purple-400" : "group-hover:text-gray-300 transition-colors"}`}>
-            {React.cloneElement(icon, { size: 20 })}
+            {React.cloneElement(icon, { size: 18 })}
         </div>
         {!collapsed && <span className="text-sm font-medium tracking-wide">{label}</span>}
         {active && !collapsed && <div className="ml-auto w-1 h-1 rounded-full bg-purple-400" />}
@@ -365,14 +312,6 @@ const StatsCard = ({ title, value, change, icon }) => (
             <div>
                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest">{title}</h3>
                 <p className="text-2xl font-bold text-white mt-1">{value}</p>
-            </div>
-            <div className="mt-4 h-1 w-full bg-[#111] rounded-full overflow-hidden">
-                <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: "65%" }}
-                    transition={{ duration: 1, delay: 0.5 }}
-                    className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"
-                />
             </div>
         </CardContent>
     </Card>
