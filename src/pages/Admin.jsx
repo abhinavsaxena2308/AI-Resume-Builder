@@ -88,7 +88,7 @@ const Admin = () => {
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center shrink-0">
                         <ShieldCheck className="w-5 h-5 text-white" />
                     </div>
-                    {sidebarOpen && <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white uppercase italic">Admin<span className="text-purple-500">Panel</span></span>}
+                    {sidebarOpen && <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white uppercase italic">Admin<span className="text-pink-500">Panel</span></span>}
                 </div>
 
                 <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto no-scrollbar">
@@ -169,7 +169,7 @@ const Admin = () => {
                                     <Download className="w-4 h-4 mr-2" />
                                     Export Data
                                 </Button>
-                                <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-600/20">
+                                <Button className="bg-gradient-to-r from-purple-600 to-pink-600  text-white shadow-lg shadow-purple-600/20">
                                     <Plus className="w-4 h-4 mr-2" />
                                     New Admin
                                 </Button>
@@ -287,16 +287,16 @@ const SidebarItem = ({ icon, label, active = false, onClick, danger = false, col
         onClick={onClick}
         className={`
       w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group
-      ${active ? "bg-purple-600/10 text-purple-600 dark:text-purple-400" : "text-gray-500 hover:bg-gray-100 dark:hover:bg-[#151515] hover:text-gray-900 dark:hover:text-gray-300"}
+      ${active ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/20" : "text-gray-500 hover:bg-gray-100 dark:hover:bg-[#151515] hover:text-gray-900 dark:hover:text-gray-300"}
       ${danger ? "hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400" : ""}
       ${collapsed ? "justify-center" : ""}
     `}
     >
-        <div className={`shrink-0 ${active ? "text-purple-600 dark:text-purple-400" : "group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors"}`}>
+        <div className={`shrink-0 ${active ? "text-white" : "group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors"}`}>
             {React.cloneElement(icon, { size: 18 })}
         </div>
         {!collapsed && <span className="text-sm font-medium tracking-wide">{label}</span>}
-        {active && !collapsed && <div className="ml-auto w-1 h-1 rounded-full bg-purple-500 dark:bg-purple-400" />}
+        {active && !collapsed && <div className="ml-auto w-1 h-1 rounded-full bg-white/80" />}
     </button>
 );
 
