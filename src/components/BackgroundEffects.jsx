@@ -17,7 +17,7 @@ const BackgroundEffects = () => {
     const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
 
     // Do not render on builder or dashboard pages
-    const isExcluded = location.pathname.includes("/builder") || location.pathname.includes("/dashboard");
+    const isExcluded = location.pathname.includes("/builder") || location.pathname.includes("/dashboard") || location.pathname.includes("/admin");
 
     useEffect(() => {
         const handleResize = () => {
