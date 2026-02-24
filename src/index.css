@@ -175,6 +175,27 @@
   .rounded-lg {
     border-radius: var(--radius);
   }
+
+  /* Premium UI Utilities */
+  .glass-morphism {
+    @apply backdrop-blur-xl bg-white/70 dark:bg-black/40 border border-white/20 dark:border-white/10;
+  }
+
+  .glass-card {
+    @apply backdrop-blur-md bg-white/50 dark:bg-[#0f0f0f]/60 border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-2xl dark:shadow-purple-500/10;
+  }
+
+  .bg-glow-purple {
+    background: radial-gradient(circle at center, rgba(168, 85, 247, 0.15), transparent 70%);
+  }
+
+  .bg-glow-blue {
+    background: radial-gradient(circle at center, rgba(59, 130, 246, 0.15), transparent 70%);
+  }
+
+  .text-glow-purple {
+    text-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+  }
 }
 
 /* ================= Enhanced Dark Mode Styles ================= */
