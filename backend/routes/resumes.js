@@ -136,10 +136,20 @@ router.get("/:id", async (req, res) => {
 router.get("/", async (req, res) => {
   const userId = req.user.uid;
   try {
-    const snapshot = await db.collection("resumes")
-      .where("user_id", "==", userId)
-      .orderBy("updated_at", "desc")
-      .get();
+    let snapshot;
+    try {
+      // This compound query requires a Firestore composite index
+      snapshot = await db.collection("resumes")
+        .where("user_id", "==", userId)
+        .orderBy("updated_at", "desc")
+        .get();
+    } catch (indexError) {
+      // Fallback: if composite index is missing, query without orderBy and sort in-memory
+      console.warn("Compound query failed (likely missing index), falling back to simple query:", indexError.message);
+      snapshot = await db.collection("resumes")
+        .where("user_id", "==", userId)
+        .get();
+    }
 
     const resumes = snapshot.docs.map(doc => ({
       ...doc.data(),
@@ -147,10 +157,14 @@ router.get("/", async (req, res) => {
       created_at: doc.data().created_at?.toDate(),
       updated_at: doc.data().updated_at?.toDate(),
     }));
+
+    // Sort in-memory as fallback (ensures correct order even without index)
+    resumes.sort((a, b) => (b.updated_at || 0) - (a.updated_at || 0));
+
     res.json(resumes);
   } catch (error) {
     console.error("List error:", error);
-    res.status(500).json({ error: "Failed to list" });
+    res.status(500).json({ error: "Failed to list", details: error.message });
   }
 });
 

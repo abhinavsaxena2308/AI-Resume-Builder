@@ -24,7 +24,8 @@ import {
     TrendingUp,
     Mail,
     Lock,
-    Loader2
+    Loader2,
+    Home
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -92,6 +93,7 @@ const Admin = () => {
                 </div>
 
                 <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto no-scrollbar">
+                    <SidebarItem icon={<Home />} label="Home" onClick={() => navigate("/")} collapsed={!sidebarOpen} />
                     <SidebarItem icon={<LayoutDashboard />} label="Dashboard" active={activeTab === "dash"} onClick={() => setActiveTab("dash")} collapsed={!sidebarOpen} />
                     <SidebarItem icon={<Users />} label="Users" active={activeTab === "users"} onClick={() => setActiveTab("users")} collapsed={!sidebarOpen} />
                     <SidebarItem icon={<FileText />} label="Resumes" active={activeTab === "resumes"} onClick={() => setActiveTab("resumes")} collapsed={!sidebarOpen} />

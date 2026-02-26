@@ -86,6 +86,9 @@ const Auth = () => {
   };
 
   const handleOAuthLogin = async (provider) => {
+    // Prevent duplicate popup requests if one is already in progress
+    if (oauthLoading) return;
+
     setOauthLoading(provider);
     try {
       let authProvider;
@@ -102,6 +105,12 @@ const Auth = () => {
       toast({ title: "Success!", description: "Signed in successfully." });
       navigate("/dashboard");
     } catch (error) {
+      // Silently ignore user-initiated popup cancellations
+      const ignoredCodes = ["auth/cancelled-popup-request", "auth/popup-closed-by-user"];
+      if (ignoredCodes.includes(error.code)) {
+        setOauthLoading("");
+        return;
+      }
       handleAuthError(error);
       toast({ title: "Error", description: error.message || "OAuth login failed", variant: "destructive" });
     } finally {
