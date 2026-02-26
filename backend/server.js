@@ -9,6 +9,7 @@ import { dirname, join } from 'path';
 // Import the new route
 import geminiSuggestionsRoute from "./routes/geminiSuggestions.js";
 import resumeRoutes from "./routes/resumes.js";
+import adminRoutes from "./routes/admin.js";
 import verifyToken from "./middleware/auth.js";
 
 dotenv.config();
@@ -21,7 +22,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const allowedOrigins = [
-  "http://localhost:5173", 
+  "http://localhost:5173",
   "http://localhost:5174",
   "https://ai-resume-builder-six-kappa.vercel.app",
   "https://ai-resume-builder-h11a.onrender.com",
@@ -33,7 +34,7 @@ app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    
+
     if (allowedOrigins.indexOf(origin) === -1) {
       const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
       console.warn(msg);
@@ -42,7 +43,7 @@ app.use(cors({
     return callback(null, true);
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "X-Admin-Key"],
   credentials: true,
   preflightContinue: false,
   optionsSuccessStatus: 204
@@ -54,7 +55,7 @@ app.get("/api/test", (req, res) => {
   res.json({ message: "Test route is working!" });
 });
 
-app.use(express.json());  
+app.use(express.json());
 
 console.log("Registering /api/gemini-suggestions route");
 app.use("/api/gemini-suggestions", geminiSuggestionsRoute);
@@ -62,11 +63,14 @@ app.use("/api/gemini-suggestions", geminiSuggestionsRoute);
 console.log("Registering /api/resumes route", !!verifyToken, !!resumeRoutes);
 app.use("/api/resumes", verifyToken, resumeRoutes);
 
+console.log("Registering /api/admin route");
+app.use("/api/admin", adminRoutes);
+
 app.use((req, res, next) => {
   if (req.path.startsWith('/api/gemini-suggestions')) {
     console.log("Gemini suggestions route not found:", req.method, req.path);
-    return res.status(404).json({ 
-      error: "Route not found", 
+    return res.status(404).json({
+      error: "Route not found",
       method: req.method,
       path: req.path,
       message: "The requested endpoint does not exist"
