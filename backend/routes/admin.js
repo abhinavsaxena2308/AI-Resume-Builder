@@ -79,10 +79,10 @@ router.get("/stats", async (req, res) => {
                 name: user.displayName || "No Name",
                 email: user.email || "N/A",
                 joined: user.metadata.creationTime
-                    ? new Date(user.metadata.creationTime).toISOString().split("T")[0]
+                    ? new Date(user.metadata.creationTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                     : "N/A",
                 lastSignIn: user.metadata.lastSignInTime
-                    ? new Date(user.metadata.lastSignInTime).toISOString().split("T")[0]
+                    ? new Date(user.metadata.lastSignInTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                     : "N/A",
                 status: user.disabled ? "Disabled" : (
                     // "Active" if signed in within last 30 days, otherwise "Inactive"

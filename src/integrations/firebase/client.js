@@ -12,14 +12,6 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-console.log("Firebase config loaded:", {
-  projectId: firebaseConfig.projectId,
-  authDomain: firebaseConfig.authDomain,
-  storageBucket: firebaseConfig.storageBucket,
-  messagingSenderId: firebaseConfig.messagingSenderId,
-  appId: firebaseConfig.appId,
-  apiKey: firebaseConfig.apiKey ? "Present" : "Missing"
-});
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

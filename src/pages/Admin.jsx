@@ -343,34 +343,18 @@ const Admin = () => {
                                     <table className="w-full text-left border-collapse">
                                         <thead>
                                             <tr className="bg-gray-50 dark:bg-[#0d0d0d] text-gray-500 dark:text-gray-500 text-[11px] font-bold uppercase tracking-wider">
-                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">User Profile</th>
-                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Joined</th>
-                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Last Sign In</th>
-                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Provider</th>
-                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Status</th>
-                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Resumes</th>
-                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a] text-right">Menu</th>
+                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Identifier</th>
+                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Providers</th>
+                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Created</th>
+                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Signed In</th>
+                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">User UID</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-100 dark:divide-[#1a1a1a]">
                                             {filteredUsers.map((user) => (
                                                 <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-[#111]/50 transition-colors group">
                                                     <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold text-xs border border-purple-500/20">
-                                                                {user.name.charAt(0).toUpperCase()}
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm font-medium text-gray-900 dark:text-white leading-none">{user.name}</p>
-                                                                <p className="text-xs text-gray-500 mt-1">{user.email}</p>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className="text-sm text-gray-500 dark:text-gray-400">{user.joined}</span>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className="text-sm text-gray-500 dark:text-gray-400">{user.lastSignIn}</span>
+                                                        <span className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[200px] inline-block" title={user.email}>{user.email}</span>
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <Badge variant="outline" className={`
@@ -384,18 +368,15 @@ const Admin = () => {
                                                         </Badge>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-1.5">
-                                                            <span className={`w-1.5 h-1.5 rounded-full ${user.status === "Active" ? "bg-emerald-500" : "bg-gray-400 dark:bg-gray-600"}`} />
-                                                            <span className={`text-[13px] ${user.status === "Active" ? "text-emerald-600 dark:text-emerald-500" : "text-gray-500"}`}>{user.status}</span>
-                                                        </div>
+                                                        <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">{user.joined}</span>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <span className="text-sm text-gray-500 dark:text-gray-400">{user.resumes} Resumes</span>
+                                                        <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">{user.lastSignIn}</span>
                                                     </td>
-                                                    <td className="px-6 py-4 text-right">
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#222]">
-                                                            <MoreHorizontal className="w-4 h-4" />
-                                                        </Button>
+                                                    <td className="px-6 py-4">
+                                                        <span className="text-gray-500 dark:text-gray-400 font-mono text-xs" title={user.id}>
+                                                            {user.id}
+                                                        </span>
                                                     </td>
                                                 </tr>
                                             ))}

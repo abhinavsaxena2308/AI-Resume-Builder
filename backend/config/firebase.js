@@ -12,16 +12,22 @@ try {
   if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
     const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
     serviceAccount = JSON.parse(readFileSync(serviceAccountPath, "utf8"));
-  } 
+  }
   // Option 2: Load from environment variable containing the JSON string directly
   else if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+
+    // Fix for dotenv escaping newlines in JSON strings:
+    // If the private key contains literal '\n' strings instead of actual newlines, fix it
+    if (serviceAccount.private_key) {
+      serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+    }
   }
 } catch (error) {
   console.warn("Could not load Firebase service account credentials. Falling back to application default credentials.", error.message);
 }
 
-console.log("Service account loaded:", serviceAccount ? `Project: ${serviceAccount.project_id}, Email: ${serviceAccount.client_email}` : "Using application default credentials");
+console.log("Service account loaded:", serviceAccount ? `Project: ${serviceAccount.project_id}, Email: ${serviceAccount.client_email}, KeyValid: ${!!serviceAccount.private_key}` : "Using application default credentials");
 
 let dbInstance;
 
@@ -31,8 +37,8 @@ try {
     dbInstance = new MockFirestore();
   } else {
     const options = {
-      credential: serviceAccount 
-        ? admin.credential.cert(serviceAccount) 
+      credential: serviceAccount
+        ? admin.credential.cert(serviceAccount)
         : admin.credential.applicationDefault(),
       storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET
     };
@@ -52,23 +58,6 @@ try {
 
 export const db = dbInstance;
 
-// Mock Auth if in Test Mode or init failed
-let authInstance;
-try {
-  if (process.env.TEST_MODE === "true" || !admin.apps.length) {
-     authInstance = {
-       verifyIdToken: async (token) => {
-         if (token === "TEST_TOKEN") return { uid: "test-user-id", email: "test@example.com" };
-         throw new Error("Invalid test token");
-       }
-     };
-  } else {
-    authInstance = admin.auth();
-  }
-} catch (e) {
-  console.warn("Auth init failed, using mock");
-  authInstance = { verifyIdToken: async () => ({ uid: "test-user-id" }) };
-}
-
-export const auth = authInstance;
+// Export the real Firebase Auth instance (no mock fallback)
+export const auth = admin.auth();
 export default admin;
