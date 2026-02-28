@@ -67,6 +67,17 @@ router.get("/stats", async (req, res) => {
                         hasSummary: !!data.summary,
                     }
                 };
+                // Enrich with exact user info from Auth if missing
+                if (!resume.userName || resume.userName === "Unknown User" || resume.userEmail === "N/A") {
+                    const matchingUser = allUsers.find(u => u.uid === resume.user_id);
+                    if (matchingUser) {
+                        resume.userName = matchingUser.displayName || matchingUser.email || "Unknown User";
+                        resume.userEmail = matchingUser.email || "N/A";
+                    } else {
+                        resume.userName = "N/A"; // fallback
+                        resume.userEmail = "N/A"; // fallback 
+                    }
+                }
                 allResumes.push(resume);
 
                 if (data.user_id) {
