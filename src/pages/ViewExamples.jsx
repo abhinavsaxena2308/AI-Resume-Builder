@@ -96,6 +96,42 @@ const ViewExamples = () => {
       ],
       skills: ["React", "Node.js", "Python", "TypeScript", "AWS", "Docker"],
     },
+    {
+      personalInfo: {
+        fullName: "Abhinav Saxena",
+        email: "abhinav@example.com",
+        phone: "(555) 123-4567",
+        location: "San Francisco, CA",
+        linkedin: "linkedin.com/in/abhinav",
+        github: "github.com/abhinav",
+      },
+      summary: "Innovative Full-Stack Engineer specializing in AI-driven web applications, scalable microservices, and modern UI/UX.",
+      experience: [
+        {
+          id: 1,
+          title: "Lead Software Architect",
+          company: "Nexus AI",
+          duration: "2021 - Present",
+          description: "Architected modern LLM-based solutions, scaling the infrastructure to handle 1M+ daily active requests with 99.9% uptime.",
+        },
+        {
+          id: 2,
+          title: "Full Stack Developer",
+          company: "TechFront Inc",
+          duration: "2018 - 2021",
+          description: "Developed and maintained multiple high-traffic client applications using React, Node.js, and PostgreSQL.",
+        },
+      ],
+      education: [
+        {
+          id: 1,
+          degree: "MS in Computer Science",
+          institution: "Stanford University",
+          year: "2018",
+        },
+      ],
+      skills: ["React", "Node.js", "Python", "TypeScript", "AWS", "Docker"],
+    },
   ];
 
   // Animation variants
@@ -177,7 +213,7 @@ const ViewExamples = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="grid md:grid-cols-2 gap-10 max-w-7xl mx-auto w-full mb-20"
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto w-full mb-20"
         >
           {exampleResumes.map((resume, index) => (
             <motion.div
@@ -189,7 +225,7 @@ const ViewExamples = () => {
               <div className="flex items-center justify-between mb-4 px-2">
                 <div>
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                    {index === 0 ? "Modern Engineer" : "Classic Professional"}
+                    {index === 0 ? "Modern Engineer" : index === 1 ? "Classic Professional" : "ATS Standard"}
                   </h2>
                   <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
                     <CheckCircle2 className="w-3 h-3 text-green-500" /> ATS Optimized
@@ -213,7 +249,7 @@ const ViewExamples = () => {
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-50/50 dark:to-gray-900/50 pointer-events-none z-10" />
 
                 <div className="relative z-0 opacity-80 group-hover:opacity-100 transition-opacity duration-500 scale-[0.98] group-hover:scale-100 origin-top">
-                  <ResumePreview data={resume} template={index === 1 ? "classic" : "modern"} />
+                  <ResumePreview data={resume} template={index === 0 ? "modern" : index === 1 ? "classic" : "ats"} />
                 </div>
               </div>
             </motion.div>
@@ -221,7 +257,7 @@ const ViewExamples = () => {
         </motion.div>
 
         {/* MINIMAL CTA */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
@@ -246,7 +282,7 @@ const ViewExamples = () => {
               </motion.button>
             </div>
           </div>
-        </motion.div>
+        </motion.div> */}
 
       </div>
     </div>
