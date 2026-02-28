@@ -17,11 +17,11 @@ const templates = [
     desc: "Traditional & formal",
   },
   {
-    id: "creative",
-    name: "Creative",
-    color: "from-purple-500 to-pink-500",
-    dot: "bg-purple-500",
-    desc: "Vibrant & bold",
+    id: "ats",
+    name: "ATS-Friendly",
+    color: "from-emerald-500 to-teal-600",
+    dot: "bg-emerald-500",
+    desc: "Optimized for parsers",
   },
 ];
 
@@ -36,8 +36,8 @@ const TemplateSelector = ({ selectedTemplate, onSelect }) => {
             onClick={() => onSelect(t.id)}
             title={t.desc}
             className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150 ${active
-                ? "bg-white dark:bg-gray-800 border-purple-400 dark:border-purple-600 text-purple-700 dark:text-purple-300 shadow-sm"
-                : "bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300"
+              ? "bg-white dark:bg-gray-800 border-purple-400 dark:border-purple-600 text-purple-700 dark:text-purple-300 shadow-sm"
+              : "bg-transparent border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300"
               }`}
           >
             <span className={`w-2 h-2 rounded-full bg-gradient-to-br ${t.color} shrink-0`} />

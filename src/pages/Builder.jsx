@@ -7,7 +7,7 @@ import { resumeApi, API_BASE_URL } from "@/services/api";
 import TemplateSelector from "@/components/ResumeTemplates/TemplateSelector";
 import TemplateModern from "@/components/ResumeTemplates/TemplateModern";
 import TemplateClassic from "@/components/ResumeTemplates/TemplateClassic";
-import TemplateCreative from "@/components/ResumeTemplates/TemplateCreative";
+import TemplateAts from "@/components/ResumeTemplates/TemplateAts";
 import AiSuggestionsPopup from "@/components/AiSuggestionsPopup";
 import {
   Menu, X, Sparkles, Save, Download, ArrowLeft, LogOut,
@@ -276,7 +276,7 @@ const Builder = () => {
   const currentTemplate = () => {
     if (selectedTemplate === "modern") return <TemplateModern {...resumeData} />;
     if (selectedTemplate === "classic") return <TemplateClassic {...resumeData} />;
-    if (selectedTemplate === "creative") return <TemplateCreative {...resumeData} />;
+    if (selectedTemplate === "ats") return <TemplateAts {...resumeData} />;
     return <TemplateModern {...resumeData} />;
   };
 

@@ -1,6 +1,6 @@
 import TemplateModern from "@/components/ResumeTemplates/TemplateModern";
 import TemplateClassic from "@/components/ResumeTemplates/TemplateClassic";
-import TemplateCreative from "@/components/ResumeTemplates/TemplateCreative";
+import TemplateAts from "@/components/ResumeTemplates/TemplateAts";
 import { useTheme } from "@/contexts/ThemeContext";
 
 const ResumePreview = ({ data, template = "modern" }) => {
@@ -10,7 +10,7 @@ const ResumePreview = ({ data, template = "modern" }) => {
   const templates = {
     modern: TemplateModern,
     classic: TemplateClassic,
-    creative: TemplateCreative,
+    ats: TemplateAts,
   };
 
   const SelectedTemplate = templates[template] || TemplateModern;
