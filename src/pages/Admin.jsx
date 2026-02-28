@@ -165,12 +165,27 @@ const Admin = () => {
         );
     }
 
+    const handleNavigation = (tab) => {
+        setActiveTab(tab);
+        if (window.innerWidth < 1024) {
+            setSidebarOpen(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-gray-200 flex overflow-hidden font-sans transition-colors duration-300">
+            {/* Mobile Sidebar Overlay */}
+            {sidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
             <aside className={`
-        ${sidebarOpen ? "translate-x-0 w-64" : "-translate-x-full w-0 lg:translate-x-0 lg:w-20"} 
-        fixed lg:relative h-full bg-white dark:bg-[#0a0a0a] border-r border-gray-200 dark:border-[#1a1a1a] transition-all duration-300 z-50 flex flex-col
+        ${sidebarOpen ? "translate-x-0 w-64" : "-translate-x-full w-64 lg:translate-x-0 lg:w-20"} 
+        fixed lg:relative h-full bg-white dark:bg-[#0a0a0a] border-r border-gray-200 dark:border-[#1a1a1a] transition-all duration-300 z-50 flex flex-col overflow-hidden
       `}>
                 <div className="p-6 flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center shrink-0">
@@ -181,21 +196,21 @@ const Admin = () => {
 
                 <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto no-scrollbar">
                     <SidebarItem icon={<Home />} label="Home" onClick={() => navigate("/")} collapsed={!sidebarOpen} />
-                    <SidebarItem icon={<LayoutDashboard />} label="Dashboard" active={activeTab === "dash"} onClick={() => setActiveTab("dash")} collapsed={!sidebarOpen} />
-                    <SidebarItem icon={<Users />} label="Users" active={activeTab === "users"} onClick={() => setActiveTab("users")} collapsed={!sidebarOpen} />
-                    <SidebarItem icon={<FileText />} label="Resumes" active={activeTab === "resumes"} onClick={() => setActiveTab("resumes")} collapsed={!sidebarOpen} />
-                    <SidebarItem icon={<CreditCard />} label="Payments" active={activeTab === "billing"} onClick={() => setActiveTab("billing")} collapsed={!sidebarOpen} />
+                    <SidebarItem icon={<LayoutDashboard />} label="Dashboard" active={activeTab === "dash"} onClick={() => handleNavigation("dash")} collapsed={!sidebarOpen} />
+                    <SidebarItem icon={<Users />} label="Users" active={activeTab === "users"} onClick={() => handleNavigation("users")} collapsed={!sidebarOpen} />
+                    <SidebarItem icon={<FileText />} label="Resumes" active={activeTab === "resumes"} onClick={() => handleNavigation("resumes")} collapsed={!sidebarOpen} />
+                    <SidebarItem icon={<CreditCard />} label="Payments" active={activeTab === "billing"} onClick={() => handleNavigation("billing")} collapsed={!sidebarOpen} />
 
                     <div className="pt-4 pb-2">
                         {sidebarOpen && <p className="px-3 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Management</p>}
                     </div>
 
-                    <SidebarItem icon={<TrendingUp />} label="Analytics" collapsed={!sidebarOpen} />
-                    <SidebarItem icon={<Settings2 />} label="Config" collapsed={!sidebarOpen} />
+                    <SidebarItem icon={<TrendingUp />} label="Analytics" active={activeTab === "analytics"} onClick={() => handleNavigation("analytics")} collapsed={!sidebarOpen} />
+                    <SidebarItem icon={<Settings2 />} label="Config" active={activeTab === "config"} onClick={() => handleNavigation("config")} collapsed={!sidebarOpen} />
                 </nav>
 
                 <div className="p-4 border-t border-gray-200 dark:border-[#1a1a1a]">
-                    <SidebarItem icon={<Settings />} label="Settings" collapsed={!sidebarOpen} />
+                    <SidebarItem icon={<Settings />} label="Settings" active={activeTab === "settings"} onClick={() => handleNavigation("settings")} collapsed={!sidebarOpen} />
                     <SidebarItem
                         icon={<LogOut />}
                         label="Logout"
@@ -209,18 +224,18 @@ const Admin = () => {
             {/* Main Content */}
             <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
                 {/* Top Header */}
-                <header className="h-16 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md border-b border-gray-200 dark:border-[#1a1a1a] px-8 flex items-center justify-between sticky top-0 z-40 shrink-0">
+                <header className="h-16 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md border-b border-gray-200 dark:border-[#1a1a1a] px-4 md:px-8 flex items-center justify-between sticky top-0 z-40 shrink-0">
                     <div className="flex items-center gap-4 flex-1">
-                        <Button variant="ghost" size="icon" className="text-gray-500 dark:text-gray-400" onClick={() => setSidebarOpen(!sidebarOpen)}>
+                        <Button variant="ghost" size="icon" className="shrink-0 text-gray-500 dark:text-gray-400" onClick={() => setSidebarOpen(!sidebarOpen)}>
                             <Menu className="w-5 h-5" />
                         </Button>
-                        <div className="relative max-w-sm w-full hidden md:block">
+                        <div className="relative w-full max-w-[200px] sm:max-w-sm">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                             <Input
-                                placeholder="Search users..."
+                                placeholder="Search..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="bg-gray-100 dark:bg-[#111] border-gray-200 dark:border-[#222] pl-10 h-9 text-sm focus:ring-purple-500/20 text-gray-900 dark:text-white"
+                                className="bg-gray-100 dark:bg-[#111] border-gray-200 dark:border-[#222] pl-10 h-9 text-xs sm:text-sm focus:ring-purple-500/20 text-gray-900 dark:text-white"
                             />
                         </div>
                     </div>
@@ -234,19 +249,19 @@ const Admin = () => {
                         )}
                         <button
                             onClick={() => fetchAdminData()}
-                            className="relative p-2 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors"
+                            className="relative p-2 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors shrink-0"
                             title="Refresh data"
                         >
                             <RefreshCw className={`w-5 h-4 ${isLoading ? "animate-spin" : ""}`} />
                         </button>
-                        <div className="h-8 w-[1px] bg-gray-200 dark:bg-[#1a1a1a] mx-2" />
-                        <div className="flex items-center gap-3 pl-2">
+                        <div className="h-8 w-[1px] bg-gray-200 dark:bg-[#1a1a1a] mx-1 sm:mx-2 shrink-0" />
+                        <div className="flex items-center gap-3 pl-1 sm:pl-2 shrink-0">
                             <div className="text-right hidden sm:block">
                                 <p className="text-sm font-medium text-gray-900 dark:text-white leading-none">Super Admin</p>
                                 <p className="text-[11px] text-gray-500 mt-1">Full Access</p>
                             </div>
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center border border-gray-300 dark:border-[#333]">
-                                <User className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center border border-gray-300 dark:border-[#333]">
+                                <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
                             </div>
                         </div>
                     </div>
