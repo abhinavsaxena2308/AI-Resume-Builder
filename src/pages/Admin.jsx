@@ -45,8 +45,10 @@ const Admin = () => {
     const [error, setError] = useState(null);
 
     // Real data from API
-    const [stats, setStats] = useState({ totalUsers: 0, activeUsers: 0, totalResumes: 0 });
+    const [stats, setStats] = useState({ totalUsers: 0, activeUsers: 0, totalResumes: 0, templateDistribution: {}, providerDistribution: {} });
     const [usersData, setUsersData] = useState([]);
+    const [resumesData, setResumesData] = useState([]);
+    const [lastUpdated, setLastUpdated] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [filterTab, setFilterTab] = useState("all"); // "all", "active", "inactive"
 
@@ -64,8 +66,8 @@ const Admin = () => {
     }, [isLoggedIn, navigate]);
 
     // Fetch admin data from API
-    const fetchAdminData = async () => {
-        setIsLoading(true);
+    const fetchAdminData = async (silent = false) => {
+        if (!silent) setIsLoading(true);
         setError(null);
         try {
             const response = await fetch(`${API_BASE_URL}/api/admin/stats`, {
@@ -81,22 +83,42 @@ const Admin = () => {
             }
 
             const data = await response.json();
+            console.log('Admin data fetched:', data); // Debug log
             setStats(data.stats);
             setUsersData(data.users);
+            const resumes = data.resumes || [];
+            setResumesData(resumes);
+            if (resumes.length === 0) {
+                console.warn('No resumes returned from API');
+                toast.warn('No resumes data available');
+            }
+            setLastUpdated(new Date().toLocaleTimeString());
         } catch (err) {
             console.error("Failed to fetch admin data:", err);
             setError(err.message);
-            toast.error("Failed to load admin data: " + err.message);
+            if (!silent) toast.error("Failed to load admin data: " + err.message);
         } finally {
-            setIsLoading(false);
+            if (!silent) setIsLoading(false);
         }
     };
 
     useEffect(() => {
         if (isLoggedIn && !isVerifying) {
             fetchAdminData();
+
+            // Real-time polling every 30 seconds
+            const interval = setInterval(() => {
+                fetchAdminData(true);
+            }, 30000);
+
+            return () => clearInterval(interval);
         }
     }, [isLoggedIn, isVerifying]);
+
+    // Debug: log resumes data changes
+    useEffect(() => {
+        console.log('Resumes data length:', resumesData.length);
+    }, [resumesData]);
 
     const handleLogout = () => {
         localStorage.removeItem("isAdmin");
@@ -118,6 +140,15 @@ const Admin = () => {
             (filterTab === "inactive" && user.status !== "Active");
 
         return matchesSearch && matchesTab;
+    });
+
+    const filteredResumes = resumesData.filter(resume => {
+        const matchesSearch =
+            !searchQuery ||
+            (resume.title && resume.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (resume.userName && resume.userName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (resume.userEmail && resume.userEmail.toLowerCase().includes(searchQuery.toLowerCase()));
+        return matchesSearch;
     });
 
     const activeCount = usersData.filter(u => u.status === "Active").length;
@@ -195,8 +226,14 @@ const Admin = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
+                        {lastUpdated && (
+                            <div className="hidden lg:flex items-center gap-2 text-[10px] text-gray-400 bg-gray-50 dark:bg-white/5 px-2 py-1 rounded-full border border-gray-100 dark:border-white/10">
+                                <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                                <span>Synced {lastUpdated}</span>
+                            </div>
+                        )}
                         <button
-                            onClick={fetchAdminData}
+                            onClick={() => fetchAdminData()}
                             className="relative p-2 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors"
                             title="Refresh data"
                         >
@@ -216,57 +253,71 @@ const Admin = () => {
                 </header>
 
                 {/* Dashboard Scrollable Body */}
-                <div className="flex-1 overflow-auto p-8 space-y-8">
+                <div className="flex-1 overflow-auto p-4 md:p-8 space-y-8 no-scrollbar">
                     <div className="max-w-7xl mx-auto w-full space-y-8">
+                        {/* Section Header */}
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             className="flex flex-col md:flex-row md:items-end justify-between gap-4"
                         >
                             <div>
-                                <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">System Users</h2>
-                                <p className="text-gray-500 dark:text-gray-400 mt-1">Review and manage your application user base.</p>
+                                <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                                    {activeTab === "dash" ? "Overview Dashboard" :
+                                        activeTab === "users" ? "User Management" :
+                                            activeTab === "resumes" ? "Resume Records" :
+                                                activeTab === "billing" ? "Payment History" : "System Settings"}
+                                </h2>
+                                <p className="text-gray-500 dark:text-gray-400 mt-1">
+                                    {activeTab === "dash" ? "Real-time system health and usage metrics." :
+                                        activeTab === "users" ? "Manage and monitor application user base." :
+                                            activeTab === "resumes" ? "Track all resumes generated across the platform." :
+                                                activeTab === "billing" ? "Monitor subscription status and payments." : "Configure system parameters."}
+                                </p>
                             </div>
                             <div className="flex items-center gap-3">
+                                {activeTab === "dash" && (
+                                    <Badge variant="outline" className="bg-purple-500/5 border-purple-500/20 text-purple-600 dark:text-purple-400 px-3 py-1">
+                                        Live Updates Active
+                                    </Badge>
+                                )}
                                 <Button variant="outline" className="bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#222] text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111]">
                                     <Download className="w-4 h-4 mr-2" />
-                                    Export Data
-                                </Button>
-                                <Button className="bg-gradient-to-r from-purple-600 to-pink-600  text-white shadow-lg shadow-purple-600/20">
-                                    <Plus className="w-4 h-4 mr-2" />
-                                    New Admin
+                                    Export CSV
                                 </Button>
                             </div>
                         </motion.div>
 
-                        {/* Stats Cards */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <StatsCard
-                                title="Total Users"
-                                value={isLoading ? "..." : stats.totalUsers.toLocaleString()}
-                                icon={<Users className="text-blue-500" />}
-                                loading={isLoading}
-                            />
-                            <StatsCard
-                                title="Active Users"
-                                value={isLoading ? "..." : stats.activeUsers.toLocaleString()}
-                                subtitle="Last 30 days"
-                                icon={<TrendingUp className="text-emerald-500" />}
-                                loading={isLoading}
-                            />
-                            <StatsCard
-                                title="Total Resumes"
-                                value={isLoading ? "..." : stats.totalResumes.toLocaleString()}
-                                icon={<FileText className="text-purple-500" />}
-                                loading={isLoading}
-                            />
-                            <StatsCard
-                                title="Avg Resumes/User"
-                                value={isLoading ? "..." : (stats.totalUsers > 0 ? (stats.totalResumes / stats.totalUsers).toFixed(1) : "0")}
-                                icon={<CreditCard className="text-orange-500" />}
-                                loading={isLoading}
-                            />
-                        </div>
+                        {/* Stats Cards Dashboard (Visible on multiple tabs or specific ones) */}
+                        {activeTab === "dash" && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <StatsCard
+                                    title="Total Users"
+                                    value={isLoading ? "..." : stats.totalUsers.toLocaleString()}
+                                    icon={<Users className="text-blue-500" />}
+                                    loading={isLoading}
+                                />
+                                <StatsCard
+                                    title="Active Users"
+                                    value={isLoading ? "..." : stats.activeUsers.toLocaleString()}
+                                    subtitle="Last 30 days"
+                                    icon={<TrendingUp className="text-emerald-500" />}
+                                    loading={isLoading}
+                                />
+                                <StatsCard
+                                    title="Total Resumes"
+                                    value={isLoading ? "..." : stats.totalResumes.toLocaleString()}
+                                    icon={<FileText className="text-purple-500" />}
+                                    loading={isLoading}
+                                />
+                                <StatsCard
+                                    title="Avg Resumes/User"
+                                    value={isLoading ? "..." : (stats.totalUsers > 0 ? (stats.totalResumes / stats.totalUsers).toFixed(1) : "0")}
+                                    icon={<CreditCard className="text-orange-500" />}
+                                    loading={isLoading}
+                                />
+                            </div>
+                        )}
 
                         {/* Error State */}
                         {error && (
@@ -277,128 +328,287 @@ const Admin = () => {
                             >
                                 <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
                                 <div className="flex-1">
-                                    <p className="text-sm font-medium text-red-800 dark:text-red-400">Failed to load data</p>
+                                    <p className="text-sm font-medium text-red-800 dark:text-red-400">Connection Interrupted</p>
                                     <p className="text-xs text-red-600 dark:text-red-500 mt-0.5">{error}</p>
                                 </div>
-                                <Button size="sm" variant="outline" onClick={fetchAdminData} className="border-red-300 dark:border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/10">
+                                <Button size="sm" variant="outline" onClick={() => fetchAdminData()} className="border-red-300 dark:border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/10">
                                     <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
                                     Retry
                                 </Button>
                             </motion.div>
                         )}
 
-                        {/* Table Area */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-[#1a1a1a] rounded-xl overflow-hidden shadow-sm"
-                        >
-                            <div className="p-4 border-b border-gray-200 dark:border-[#1a1a1a] flex flex-wrap items-center justify-between gap-4 bg-gray-50 dark:bg-[#0d0d0d]">
-                                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                                    <TabButton
-                                        active={filterTab === "all"}
-                                        label="All Members"
-                                        count={usersData.length.toLocaleString()}
-                                        onClick={() => setFilterTab("all")}
-                                    />
-                                    <TabButton
-                                        active={filterTab === "active"}
-                                        label="Active"
-                                        count={activeCount.toLocaleString()}
-                                        onClick={() => setFilterTab("active")}
-                                    />
-                                    <TabButton
-                                        active={filterTab === "inactive"}
-                                        label="Inactive"
-                                        count={inactiveCount.toLocaleString()}
-                                        onClick={() => setFilterTab("inactive")}
-                                    />
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Button variant="outline" size="sm" className="bg-white dark:bg-[#111] border-gray-200 dark:border-[#222] text-xs h-9 text-gray-600 dark:text-gray-300">
-                                        <Filter className="w-3.5 h-3.5 mr-2" />
-                                        Apply Filters
-                                    </Button>
-                                </div>
-                            </div>
-
-                            {isLoading ? (
-                                <div className="flex items-center justify-center py-20">
-                                    <div className="text-center space-y-3">
-                                        <Loader2 className="w-8 h-8 text-purple-500 animate-spin mx-auto" />
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">Loading users from Firebase...</p>
-                                    </div>
-                                </div>
-                            ) : filteredUsers.length === 0 ? (
-                                <div className="flex items-center justify-center py-20">
-                                    <div className="text-center space-y-3">
-                                        <Users className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto" />
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                                            {searchQuery ? "No users match your search" : "No users found"}
-                                        </p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left border-collapse">
-                                        <thead>
-                                            <tr className="bg-gray-50 dark:bg-[#0d0d0d] text-gray-500 dark:text-gray-500 text-[11px] font-bold uppercase tracking-wider">
-                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Identifier</th>
-                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Providers</th>
-                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Created</th>
-                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Signed In</th>
-                                                <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">User UID</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-100 dark:divide-[#1a1a1a]">
-                                            {filteredUsers.map((user) => (
-                                                <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-[#111]/50 transition-colors group">
-                                                    <td className="px-6 py-4">
-                                                        <span className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[200px] inline-block" title={user.email}>{user.email}</span>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <Badge variant="outline" className={`
-                                                            ${user.provider === "google.com" ? "border-blue-500/50 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/5" :
-                                                                user.provider === "github.com" ? "border-gray-500/50 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-500/5" :
-                                                                    "border-purple-500/50 text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/5"}
-                                                            text-[10px] px-2 py-0.5 font-medium
-                                                        `}>
-                                                            {user.provider === "google.com" ? "Google" :
-                                                                user.provider === "github.com" ? "GitHub" : "Email"}
-                                                        </Badge>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">{user.joined}</span>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">{user.lastSignIn}</span>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className="text-gray-500 dark:text-gray-400 font-mono text-xs" title={user.id}>
-                                                            {user.id}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-
-                            <div className="p-4 border-t border-gray-200 dark:border-[#1a1a1a] flex items-center justify-between text-xs text-gray-500 bg-gray-50 dark:bg-[#0d0d0d]">
-                                <p>Showing {filteredUsers.length} of {usersData.length} total users</p>
-                                <div className="flex items-center gap-2">
-                                    <Button variant="outline" size="sm" className="h-8 bg-white dark:bg-[#111] border-gray-200 dark:border-[#222]">Previous</Button>
-                                    <Button variant="outline" size="sm" className="h-8 bg-white dark:bg-[#111] border-gray-200 dark:border-[#222]">Next</Button>
-                                </div>
-                            </div>
-                        </motion.div>
+                        {/* Tab Content Switching */}
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={activeTab}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                {activeTab === "dash" && renderDashboardOverview()}
+                                {activeTab === "users" && renderUsersTable()}
+                                {activeTab === "resumes" && renderResumesTable()}
+                                {(activeTab === "billing" || activeTab === "analytics" || activeTab === "config") && renderPlaceholder(`${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Module Coming Soon`)}
+                            </motion.div>
+                        </AnimatePresence>
                     </div>
                 </div>
             </main>
         </div>
     );
+
+    // --- Content Renderers ---
+
+    function renderDashboardOverview() {
+        return (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Registration Distribution */}
+                <Card className="bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#1a1a1a] overflow-hidden">
+                    <CardHeader className="border-b border-gray-50 dark:border-white/5 bg-gray-50/50 dark:bg-white/5">
+                        <CardTitle className="text-sm font-bold flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-purple-500" />
+                            Authentication Providers
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        <div className="space-y-4">
+                            {Object.entries(stats.providerDistribution || {}).map(([provider, count]) => {
+                                const percentage = stats.totalUsers > 0 ? (count / stats.totalUsers) * 100 : 0;
+                                return (
+                                    <div key={provider} className="space-y-2">
+                                        <div className="flex justify-between text-xs font-medium">
+                                            <span className="text-gray-600 dark:text-gray-400">{provider}</span>
+                                            <span className="text-gray-900 dark:text-white">{count} ({percentage.toFixed(0)}%)</span>
+                                        </div>
+                                        <div className="h-2 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${percentage}%` }}
+                                                transition={{ duration: 1, ease: "easeOut" }}
+                                                className={`h-full rounded-full ${provider === "Google" ? "bg-blue-500" :
+                                                    provider === "GitHub" ? "bg-gray-800 dark:bg-gray-400" : "bg-purple-500"
+                                                    }`}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Template Popularity */}
+                <Card className="bg-white dark:bg-[#0a0a0a] border-gray-200 dark:border-[#1a1a1a] overflow-hidden">
+                    <CardHeader className="border-b border-gray-50 dark:border-white/5 bg-gray-50/50 dark:bg-white/5">
+                        <CardTitle className="text-sm font-bold flex items-center gap-2">
+                            <LayoutDashboard className="w-4 h-4 text-blue-500" />
+                            Resume Template Usage
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        <div className="space-y-4">
+                            {Object.entries(stats.templateDistribution || {}).map(([template, count]) => {
+                                const percentage = stats.totalResumes > 0 ? (count / stats.totalResumes) * 100 : 0;
+                                return (
+                                    <div key={template} className="space-y-2">
+                                        <div className="flex justify-between text-xs font-medium uppercase tracking-tight">
+                                            <span className="text-gray-600 dark:text-gray-400">{template}</span>
+                                            <span className="text-gray-900 dark:text-white">{count} Resumes</span>
+                                        </div>
+                                        <div className="h-2 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${percentage}%` }}
+                                                transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+                                                className="h-full bg-blue-500 rounded-full"
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
+    function renderUsersTable() {
+        return (
+            <div className="bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-[#1a1a1a] rounded-xl overflow-hidden shadow-sm">
+                <div className="p-4 border-b border-gray-200 dark:border-[#1a1a1a] flex flex-wrap items-center justify-between gap-4 bg-gray-50 dark:bg-[#0d0d0d]">
+                    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                        <TabButton
+                            active={filterTab === "all"}
+                            label="All Members"
+                            count={usersData.length.toLocaleString()}
+                            onClick={() => setFilterTab("all")}
+                        />
+                        <TabButton
+                            active={filterTab === "active"}
+                            label="Active"
+                            count={activeCount.toLocaleString()}
+                            onClick={() => setFilterTab("active")}
+                        />
+                        <TabButton
+                            active={filterTab === "inactive"}
+                            label="Inactive"
+                            count={inactiveCount.toLocaleString()}
+                            onClick={() => setFilterTab("inactive")}
+                        />
+                    </div>
+                </div>
+
+                {isLoading ? renderLoadingState("Querying Firebase Auth...") : filteredUsers.length === 0 ? renderEmptyState("No users found") : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-gray-50 dark:bg-[#0d0d0d] text-gray-500 dark:text-gray-500 text-[11px] font-bold uppercase tracking-wider">
+                                    <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Identifier</th>
+                                    <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Providers</th>
+                                    <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Created</th>
+                                    <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Signed In</th>
+                                    <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">User UID</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 dark:divide-[#1a1a1a]">
+                                {filteredUsers.map((user) => (
+                                    <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-[#111]/50 transition-colors group">
+                                        <td className="px-6 py-4">
+                                            <span className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[200px] inline-block" title={user.email}>{user.email}</span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <Badge variant="outline" className={`
+                                                ${user.provider === "google.com" ? "border-blue-500/50 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/5" :
+                                                    user.provider === "github.com" ? "border-gray-500/50 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-500/5" :
+                                                        "border-purple-500/50 text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/5"}
+                                                text-[10px] px-2 py-0.5 font-medium
+                                            `}>
+                                                {user.provider === "google.com" ? "Google" :
+                                                    user.provider === "github.com" ? "GitHub" : "Email"}
+                                            </Badge>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">{user.joined}</span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">{user.lastSignIn}</span>
+                                        </td>
+                                        <td className="px-6 py-4 font-mono text-[10px] text-gray-400">{user.id}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    function renderResumesTable() {
+        return (
+            <div className="bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-[#1a1a1a] rounded-xl overflow-hidden shadow-sm">
+                <div className="p-4 border-b border-gray-200 dark:border-[#1a1a1a] space-y-4 bg-gray-50 dark:bg-[#0d0d0d]">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-none px-2 py-0.5 text-xs font-bold">
+                                {resumesData.length} TOTAL
+                            </Badge>
+                        </div>
+                    </div>
+                </div>
+
+                {isLoading ? renderLoadingState("Fetching Firestore documents...") : filteredResumes.length === 0 ? renderEmptyState("No resumes found") : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-gray-50 dark:bg-[#0d0d0d] text-gray-500 dark:text-gray-500 text-[11px] font-bold uppercase tracking-wider">
+                                    <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Title / Resume ID</th>
+                                    <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Owner</th>
+                                    <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Template</th>
+                                    <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Sections</th>
+                                    <th className="px-6 py-4 border-b border-gray-200 dark:border-[#1a1a1a]">Last Updated</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 dark:divide-[#1a1a1a]">
+                                {filteredResumes.map((resume) => (
+                                    <tr key={resume.id} className="hover:bg-gray-50 dark:hover:bg-[#111]/50 transition-colors group text-xs">
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col">
+                                                <span className="font-bold text-gray-900 dark:text-white mb-0.5">{resume.title || "Untitled Resume"}</span>
+                                                <span className="text-[10px] text-gray-500 font-mono">{resume.id}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col">
+                                                <span className="font-medium text-gray-700 dark:text-gray-300">{resume.userName || "Unknown User"}</span>
+                                                <span className="text-[10px] text-gray-500">{resume.userEmail || "N/A"}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <Badge variant="outline" className="text-[10px] capitalize border-gray-200 dark:border-gray-800">
+                                                {resume.template || "default"}
+                                            </Badge>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex gap-1">
+                                                {resume.sections?.hasExperience && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" title="Experience" />}
+                                                {resume.sections?.hasEducation && <div className="w-1.5 h-1.5 rounded-full bg-blue-500" title="Education" />}
+                                                {resume.sections?.hasSkills && <div className="w-1.5 h-1.5 rounded-full bg-purple-500" title="Skills" />}
+                                                {resume.sections?.hasSummary && <div className="w-1.5 h-1.5 rounded-full bg-orange-500" title="Summary" />}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-500">{resume.updatedAt}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    function renderPlaceholder(message) {
+        return (
+            <div className="bg-white dark:bg-[#0a0a0a] border border-dashed border-gray-300 dark:border-gray-800 rounded-2xl p-20 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center mx-auto mb-6">
+                    <Loader2 className="w-8 h-8 text-gray-300 dark:text-gray-600 animate-spin" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{message}</h3>
+                <p className="text-gray-500 mt-2 max-w-sm mx-auto">We're currently building this module to give you deeper insights and control over your platform.</p>
+                <Button variant="outline" className="mt-8 border-gray-200 dark:border-gray-800" onClick={() => setActiveTab("dash")}>Back to Dashboard</Button>
+            </div>
+        );
+    }
+
+    function renderLoadingState(message) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <div className="text-center space-y-3">
+                    <Loader2 className="w-8 h-8 text-purple-500 animate-spin mx-auto" />
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
+                </div>
+            </div>
+        );
+    }
+
+    function renderEmptyState(message) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <div className="text-center space-y-3">
+                    <Search className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto" />
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
+                </div>
+            </div>
+        );
+    }
 };
+
+
+
 
 const SidebarItem = ({ icon, label, active = false, onClick, danger = false, collapsed = false }) => (
     <button
