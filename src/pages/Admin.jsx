@@ -128,26 +128,30 @@ const Admin = () => {
 
     // Filter users based on search and tab
     const filteredUsers = usersData.filter(user => {
+        const query = searchQuery ? searchQuery.toLowerCase() : "";
         const matchesSearch =
             !searchQuery ||
-            user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.id.toLowerCase().includes(searchQuery.toLowerCase());
+            (user.name && user.name.toLowerCase().includes(query)) ||
+            (user.email && user.email.toLowerCase().includes(query)) ||
+            (user.id && user.id.toLowerCase().includes(query));
 
         const matchesTab =
-            filterTab === "all" ||
-            (filterTab === "active" && user.status === "Active") ||
-            (filterTab === "inactive" && user.status !== "Active");
+            searchQuery ? true : // ignore tab filter when searching globally
+                (filterTab === "all" ||
+                    (filterTab === "active" && user.status === "Active") ||
+                    (filterTab === "inactive" && user.status !== "Active"));
 
         return matchesSearch && matchesTab;
     });
 
     const filteredResumes = resumesData.filter(resume => {
+        const query = searchQuery ? searchQuery.toLowerCase() : "";
         const matchesSearch =
             !searchQuery ||
-            (resume.title && resume.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (resume.userName && resume.userName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (resume.userEmail && resume.userEmail.toLowerCase().includes(searchQuery.toLowerCase()));
+            (resume.title && resume.title.toLowerCase().includes(query)) ||
+            (resume.userName && resume.userName.toLowerCase().includes(query)) ||
+            (resume.userEmail && resume.userEmail.toLowerCase().includes(query)) ||
+            (resume.id && resume.id.toLowerCase().includes(query));
         return matchesSearch;
     });
 
@@ -356,16 +360,20 @@ const Admin = () => {
                         {/* Tab Content Switching */}
                         <AnimatePresence mode="wait">
                             <motion.div
-                                key={activeTab}
+                                key={searchQuery ? "search" : activeTab}
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
                                 transition={{ duration: 0.2 }}
                             >
-                                {activeTab === "dash" && renderDashboardOverview()}
-                                {activeTab === "users" && renderUsersTable()}
-                                {activeTab === "resumes" && renderResumesTable()}
-                                {(activeTab === "billing" || activeTab === "analytics" || activeTab === "config") && renderPlaceholder(`${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Module Coming Soon`)}
+                                {searchQuery ? renderGlobalSearchResults() : (
+                                    <>
+                                        {activeTab === "dash" && renderDashboardOverview()}
+                                        {activeTab === "users" && renderUsersTable()}
+                                        {activeTab === "resumes" && renderResumesTable()}
+                                        {(activeTab === "billing" || activeTab === "analytics" || activeTab === "config" || activeTab === "settings") && renderPlaceholder(`${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Module Coming Soon`)}
+                                    </>
+                                )}
                             </motion.div>
                         </AnimatePresence>
                     </div>
@@ -450,31 +458,61 @@ const Admin = () => {
         );
     }
 
-    function renderUsersTable() {
+    function renderGlobalSearchResults() {
+        return (
+            <div className="space-y-8">
+                <div className="mb-2">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Search className="w-5 h-5 text-purple-500" />
+                        Search Results for "{searchQuery}"
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">Found {filteredUsers.length} users and {filteredResumes.length} resumes</p>
+                </div>
+
+                <div className="space-y-4">
+                    <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center justify-between">
+                        Matching Users
+                    </h4>
+                    {renderUsersTable(true)}
+                </div>
+
+                <div className="space-y-4 mt-8">
+                    <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center justify-between">
+                        Matching Resumes
+                    </h4>
+                    {renderResumesTable(true)}
+                </div>
+            </div>
+        );
+    }
+
+    function renderUsersTable(hideHeader = false) {
         return (
             <div className="bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-[#1a1a1a] rounded-xl overflow-hidden shadow-sm">
-                <div className="p-4 border-b border-gray-200 dark:border-[#1a1a1a] flex flex-wrap items-center justify-between gap-4 bg-gray-50 dark:bg-[#0d0d0d]">
-                    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                        <TabButton
-                            active={filterTab === "all"}
-                            label="All Members"
-                            count={usersData.length.toLocaleString()}
-                            onClick={() => setFilterTab("all")}
-                        />
-                        <TabButton
-                            active={filterTab === "active"}
-                            label="Active"
-                            count={activeCount.toLocaleString()}
-                            onClick={() => setFilterTab("active")}
-                        />
-                        <TabButton
-                            active={filterTab === "inactive"}
-                            label="Inactive"
-                            count={inactiveCount.toLocaleString()}
-                            onClick={() => setFilterTab("inactive")}
-                        />
+                {!hideHeader && (
+                    <div className="p-4 border-b border-gray-200 dark:border-[#1a1a1a] flex flex-wrap items-center justify-between gap-4 bg-gray-50 dark:bg-[#0d0d0d]">
+                        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                            <TabButton
+                                active={filterTab === "all"}
+                                label="All Members"
+                                count={usersData.length.toLocaleString()}
+                                onClick={() => setFilterTab("all")}
+                            />
+                            <TabButton
+                                active={filterTab === "active"}
+                                label="Active"
+                                count={activeCount.toLocaleString()}
+                                onClick={() => setFilterTab("active")}
+                            />
+                            <TabButton
+                                active={filterTab === "inactive"}
+                                label="Inactive"
+                                count={inactiveCount.toLocaleString()}
+                                onClick={() => setFilterTab("inactive")}
+                            />
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {isLoading ? renderLoadingState("Querying Firebase Auth...") : filteredUsers.length === 0 ? renderEmptyState("No users found") : (
                     <div className="overflow-x-auto">
@@ -522,18 +560,20 @@ const Admin = () => {
         );
     }
 
-    function renderResumesTable() {
+    function renderResumesTable(hideHeader = false) {
         return (
             <div className="bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-[#1a1a1a] rounded-xl overflow-hidden shadow-sm">
-                <div className="p-4 border-b border-gray-200 dark:border-[#1a1a1a] space-y-4 bg-gray-50 dark:bg-[#0d0d0d]">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-none px-2 py-0.5 text-xs font-bold">
-                                {resumesData.length} TOTAL
-                            </Badge>
+                {!hideHeader && (
+                    <div className="p-4 border-b border-gray-200 dark:border-[#1a1a1a] space-y-4 bg-gray-50 dark:bg-[#0d0d0d]">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-none px-2 py-0.5 text-xs font-bold">
+                                    {resumesData.length} TOTAL
+                                </Badge>
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 {isLoading ? renderLoadingState("Fetching Firestore documents...") : filteredResumes.length === 0 ? renderEmptyState("No resumes found") : (
                     <div className="overflow-x-auto">
