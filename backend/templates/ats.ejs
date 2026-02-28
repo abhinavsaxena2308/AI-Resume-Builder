@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume - ATS-Friendly</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            color: #000;
+            line-height: 1.5;
+            margin: 0;
+            padding: 40px;
+            background-color: #fff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 1px solid #000;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .name {
+            font-size: 28px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .contact {
+            font-size: 14px;
+        }
+        .contact-item {
+            display: inline-block;
+        }
+        .contact-separator {
+            margin: 0 8px;
+        }
+        .section {
+            margin-bottom: 15px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 1px solid #000;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+        }
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 2px;
+        }
+        .item-title {
+            font-size: 15px;
+            font-weight: bold;
+        }
+        .item-subtitle {
+            font-size: 14px;
+            font-style: italic;
+            margin-bottom: 5px;
+        }
+        .item-date {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .item-description {
+            font-size: 14px;
+            white-space: pre-line;
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        .summary-text {
+            font-size: 14px;
+            text-align: justify;
+        }
+        .skills-text {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="name"><%= resumeData.personalInfo?.fullName || "YOUR NAME" %></div>
+            <div class="contact">
+                <% 
+                   const info = resumeData.personalInfo || {};
+                   const contactItems = [info.email, info.phone, info.location, info.linkedin, info.github].filter(Boolean);
+                %>
+                <% contactItems.forEach(function(item, index) { %>
+                    <span class="contact-item"><%= item %></span>
+                    <% if (index < contactItems.length - 1) { %><span class="contact-separator">|</span><% } %>
+                <% }); %>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <% if (resumeData.summary) { %>
+            <div class="section">
+                <div class="section-title">Professional Summary</div>
+                <div class="summary-text"><%= resumeData.summary %></div>
+            </div>
+        <% } %>
+
+        <!-- Experience -->
+        <% if (resumeData.experience && resumeData.experience.length > 0) { %>
+            <div class="section">
+                <div class="section-title">Professional Experience</div>
+                <% resumeData.experience.forEach(function(exp) { %>
+                    <div class="item-row">
+                        <div class="item-title"><%= exp.title %></div>
+                        <div class="item-date"><%= exp.duration || "" %></div>
+                    </div>
+                    <div class="item-subtitle"><%= exp.company || "" %></div>
+                    <div class="item-description"><%= exp.description || "" %></div>
+                <% }); %>
+            </div>
+        <% } %>
+
+        <!-- Education -->
+        <% if (resumeData.education && resumeData.education.length > 0) { %>
+            <div class="section">
+                <div class="section-title">Education</div>
+                <% resumeData.education.forEach(function(edu) { %>
+                    <div class="item-row">
+                        <div>
+                            <span class="item-title"><%= edu.degree %></span>
+                        </div>
+                        <div class="item-date"><%= edu.year || "" %></div>
+                    </div>
+                    <div class="item-subtitle"><%= edu.institution || "" %></div>
+                <% }); %>
+            </div>
+        <% } %>
+
+        <!-- Projects -->
+        <% if (resumeData.projects && resumeData.projects.length > 0) { %>
+            <div class="section">
+                <div class="section-title">Projects</div>
+                <% resumeData.projects.forEach(function(project) { %>
+                    <div class="item-row">
+                        <div class="item-title">
+                            <%= project.name %> 
+                            <% if (project.technologies) { %> | <%= project.technologies %><% } %>
+                        </div>
+                        <div class="item-date"><%= project.date || "" %></div>
+                    </div>
+                    <div class="item-description"><%= project.description || "" %></div>
+                <% }); %>
+            </div>
+        <% } %>
+
+        <!-- Certifications -->
+        <% if (resumeData.certifications && resumeData.certifications.length > 0) { %>
+            <div class="section">
+                <div class="section-title">Certifications</div>
+                <% resumeData.certifications.forEach(function(cert) { %>
+                    <div class="item-row" style="margin-bottom: 8px;">
+                        <div>
+                            <span class="item-title"><%= cert.name %></span>
+                            <% if (cert.issuer) { %><span class="item-subtitle" style="margin-left: 8px;">(<%= cert.issuer %>)</span><% } %>
+                        </div>
+                        <div class="item-date"><%= cert.date || "" %></div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
+
+        <!-- Skills -->
+        <% 
+            let flattenedSkills = [];
+            if (resumeData.skills) {
+                if (Array.isArray(resumeData.skills)) {
+                    flattenedSkills = resumeData.skills;
+                } else {
+                    Object.values(resumeData.skills).forEach(arr => {
+                        if (Array.isArray(arr)) flattenedSkills = flattenedSkills.concat(arr);
+                    });
+                }
+            }
+        %>
+        <% if (flattenedSkills && flattenedSkills.length > 0) { %>
+            <div class="section">
+                <div class="section-title">Skills</div>
+                <div class="skills-text">
+                    <%= flattenedSkills.join(", ") %>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

@@ -147,7 +147,7 @@ app.post("/api/generate-pdf", async (req, res) => {
     const { resumeData, template = "modern" } = req.body;
 
     // Validate template
-    const validTemplates = ["modern", "classic", "creative"];
+    const validTemplates = ["modern", "classic", "ats"];
     if (!validTemplates.includes(template)) {
       return res.status(400).json({ error: "Invalid template specified" });
     }
