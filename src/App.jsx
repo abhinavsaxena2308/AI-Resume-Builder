@@ -6,8 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ThemeToggle from "./components/ThemeToggle";
-import Footer from "@/components/Footer";
-import BackgroundEffects from "@/components/BackgroundEffects";
 import ScrollToTop from "@/components/ScrollToTop";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -27,8 +25,8 @@ const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const RouteLoading = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black">
-    <div className="w-10 h-10 border-4 border-gray-300 border-t-purple-500 rounded-full animate-spin" />
+  <div className="min-h-screen flex items-center justify-center bg-[#09090b]">
+    <div className="w-10 h-10 border-4 border-zinc-800 border-t-orange-500 rounded-full animate-spin" />
   </div>
 );
 
@@ -47,15 +45,10 @@ const PageTransition = ({ children }) => (
 
 const AppRoutes = () => {
   const location = useLocation();
-  const knownRoutes = ["/", "/auth", "/dashboard", "/examples", "/career-tips", "/resume-tips", "/interview-tips", "/test-ai", "/about-us", "/privacy-policy", "/terms-of-service", "/admin"];
-  const isBuilder = location.pathname.startsWith("/builder/");
-  const isKnownRoute = knownRoutes.includes(location.pathname) || isBuilder;
-  const hideFooter = location.pathname.startsWith("/auth") || location.pathname.startsWith("/admin") || isBuilder || !isKnownRoute;
 
   return (
     <>
       <ScrollToTop />
-      <BackgroundEffects />
       <Suspense fallback={<RouteLoading />}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
@@ -76,7 +69,6 @@ const AppRoutes = () => {
           </Routes>
         </AnimatePresence>
       </Suspense>
-      {!hideFooter && <Footer />}
     </>
   );
 };

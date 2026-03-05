@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { auth, handleAuthError } from "@/integrations/firebase/client";
 import { signOut } from "firebase/auth";
-import { FileText, User, Menu, X, ChevronDown } from "lucide-react";
+import { FileText, User, Menu, X, ChevronDown, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = ({ user }) => {
@@ -12,7 +12,6 @@ const Navbar = ({ user }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
 
-  // Handle scroll effect for dynamic navbar styling
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -37,198 +36,215 @@ const Navbar = ({ user }) => {
     setActiveDropdown(null);
   };
 
-  // NavItem component for reusability and consistent hover effects
-  const NavItem = ({ label, hasDropdown, onClick, onMouseEnter, onMouseLeave, isActive }) => (
+  const NavLink = ({ label, hasDropdown, onClick, onMouseEnter, onMouseLeave, isActive }) => (
     <button
       onClick={onClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className="relative group px-4 py-2 text-sm font-medium flex items-center gap-1 text-gray-700 dark:text-gray-200"
       aria-expanded={isActive}
+      className="relative group flex items-center gap-1 px-3 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors duration-200"
     >
-      <span className="relative z-10 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
-        {label}
-      </span>
+      {label}
       {hasDropdown && (
-        <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-purple-500 transition-transform duration-300 group-hover:rotate-180" />
+        <ChevronDown
+          className={`w-3.5 h-3.5 text-zinc-500 transition-transform duration-200 ${isActive ? "rotate-180 text-gold-400" : "group-hover:text-zinc-300"}`}
+        />
       )}
-      {/* Dynamic Hover Underline Effect */}
-      <span className="absolute left-4 right-4 bottom-0 h-[2px] bg-gradient-to-r from-purple-500 to-pink-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center rounded-full" />
+      {/* animated underline */}
+      <span className="absolute bottom-0 left-3 right-3 h-px bg-gold-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left rounded-full opacity-70" />
     </button>
   );
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b ${isScrolled
-        ? "bg-white/80 dark:bg-black/80 backdrop-blur-md border-gray-200/50 dark:border-gray-800/50 shadow-sm py-2"
-        : "bg-white dark:bg-black border-transparent py-4"
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled
+        ? "bg-zinc-950/90 backdrop-blur-md border-b border-white/[0.07] shadow-2xl shadow-black/30 py-2"
+        : "bg-transparent border-b border-transparent py-4"
         }`}
     >
-      <div className="container mx-auto px-4 md:px-8 flex justify-between items-center">
-        {/* Logo Section */}
+      <div className="max-w-6xl mx-auto px-5 md:px-8 flex justify-between items-center">
+
+        {/* Logo */}
         <div
-          className="flex items-center gap-2 cursor-pointer group"
+          className="flex items-center gap-2.5 cursor-pointer group"
           onClick={() => navigate("/")}
         >
-          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 flex items-center justify-center p-1.5 transition-transform duration-300 group-hover:scale-110 shadow-sm border border-purple-200 dark:border-purple-800">
-            <FileText className="w-full h-full text-purple-600 dark:text-purple-400" />
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center shadow-lg shadow-gold-500/25 group-hover:shadow-gold-500/40 transition-shadow duration-300">
+            <FileText className="w-4 h-4 text-white" />
           </div>
-          <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent group-hover:from-purple-500 group-hover:to-pink-500 transition-all duration-300">
-            AI Resume
+          <span className="text-lg font-bold text-white tracking-tight">
+            AI Resume<span className="text-gold-500">.</span>
           </span>
         </div>
 
-        {/* Desktop Navigation Center */}
-        <nav className="hidden md:flex flex-1 items-center justify-center space-x-2">
-          <NavItem
-            label="Home"
-            onClick={() => handleNavClick("/")}
-          />
-          <NavItem
-            label="Templates"
-            onClick={() => handleNavClick("/examples")}
-          />
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-1">
+          <NavLink label="Home" onClick={() => handleNavClick("/")} />
+          <NavLink label="Templates" onClick={() => handleNavClick("/examples")} />
 
+          {/* Tips dropdown */}
           <div
             className="relative"
             onMouseEnter={() => setActiveDropdown("tips")}
             onMouseLeave={() => setActiveDropdown(null)}
           >
-            <NavItem
+            <NavLink
               label="Tips"
-              hasDropdown={true}
+              hasDropdown
               isActive={activeDropdown === "tips"}
             />
-            {/* Dropdown for Tips */}
             <AnimatePresence>
               {activeDropdown === "tips" && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white dark:bg-gray-900 rounded-xl shadow-xl shadow-purple-500/10 border border-gray-100 dark:border-gray-800 py-2 overflow-hidden"
+                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-zinc-900 rounded-xl border border-white/[0.08] shadow-2xl shadow-black/40 py-1.5 overflow-hidden"
                 >
-                  <button
-                    onClick={() => handleNavClick("/career-tips")}
-                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-                  >
-                    Career Tips
-                  </button>
-                  <button
-                    onClick={() => handleNavClick("/interview-tips")}
-                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-                  >
-                    Interview Tips
-                  </button>
-                  <button
-                    onClick={() => handleNavClick("/resume-tips")}
-                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-                  >
-                    Resume Tips
-                  </button>
+                  {[
+                    { label: "Career Tips", path: "/career-tips" },
+                    { label: "Interview Tips", path: "/interview-tips" },
+                    { label: "Resume Tips", path: "/resume-tips" },
+                  ].map((item) => (
+                    <button
+                      key={item.path}
+                      onClick={() => handleNavClick(item.path)}
+                      className="w-full text-left px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:bg-gold-500/10 transition-colors flex items-center gap-2 group"
+                    >
+                      <span className="w-1 h-1 rounded-full bg-gold-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      {item.label}
+                    </button>
+                  ))}
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          <NavItem
-            label="About Us"
-            onClick={() => handleNavClick("/about-us")}
-          />
+          <NavLink label="About" onClick={() => handleNavClick("/about-us")} />
         </nav>
 
-        {/* Desktop Right Actions (Auth/Dashboard) */}
-        <div className="hidden md:flex items-center gap-4">
+        {/* Desktop Right Actions */}
+        <div className="hidden md:flex items-center gap-3">
           {user ? (
             <div className="flex items-center gap-3">
               {location.pathname !== "/dashboard" && (
                 <button
                   onClick={() => navigate("/dashboard")}
-                  className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                  className="text-sm text-zinc-400 hover:text-white transition-colors font-medium"
                 >
                   Dashboard
                 </button>
               )}
-              <div className="flex items-center gap-2 pl-4 border-l border-gray-200 dark:border-gray-700">
-                <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center cursor-pointer hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors">
-                  <User className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <div className="w-px h-5 bg-white/10" />
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-gold-500/15 border border-gold-500/20 flex items-center justify-center">
+                  <User className="w-4 h-4 text-gold-400" />
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-red-500 transition-colors"
+                  className="text-sm text-zinc-500 hover:text-red-400 transition-colors font-medium"
                 >
                   Logout
                 </button>
               </div>
             </div>
           ) : (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => navigate("/auth")}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-medium shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300"
-            >
-              <User className="w-4 h-4" />
-              <span>Login / Sign Up</span>
-            </motion.button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate("/auth")}
+                className="btn-invertase-glow-secondary !px-4 !py-2 !text-xs"
+              >
+                Login
+              </button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate("/auth")}
+                className="btn-invertase-glow !px-4 !py-2 !text-xs"
+              >
+                <span>Get Started</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </motion.button>
+            </div>
           )}
         </div>
 
-        {/* Mobile Menu Toggle */}
+        {/* Mobile Toggle */}
         <button
-          className="md:hidden p-2 text-gray-600 dark:text-gray-300"
+          className="md:hidden p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
-          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 overflow-hidden shadow-xl"
+            transition={{ duration: 0.25 }}
+            className="md:hidden bg-zinc-950 border-t border-white/[0.07] overflow-hidden"
           >
-            <div className="px-4 py-6 flex flex-col gap-4">
-              <button onClick={() => handleNavClick("/")} className="text-left text-lg font-medium text-gray-800 dark:text-gray-200">
-                Home
-              </button>
-              <button onClick={() => handleNavClick("/examples")} className="text-left text-lg font-medium text-gray-800 dark:text-gray-200">
-                Templates
-              </button>
-              <div className="flex flex-col gap-2 pl-4 border-l-2 border-purple-200 dark:border-purple-900/50">
-                <span className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold">Tips</span>
-                <button onClick={() => handleNavClick("/career-tips")} className="text-left text-gray-700 dark:text-gray-300">Career Tips</button>
-                <button onClick={() => handleNavClick("/interview-tips")} className="text-left text-gray-700 dark:text-gray-300">Interview Tips</button>
-                <button onClick={() => handleNavClick("/resume-tips")} className="text-left text-gray-700 dark:text-gray-300">Resume Tips</button>
-              </div>
-              <button onClick={() => handleNavClick("/about-us")} className="text-left text-lg font-medium text-gray-800 dark:text-gray-200">
-                About Us
-              </button>
+            <div className="px-5 py-5 flex flex-col gap-1">
+              {[
+                { label: "Home", path: "/" },
+                { label: "Templates", path: "/examples" },
+                { label: "About", path: "/about-us" },
+              ].map((item) => (
+                <button
+                  key={item.path}
+                  onClick={() => handleNavClick(item.path)}
+                  className="text-left py-3 px-3 text-zinc-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors font-medium text-base"
+                >
+                  {item.label}
+                </button>
+              ))}
 
-              <div className="h-px w-full bg-gray-200 dark:bg-gray-800 my-2" />
+              <div className="pl-3 py-1 border-l border-gold-500/30 ml-3 flex flex-col gap-1">
+                <span className="text-xs text-gold-500 uppercase tracking-widest font-semibold mb-1">Tips</span>
+                {[
+                  { label: "Career Tips", path: "/career-tips" },
+                  { label: "Interview Tips", path: "/interview-tips" },
+                  { label: "Resume Tips", path: "/resume-tips" },
+                ].map((item) => (
+                  <button
+                    key={item.path}
+                    onClick={() => handleNavClick(item.path)}
+                    className="text-left py-2 text-zinc-400 hover:text-white transition-colors text-sm"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="h-px bg-white/[0.07] my-3" />
 
               {user ? (
                 <>
-                  <button onClick={() => handleNavClick("/dashboard")} className="text-left text-lg font-medium text-purple-600 dark:text-purple-400">
+                  <button
+                    onClick={() => handleNavClick("/dashboard")}
+                    className="btn-invertase-glow !w-full !justify-center py-3 mb-2"
+                  >
                     Dashboard
                   </button>
-                  <button onClick={handleLogout} className="text-left text-lg font-medium text-red-500">
+                  <button
+                    onClick={handleLogout}
+                    className="btn-invertase-glow-secondary !w-full !justify-center py-3"
+                  >
                     Logout
                   </button>
                 </>
               ) : (
                 <button
                   onClick={() => handleNavClick("/auth")}
-                  className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium"
+                  className="btn-invertase-glow !w-full !justify-center py-3"
                 >
-                  <User className="w-5 h-5" />
-                  <span>Login / Sign Up</span>
+                  <span>Get Started</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               )}
             </div>

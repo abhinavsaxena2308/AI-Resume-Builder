@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import heroLight from "@/assets/hero-image-light.png";
-import heroDark from "@/assets/hero-image-dark.png";
-import premiumOfferImg from "@/assets/premium.png";
 import { auth, getCurrentUser, onAuthStateChange } from "@/integrations/firebase/client";
 import { signOut } from "firebase/auth";
 import { useTheme } from "@/contexts/ThemeContext";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import {
   FileText,
   Sparkles,
@@ -21,60 +19,65 @@ import {
   Award,
   Briefcase,
   Gift,
-  X
+  X,
+  ChevronRight,
+  Brain,
+  Shield,
+  Clock,
+  TrendingUp,
+  BookOpen,
+  MessageSquare
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import premiumOfferImg from "@/assets/premium.png";
+import bgImage from "@/assets/bg.png";
+
+/* ── Reusable animation variants ── */
+const fadeUp = {
+  initial: { opacity: 0, y: 28 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+};
+
+const stagger = (delay = 0) => ({
+  initial: { opacity: 0, y: 24 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] },
+});
 
 const Index = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const [user, setUser] = useState(null);
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      navigate("/");
-    } catch (err) {
-      console.error("Logout error:", err);
-    }
-  };
-
-  useEffect(() => {
-    getCurrentUser().then((user) => {
-      if (user) setUser(user);
-    });
-
-    const unsubscribe = onAuthStateChange((user) => {
-      if (user) setUser(user);
-      else setUser(null);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
   useEffect(() => {
-    const hasSeenModal = sessionStorage.getItem("hasSeenPremiumModal");
-    if (!hasSeenModal) {
-      const timer = setTimeout(() => {
+    getCurrentUser().then((u) => { if (u) setUser(u); });
+    const unsub = onAuthStateChange((u) => setUser(u || null));
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    const seen = sessionStorage.getItem("hasSeenPremiumModal");
+    if (!seen) {
+      const t = setTimeout(() => {
         setIsPremiumModalOpen(true);
         sessionStorage.setItem("hasSeenPremiumModal", "true");
       }, 1500);
-      return () => clearTimeout(timer);
+      return () => clearTimeout(t);
     }
   }, []);
 
   const handleGetPremium = () => {
     setIsSuccess(true);
-    setTimeout(() => {
-      setIsPremiumModalOpen(false);
-      // Reset after close animation if needed
-    }, 2000);
+    setTimeout(() => setIsPremiumModalOpen(false), 2000);
   };
 
-  const PremiumOfferModal = () => (
+  /* ── Premium Modal ── */
+  const PremiumModal = () => (
     <AnimatePresence>
       {isPremiumModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -83,59 +86,49 @@ const Index = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => !isSuccess && setIsPremiumModalOpen(false)}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
           />
           <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="relative w-full max-w-lg bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-2xl border border-purple-500/30 overflow-hidden"
+            className="relative w-full max-w-lg bg-zinc-900 rounded-2xl p-8 shadow-2xl border border-white/[0.08] overflow-hidden"
           >
-            {/* Background Glow */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 blur-3xl -translate-y-1/2 translate-x-1/2" />
-
+            <div className="absolute top-0 right-0 w-48 h-48 bg-gold-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
             {!isSuccess ? (
               <>
                 <button
                   onClick={() => setIsPremiumModalOpen(false)}
-                  className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                  className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-lg transition-colors text-zinc-400 hover:text-white"
                 >
                   <X className="w-5 h-5" />
                 </button>
-
                 <div className="text-center">
-                  <div className="relative mb-6 group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-xl group-hover:blur-2xl transition-all rounded-3xl" />
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 bg-gradient-to-r from-gold-500/20 to-gold-300/20 blur-xl rounded-3xl" />
                     <img
                       src={premiumOfferImg}
                       alt="Premium Offer"
-                      className="relative w-full h-48 object-cover rounded-2xl shadow-lg border border-white/10"
+                      className="relative w-full h-48 object-cover rounded-xl border border-white/10"
                     />
-                    <div className="absolute -bottom-4 right-4 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-purple-500/20">
-                      <Gift className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                    <div className="absolute -bottom-4 right-4 p-3 bg-zinc-800 rounded-xl shadow-xl border border-white/10">
+                      <Gift className="w-6 h-6 text-gold-400" />
                     </div>
                   </div>
-
-                  <h2 className="text-3xl font-extrabold mb-3 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    Premium Gift!
-                  </h2>
-
-                  <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg leading-relaxed">
-                    Unlock our most advanced AI features and ATS-premium layouts for <span className="font-bold text-green-500 underline decoration-green-500/30">FREE</span> for your first 3 resumes!
+                  <h2 className="text-3xl font-extrabold mb-3 text-gold-gradient">Premium Gift!</h2>
+                  <p className="text-zinc-400 mb-6 text-base leading-relaxed">
+                    Unlock our most advanced AI features and ATS-premium layouts for{" "}
+                    <span className="font-bold text-green-400">FREE</span> for your first 3 resumes!
                   </p>
-
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleGetPremium}
-                    className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl font-bold text-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all"
+                    className="btn-invertase-glow w-full !py-4 !text-lg !rounded-xl"
                   >
-                    Claim My Premium Access
+                    <span>Claim My Premium Access</span>
                   </motion.button>
-
-                  <p className="mt-4 text-xs text-gray-400">
-                    No credit card required • Limited time offer
-                  </p>
+                  <p className="mt-4 text-[10px] text-zinc-600 uppercase tracking-widest font-bold">No credit card required • Limited time offer</p>
                 </div>
               </>
             ) : (
@@ -144,11 +137,11 @@ const Index = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 className="text-center py-10"
               >
-                <div className="w-20 h-20 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle2 className="w-10 h-10 text-green-600 dark:text-green-400" />
+                <div className="w-20 h-20 bg-green-500/15 border border-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <CheckCircle2 className="w-10 h-10 text-green-400" />
                 </div>
-                <h3 className="text-2xl font-bold mb-2">Successfully Activated!</h3>
-                <p className="text-gray-500 dark:text-gray-400">Your account has been upgraded to Premium.</p>
+                <h3 className="text-2xl font-bold mb-2 text-white">Successfully Activated!</h3>
+                <p className="text-zinc-400">Your account has been upgraded to Premium.</p>
               </motion.div>
             )}
           </motion.div>
@@ -157,679 +150,511 @@ const Index = () => {
     </AnimatePresence>
   );
 
-  const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5 }
-  };
-
-  const staggerContainer = {
-    animate: {
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50 dark:from-gray-950 dark:via-black dark:to-purple-950 text-gray-900 dark:text-gray-100 overflow-hidden">
-      <PremiumOfferModal />
-      {/* Animated background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-purple-500/5 to-pink-500/5 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-[#09090b] text-white overflow-hidden font-sans">
+      <PremiumModal />
+
+      {/* ── Blended Background Section ── */}
+      <div className="absolute top-0 left-0 w-full h-[120vh] pointer-events-none z-0 overflow-hidden bg-[#09090b]">
+        <img
+          src={bgImage}
+          alt="background"
+          className="w-full h-full object-cover opacity-100 object-top"
+        />
+        {/* Blending gradients to make it feel like a continuation */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#09090b]" />
+        <div className="absolute inset-x-0 bottom-0 h-[400px] bg-gradient-to-t from-[#09090b] via-[#09090b]/80 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,_transparent_0%,_rgba(9,9,11,0.5)_60%,_rgba(9,9,11,0.9)_100%)]" />
       </div>
 
-      {/* Header */}
       <Navbar user={user} />
 
-
-      {/* Hero Section */}
-      <section className="relative container mx-auto px-6 mt-10 py-12 lg:py-16">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="space-y-8"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium border border-purple-200 dark:border-purple-800">
-                <Sparkles className="w-4 h-4" />
+      {/* ══════════════════════════════════════════════════
+          HERO SECTION
+      ══════════════════════════════════════════════════ */}
+      <section className="relative z-10 pt-28 pb-20 px-8 md:px-16 lg:px-24 min-h-[85vh] flex items-center">
+        <div className="max-w-6xl w-full mx-auto">
+          <div className="max-w-3xl">
+            {/* Top badge */}
+            <motion.div {...stagger(0)} className="flex justify-start mb-6">
+              <span className="badge-pill !px-4 !py-1.5 !text-[11px] ring-1 ring-gold-500/20">
+                <Sparkles className="w-3.5 h-3.5" />
                 AI-Powered Resume Creation
               </span>
             </motion.div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
-              Build Your{" "}
-              <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
-                Perfect Resume
-              </span>{" "}
-              <br className="hidden sm:block" />
-              in Minutes
-            </h1>
+            {/* Premium Left-Aligned Headline - Tighter and smaller for viewport fitting */}
+            <motion.h1
+              {...stagger(0.1)}
+              className="text-5xl sm:text-[70px] lg:text-[85px] font-bold text-hero-gradient text-invertase-headline mb-6 tracking-tighter leading-[0.9] !text-left drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
+            >
+              Build your <span className="text-white">future</span>
+              <br />
+              <span className="text-gold-gradient drop-shadow-[0_0_30px_rgba(212,175,55,0.5)]">with AI precision.</span>
+            </motion.h1>
 
-            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-xl">
-              Create professional, ATS-friendly resumes with AI assistance.
-              Stand out from the crowd and land your dream job faster.
-            </p>
+            {/* Sub-headline - Smaller and more compact */}
+            <motion.p
+              {...stagger(0.2)}
+              className="text-lg sm:text-xl text-zinc-400 max-w-xl mb-10 leading-relaxed !text-left font-medium"
+            >
+              The intelligent way to craft ATS-optimized resumes.
+              Accelerate your career with Google Gemini-powered engineering.
+            </motion.p>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            <motion.div
+              {...stagger(0.3)}
+              className="flex flex-col sm:flex-row items-center justify-start gap-10 mb-20"
+            >
               <motion.button
-                whileHover={{ scale: 1.02, y: -2 }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate(user ? "/dashboard" : "/auth")}
-                className="group flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold shadow-xl shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300"
+                className="btn-invertase-glow"
               >
-                <Zap className="w-5 h-5" />
-                {user ? "Go to Dashboard" : "Start Building Free"}
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <span>{user ? "Go to Dashboard" : "Start Building Free"}</span>
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate("/examples")}
-                className="flex items-center justify-center gap-2 px-8 py-4 border-2 border-gray-300 dark:border-gray-700 rounded-xl font-semibold hover:border-purple-400 dark:hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition-all text-gray-700 dark:text-gray-300"
+                className="btn-invertase-glow-secondary"
               >
-                <Eye className="w-5 h-5" />
-                View Examples
+                <span>Explore our services</span>
+                <ChevronRight className="w-4 h-4 ml-1" />
               </motion.button>
-            </div>
+            </motion.div>
 
-            {/* Trust indicators */}
-            <div className="flex flex-wrap items-center gap-6 pt-4">
-              <div className="flex items-center gap-2">
-                <div className="flex -space-x-2">
-                  {[...Array(4)].map((_, i) => (
-                    <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 border-2 border-white dark:border-gray-900" />
-                  ))}
-                </div>
-                <span className="text-sm text-gray-600 dark:text-gray-400">1000+ users</span>
-              </div>
-              <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                ))}
-                <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">4.9/5 rating</span>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="relative"
-          >
-            {/* Decorative elements */}
-            <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl opacity-20 blur-xl" />
-            <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-br from-pink-500 to-purple-500 rounded-2xl opacity-20 blur-xl" />
-
-            {/* Main image */}
-            <div className="relative">
-              <img
-                src={theme === 'dark' ? heroDark : heroLight}
-                alt="Resume Builder Interface"
-                decoding="async"
-                fetchpriority="high"
-                loading="eager"
-                className="relative rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 bg-white dark:bg-gray-900"
-              />
-
-              {/* Floating badges */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                className="absolute -bottom-4 -left-4 sm:left-4 bg-white dark:bg-gray-800 rounded-xl p-3 shadow-xl border border-gray-100 dark:border-gray-700"
-              >
+            {/* Trusted By Section (Exact Image Match) */}
+            {/* <motion.div
+              {...stagger(0.4)}
+              className="w-full"
+            >
+              <p className="text-[12px] font-bold text-zinc-500 uppercase tracking-[0.1em] mb-10">
+                TRUSTED BY INDUSTRY LEADERS
+              </p>
+              <div className="flex flex-wrap items-center justify-start gap-x-14 gap-y-10 opacity-60 grayscale contrast-125">
+                <div className="h-8 flex items-center justify-center font-bold text-2xl tracking-tighter text-white">Google</div>
+                <div className="h-8 flex items-center justify-center font-bold text-2xl tracking-tighter text-white">amazon</div>
                 <div className="flex items-center gap-2">
-                  <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg">
-                    <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  <div className="w-7 h-7 bg-zinc-400 rounded-sm flex items-center justify-center">
+                    <div className="w-4 h-4 border-2 border-zinc-900 rounded-full flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 bg-zinc-900 rounded-full" />
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">ATS Score</p>
-                    <p className="font-bold text-green-600 dark:text-green-400">95/100</p>
-                  </div>
+                  <span className="font-semibold text-xl text-zinc-300">Canonical</span>
                 </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1 }}
-                className="absolute -top-4 -right-4 sm:right-4 bg-white dark:bg-gray-800 rounded-xl p-3 shadow-xl border border-gray-100 dark:border-gray-700"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
-                    <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">AI Powered</p>
-                    <p className="font-bold text-purple-600 dark:text-purple-400">Smart Writing</p>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </motion.div>
+              </div>
+            </motion.div> */}
+          </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="relative container mx-auto px-6 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-6"
-        >
+      {/* ══════════════════════════════════════════════════
+          STATS SECTION
+      ══════════════════════════════════════════════════ */}
+      <section className="relative z-10 py-24 px-8 md:px-16 border-y border-white/[0.05] bg-[#09090b]">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-12">
           {[
-            { icon: Users, value: "10K+", label: "Active Users" },
-            { icon: FileText, value: "50K+", label: "Resumes Created" },
-            { icon: Briefcase, value: "85%", label: "Interview Rate" },
+            { icon: Users, value: "12K+", label: "Active Users" },
+            { icon: FileText, value: "65K+", label: "Resumes Created" },
+            { icon: Briefcase, value: "92%", label: "Interview Rate" },
             { icon: Award, value: "4.9/5", label: "User Rating" },
-          ].map((stat, idx) => (
+          ].map((stat, i) => (
             <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-              className="text-center p-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-2xl border border-gray-200/50 dark:border-gray-800/50"
+              key={i}
+              {...stagger(i * 0.08)}
+              className="text-left group"
             >
-              <stat.icon className="w-8 h-8 mx-auto mb-3 text-purple-600 dark:text-purple-400" />
-              <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{stat.value}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{stat.label}</p>
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gold-500/10 border border-gold-500/20 mb-5 group-hover:bg-gold-500/15 transition-all duration-300 group-hover:scale-110">
+                <stat.icon className="w-6 h-6 text-gold-400" />
+              </div>
+              <p className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tighter">{stat.value}</p>
+              <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest">{stat.label}</p>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       </section>
 
-      {/* Features Section - Bus Topology */}
-      <section id="about" className="relative container mx-auto px-6 py-12 lg:py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <span className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium mb-4">
-            <Zap className="w-4 h-4" />
-            Core Infrastructure
-          </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-            Why Choose{" "}
-            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              AI Resume Builder
-            </span>
-          </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Our engine is built on a high-speed data bus, connecting 6 powerful nodes to construct the ultimate resume network.
-          </p>
-        </motion.div>
+      {/* ══════════════════════════════════════════════════
+          FEATURES SECTION  (Invertase "Our services" style)
+      ══════════════════════════════════════════════════ */}
+      <section id="features" className="relative z-10 py-24 px-5">
+        <div className="max-w-6xl mx-auto">
+          <motion.div {...fadeUp} className="mb-14">
+            <div className="section-tag">
+              <Zap className="w-3.5 h-3.5" />
+              Core Features
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl text-white mb-4 text-invertase-headline">
+              Why choose{" "}
+              <span className="text-gold-gradient">AI Resume Builder</span>
+            </h2>
+            <p className="text-zinc-400 text-lg max-w-xl">
+              Everything you need to craft a resume that gets noticed — built with cutting-edge AI.
+            </p>
+          </motion.div>
 
-        <div className="relative w-fit max-w-5xl mx-auto py-16">
-          {/* Central Bus Line (Horizontal) */}
-          <div className="hidden md:block absolute top-1/2 left-4 right-4 h-2 bg-gray-200 dark:bg-gray-800 rounded-full -translate-y-1/2 shadow-inner overflow-hidden">
-            {/* Data packets flowing across the bus */}
-            <motion.div
-              className="h-full w-32 bg-gradient-to-r from-transparent via-purple-500 to-transparent"
-              animate={{ x: ["-100%", "2000%"] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-            />
-            <motion.div
-              className="h-full w-24 bg-gradient-to-r from-transparent via-pink-500 to-transparent absolute top-0"
-              animate={{ x: ["-100%", "2500%"] }}
-              transition={{ duration: 7, repeat: Infinity, ease: "linear", delay: 2.5 }}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-y-16 md:gap-y-24 gap-x-6 md:gap-x-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
               {
-                icon: Sparkles,
+                icon: Brain,
                 title: "AI-Powered Writing",
-                desc: "Generate professional summaries and descriptions.",
-                color: "text-purple-500",
-                border: "border-purple-500",
-                bg: "bg-purple-500"
+                desc: "Generate professional summaries and bullet points tailored to your target role, powered by Google's Gemini AI.",
+                tag: "Smart Content",
               },
               {
                 icon: Target,
                 title: "ATS-Optimized",
-                desc: "Templates designed to pass Applicant Tracking Systems.",
-                color: "text-green-500",
-                border: "border-green-500",
-                bg: "bg-green-500"
+                desc: "All templates are engineered to pass Applicant Tracking Systems with proper structure and keyword density.",
+                tag: "Job-Ready",
               },
               {
                 icon: Eye,
                 title: "Real-Time Preview",
-                desc: "See your resume come to life exactly as you type.",
-                color: "text-blue-500",
-                border: "border-blue-500",
-                bg: "bg-blue-500"
+                desc: "Watch your resume come to life instantly as you type. What you see is exactly what employers receive.",
+                tag: "Live Editor",
               },
               {
                 icon: Download,
-                title: "Easy Export",
-                desc: "Download formatted PDF ready to send to employers.",
-                color: "text-orange-500",
-                border: "border-orange-500",
-                bg: "bg-orange-500"
+                title: "Easy PDF Export",
+                desc: "One-click export to perfectly formatted PDF, ready to send to recruiters and upload to job boards.",
+                tag: "Export",
               },
               {
-                icon: Zap,
+                icon: Clock,
                 title: "Lightning Fast",
-                desc: "Create a professional resume in minutes, not hours.",
-                color: "text-yellow-500",
-                border: "border-yellow-500",
-                bg: "bg-yellow-500"
+                desc: "Create a professional, polished resume in minutes rather than hours. Your time is valuable.",
+                tag: "Efficient",
               },
               {
-                icon: CheckCircle2,
+                icon: Shield,
                 title: "Smart Suggestions",
-                desc: "Intelligent recommendations for keywords and content.",
-                color: "text-pink-500",
-                border: "border-pink-500",
-                bg: "bg-pink-500"
+                desc: "Intelligent, context-aware recommendations for skills, keywords, and phrasing that align with top job listings.",
+                tag: "Intelligent",
               },
-            ].map((feature, idx) => {
-              const isTop = idx < 3;
-              return (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: isTop ? -30 : 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.6, delay: idx * 0.1 }}
-                  className={`relative flex flex-col items-center ${isTop ? 'md:flex-col-reverse' : 'md:flex-col'}`}
-                >
-                  {/* Vertical Branch Line connecting node to horizontal bus */}
-                  <div
-                    className={`hidden md:block absolute left-1/2 -translate-x-1/2 w-[3px] bg-gradient-to-b ${isTop ? 'from-transparent to-gray-200 dark:to-gray-700' : 'from-gray-200 dark:from-gray-700 to-transparent'}`}
-                    style={{
-                      height: '32px',
-                      [isTop ? 'top' : 'bottom']: '100%',
-                      [isTop ? 'bottom' : 'top']: 'auto'
-                    }}
-                  >
-                    {/* Flowing data on branch */}
-                    <motion.div
-                      className={`absolute left-0 right-0 h-4 bg-gradient-to-b ${isTop ? 'from-transparent to-purple-500' : 'from-purple-500 to-transparent'}`}
-                      animate={isTop ? { top: ["0%", "100%"] } : { top: ["0%", "100%"] }}
-                      transition={{ duration: 1.5, repeat: Infinity, ease: "linear", delay: idx * 0.3 }}
-                    />
+            ].map((f, i) => (
+              <motion.div
+                key={i}
+                {...stagger(i * 0.07)}
+                className="invertase-card p-6 group"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gold-500/10 border border-gold-500/20 flex items-center justify-center group-hover:bg-gold-500/15 transition-colors">
+                    <f.icon className="w-5 h-5 text-gold-400" />
                   </div>
-
-                  {/* Node connection point on central bus */}
-                  <div
-                    className={`hidden md:block absolute left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border-[3px] border-white dark:border-gray-950 ${feature.bg} z-10 shadow-[0_0_10px_rgba(168,85,247,0.5)]`}
-                    style={{ [isTop ? 'top' : 'bottom']: 'calc(100% + 32px)', marginTop: isTop ? '-6px' : '0', marginBottom: !isTop ? '-6px' : '0' }}
-                  />
-
-                  {/* Main Feature Card */}
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    className={`w-full relative z-20 group p-6 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-2xl shadow-xl hover:shadow-2xl border ${feature.border} transition-all duration-300 before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/50 before:to-transparent before:dark:from-white/5 before:dark:to-transparent before:rounded-2xl`}
-                  >
-                    <div className="relative z-10">
-                      <div className={`inline-flex p-3 rounded-xl mb-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm ${feature.color} group-hover:scale-110 transition-transform`}>
-                        <feature.icon className="w-6 h-6" />
-                      </div>
-                      <h3 className="text-lg md:text-xl font-bold mb-2 text-gray-900 dark:text-white transition-colors">
-                        {feature.title}
-                      </h3>
-                      <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
-                        {feature.desc}
-                      </p>
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="font-bold text-white text-base">{f.title}</h3>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gold-500/10 text-gold-400 border border-gold-500/15">
+                        {f.tag}
+                      </span>
                     </div>
-                  </motion.div>
-
-                </motion.div>
-              );
-            })}
+                    <p className="text-zinc-500 text-sm leading-relaxed">{f.desc}</p>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-1 text-gold-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                  Learn more <ChevronRight className="w-3.5 h-3.5" />
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="relative container mx-auto px-6 py-12 lg:py-16 overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-0 w-96 h-96 bg-purple-500/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute top-1/2 right-0 w-96 h-96 bg-pink-500/5 rounded-full translate-x-1/2 -translate-y-1/2" />
-        </div>
+      {/* ══════════════════════════════════════════════════
+          HOW IT WORKS (Numbered steps)
+      ══════════════════════════════════════════════════ */}
+      <section className="relative z-10 py-24 px-5 border-t border-white/[0.05]">
+        <div className="max-w-6xl mx-auto">
+          <motion.div {...fadeUp} className="mb-14">
+            <div className="section-tag">
+              <Target className="w-3.5 h-3.5" />
+              Simple Process
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl text-white mb-4 text-invertase-headline">
+              Three steps to your{" "}
+              <span className="text-gold-gradient">dream job</span>
+            </h2>
+            <p className="text-zinc-400 text-lg max-w-xl">
+              Our streamlined workflow makes creating a standout resume effortless.
+            </p>
+          </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16 relative"
-        >
-          <span className="inline-flex items-center gap-2 px-4 py-2 bg-pink-100 dark:bg-pink-900/50 text-pink-700 dark:text-pink-300 rounded-full text-sm font-medium mb-4">
-            <Target className="w-4 h-4" />
-            Simple Process
-          </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-            How It Works
-          </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Create your perfect resume in three simple steps
-          </p>
-        </motion.div>
-
-        <div className="relative max-w-5xl mx-auto">
-          {/* Connection line for desktop */}
-          <div className="hidden lg:block absolute top-32 left-[16%] right-[16%] h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 rounded-full" />
-
-          {/* Animated dots on line */}
-          <div className="hidden lg:flex absolute top-32 left-[16%] right-[16%] justify-between -translate-y-1/2">
-            {[0, 1, 2].map((i) => (
-              <motion.div
-                key={i}
-                initial={{ scale: 0 }}
-                whileInView={{ scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.5 + i * 0.2 }}
-                className="w-3 h-3 rounded-full bg-white border-2 border-purple-500 shadow-lg"
-              />
-            ))}
-          </div>
-
-          <div className="grid lg:grid-cols-3 gap-8 lg:gap-6">
+          <div className="grid lg:grid-cols-3 gap-6">
             {[
               {
                 step: "01",
                 icon: FileText,
                 title: "Enter Your Details",
-                desc: "Fill in your information, experience, and skills. Our smart form guides you through the process.",
-                color: "purple"
+                desc: "Fill in your experience, skills, and education. Our intelligent form guides you step-by-step, ensuring nothing important is missed.",
               },
               {
                 step: "02",
                 icon: Sparkles,
                 title: "AI Enhancement",
-                desc: "Let our AI polish your content, suggest improvements, and optimize for ATS systems.",
-                color: "pink"
+                desc: "Our AI polishes your content, rewrites bullet points for impact, optimizes keywords, and tailors the copy to your target role.",
               },
               {
                 step: "03",
                 icon: Download,
                 title: "Download & Apply",
-                desc: "Export your professional resume as PDF and start applying to your dream jobs.",
-                color: "purple"
+                desc: "Export a perfect PDF and start applying. Your resume is saved to your account so you can update it any time.",
               },
-            ].map((item, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.2, duration: 0.5 }}
-                className="relative"
-              >
-                {/* Mobile connector line */}
-                {idx < 2 && (
-                  <div className="lg:hidden absolute left-1/2 top-full w-0.5 h-8 bg-gradient-to-b from-purple-500 to-pink-500 -translate-x-1/2" />
+            ].map((item, i) => (
+              <motion.div key={i} {...stagger(i * 0.12)} className="relative group">
+                {/* Connector line on desktop */}
+                {i < 2 && (
+                  <div className="hidden lg:block absolute top-10 left-full w-6 h-px bg-gradient-to-r from-gold-500/40 to-transparent z-10" />
                 )}
-
-                <div className="group relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 rounded-2xl p-8 hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 h-full">
-                  {/* Step number badge */}
-                  <div className="absolute -top-4 left-8 px-4 py-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-white text-sm font-bold shadow-lg">
-                    Step {item.step}
-                  </div>
-
-                  {/* Icon */}
-                  <motion.div
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    className={`w-16 h-16 rounded-2xl bg-gradient-to-br from-${item.color}-500 to-pink-500 flex items-center justify-center text-white mb-6 shadow-lg shadow-${item.color}-500/30 group-hover:shadow-${item.color}-500/50 transition-shadow`}
-                  >
-                    <item.icon className="w-8 h-8" />
-                  </motion.div>
-
-                  {/* Content */}
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                    {item.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {item.desc}
-                  </p>
-
-                  {/* Arrow indicator */}
-                  <div className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white dark:bg-gray-800 rounded-full items-center justify-center shadow-lg border border-gray-200 dark:border-gray-700">
-                    {idx < 2 && <ArrowRight className="w-3 h-3 text-purple-500" />}
-                    {idx === 2 && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                <div className="invertase-card p-7 h-full">
+                  <div className="flex items-start gap-5">
+                    <div className="flex-shrink-0">
+                      <div className="text-5xl font-black text-gold-500/10 group-hover:text-gold-500/15 transition-colors leading-none select-none">
+                        {item.step}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="w-8 h-8 rounded-lg bg-gold-500/10 border border-gold-500/20 flex items-center justify-center mb-3 group-hover:bg-gold-500/15 transition-colors">
+                        <item.icon className="w-4 h-4 text-gold-400" />
+                      </div>
+                      <h3 className="text-white font-bold text-lg mb-2">{item.title}</h3>
+                      <p className="text-zinc-500 text-sm leading-relaxed">{item.desc}</p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
             ))}
           </div>
 
-          {/* Bottom CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.6 }}
-            className="text-center mt-12"
-          >
-            <p className="text-gray-500 dark:text-gray-400 mb-4">Ready to get started?</p>
+          <motion.div {...stagger(0.5)} className="mt-10 text-center">
             <motion.button
-              whileHover={{ scale: 1.02, y: -2 }}
+              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => navigate(user ? "/dashboard" : "/auth")}
-              className="group inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all"
+              className="btn-invertase-glow"
             >
-              {user ? "Go to Dashboard" : "Create Your Resume"}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <span>{user ? "Go to Dashboard" : "Create My Resume"}</span>
+              <ChevronRight className="w-4 h-4" />
             </motion.button>
           </motion.div>
         </div>
       </section>
 
-      {/* Testimonials Section 
-      <section className="relative container mx-auto px-6 py-16 lg:py-24">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-full text-sm font-medium mb-4">
-            Loved by Users
-          </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-            What Our Users Say
-          </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Join thousands of satisfied professionals who landed their dream jobs
-          </p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              name: "Sarah Johnson",
-              role: "Software Engineer at Google",
-              content: "This AI resume builder helped me land my dream job at Google! The ATS optimization feature is incredible.",
-              rating: 5
-            },
-            {
-              name: "Michael Chen",
-              role: "Product Manager at Meta",
-              content: "I was struggling with my resume for months. Within 30 minutes of using this tool, I had a professional resume ready.",
-              rating: 5
-            },
-            {
-              name: "Emily Davis",
-              role: "Data Scientist at Amazon",
-              content: "The AI suggestions were spot-on! It knew exactly what skills to highlight for my target role. Highly recommend!",
-              rating: 5
-            },
-          ].map((testimonial, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-              className="p-6 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 rounded-2xl"
-            >
-              <div className="flex items-center gap-1 mb-4">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                ))}
+      {/* ══════════════════════════════════════════════════
+          TIPS / BLOG SECTION (Invertase "Blog" style)
+      ══════════════════════════════════════════════════ */}
+      <section className="relative z-10 py-24 px-5 border-t border-white/[0.05]">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
+            <motion.div {...fadeUp}>
+              <div className="section-tag">
+                <BookOpen className="w-3.5 h-3.5" />
+                Resources
               </div>
-              <p className="text-gray-600 dark:text-gray-300 mb-6 italic">"{testimonial.content}"</p>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
-                  {testimonial.name.split(' ').map(n => n[0]).join('')}
-                </div>
-                <div>
-                  <p className="font-semibold">{testimonial.name}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{testimonial.role}</p>
-                </div>
-              </div>
+              <h2 className="text-3xl sm:text-4xl text-white text-invertase-headline">
+                Career insights &amp; resources
+              </h2>
             </motion.div>
-          ))}
-        </div>
-      </section>
-      */}
-
-      {/* FAQ Section */}
-      <section className="relative container mx-auto px-6 py-12 lg:py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <span className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium mb-4">
-            <CheckCircle2 className="w-4 h-4" />
-            FAQ
-          </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-            Frequently Asked Questions
-          </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Got questions? We've got answers
-          </p>
-        </motion.div>
-
-        <div className="max-w-3xl mx-auto space-y-4">
-          {[
-            {
-              question: "Is AI Resume Builder free to use?",
-              answer: "Yes! You can create and download professional resumes completely free. We believe everyone deserves access to great career tools."
-            },
-            {
-              question: "How does the AI writing assistance work?",
-              answer: "Our AI analyzes your experience and skills, then generates professional summaries and bullet points tailored to your target role. It's powered by Google's Gemini AI for the best results."
-            },
-            {
-              question: "Are the resumes ATS-friendly?",
-              answer: "Absolutely! All our templates are designed to pass through Applicant Tracking Systems. We use clean formatting and proper structure that ATS software can easily parse."
-            },
-            {
-              question: "Can I edit my resume after creating it?",
-              answer: "Yes! Your resumes are automatically saved to your account. You can come back anytime to edit, update, or create new versions of your resume."
-            },
-            {
-              question: "What file formats can I download?",
-              answer: "Currently, we support PDF downloads which is the most widely accepted format by employers. The PDF maintains perfect formatting across all devices."
-            },
-          ].map((faq, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.05 }}
-              className="p-6 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 rounded-2xl"
+            <motion.button
+              {...stagger(0.15)}
+              onClick={() => navigate("/career-tips")}
+              className="flex-shrink-0 text-sm text-zinc-400 hover:text-gold-400 transition-colors flex items-center gap-1 font-medium"
             >
-              <h3 className="text-lg font-semibold mb-2 flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center text-sm font-bold">
-                  ?
-                </span>
-                {faq.question}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 ml-9">{faq.answer}</p>
-            </motion.div>
-          ))}
+              View all <ChevronRight className="w-4 h-4" />
+            </motion.button>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-5">
+            {[
+              {
+                category: "Career Tips",
+                path: "/career-tips",
+                title: "How to Write a Resume That Gets Noticed",
+                desc: "Learn the proven framework for structuring your resume to capture recruiter attention in the first 6 seconds.",
+                icon: TrendingUp,
+                time: "5 min read",
+              },
+              {
+                category: "Interview Tips",
+                path: "/interview-tips",
+                title: "Mastering Behavioral Interview Questions",
+                desc: "Use the STAR method to answer tricky behavioral questions with confidence and impress any interviewer.",
+                icon: MessageSquare,
+                time: "7 min read",
+              },
+              {
+                category: "Resume Tips",
+                path: "/resume-tips",
+                title: "ATS Optimization: Beat the Bots",
+                desc: "Understand how Applicant Tracking Systems work and format your resume to always make it through.",
+                icon: Shield,
+                time: "6 min read",
+              },
+            ].map((post, i) => (
+              <motion.div
+                key={i}
+                {...stagger(i * 0.1)}
+                onClick={() => navigate(post.path)}
+                className="invertase-card p-6 cursor-pointer group"
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-7 h-7 rounded-md bg-gold-500/10 border border-gold-500/15 flex items-center justify-center">
+                    <post.icon className="w-3.5 h-3.5 text-gold-400" />
+                  </div>
+                  <span className="text-xs font-semibold text-gold-400">{post.category}</span>
+                  <span className="ml-auto text-xs text-zinc-600">{post.time}</span>
+                </div>
+                <h3 className="text-white font-bold text-base mb-2 leading-snug group-hover:text-gold-300 transition-colors">
+                  {post.title}
+                </h3>
+                <p className="text-zinc-500 text-sm leading-relaxed mb-4">{post.desc}</p>
+                <div className="flex items-center gap-1 text-gold-400 text-sm font-medium">
+                  Read article <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="relative container mx-auto px-6 py-12 lg:py-16">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="relative overflow-hidden rounded-3xl"
-        >
-          {/* Background gradient */}
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-[length:200%_auto] animate-gradient" />
+      {/* ══════════════════════════════════════════════════
+          FAQ SECTION
+      ══════════════════════════════════════════════════════ */}
+      <section className="relative z-10 py-24 px-5 border-t border-white/[0.05]">
+        <div className="max-w-3xl mx-auto">
+          <motion.div {...fadeUp} className="mb-12 text-center">
+            <div className="section-tag mx-auto w-fit">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              FAQ
+            </div>
+            <h2 className="text-3xl sm:text-4xl text-white mb-4 text-invertase-headline">
+              Frequently asked questions
+            </h2>
+            <p className="text-zinc-400">Everything you need to know.</p>
+          </motion.div>
 
-          {/* Decorative elements */}
-          <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/10 rounded-full translate-x-1/2 translate-y-1/2" />
+          <div className="space-y-3">
+            {[
+              {
+                q: "Is AI Resume Builder free to use?",
+                a: "Yes! You can create and download professional resumes completely free. We believe everyone deserves access to great career tools.",
+              },
+              {
+                q: "How does the AI writing assistance work?",
+                a: "Our AI analyzes your experience and skills, then generates professional summaries and bullet points tailored to your target role. Powered by Google's Gemini AI.",
+              },
+              {
+                q: "Are the resumes ATS-friendly?",
+                a: "Absolutely. All templates are designed to pass Applicant Tracking Systems. We use clean formatting and proper structure that ATS software can parse easily.",
+              },
+              {
+                q: "Can I edit my resume after creating it?",
+                a: "Yes! Your resumes are automatically saved to your account. Return anytime to edit, update, or create new versions.",
+              },
+              {
+                q: "What file formats can I download?",
+                a: "We support PDF downloads — the most widely accepted format by employers — maintaining perfect formatting across all devices.",
+              },
+            ].map((faq, i) => (
+              <motion.div
+                key={i}
+                {...stagger(i * 0.06)}
+                className="invertase-card p-6"
+              >
+                <h3 className="text-white font-semibold mb-2 flex items-start gap-3">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-gold-500/10 border border-gold-500/20 text-gold-400 flex items-center justify-center text-xs font-bold mt-0.5">
+                    ?
+                  </span>
+                  {faq.q}
+                </h3>
+                <p className="text-zinc-500 text-sm leading-relaxed ml-8">{faq.a}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          <div className="relative p-12 md:p-16 text-center text-white">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="max-w-2xl mx-auto"
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-6">
-                <Sparkles className="w-4 h-4" />
+      {/* ══════════════════════════════════════════════════
+          CTA BANNER (Invertase bottom CTA style)
+      ══════════════════════════════════════════════════ */}
+      <section className="relative z-10 py-24 px-5 border-t border-white/[0.05]">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="relative overflow-hidden rounded-2xl border border-gold-500/20 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-900 p-12 md:p-16 text-center"
+          >
+            {/* Exact Invertase Hero Background */}
+            <div className="absolute inset-0 z-0 bg-invertase-hero" />
+
+            {/* Grid Texture */}
+            <div className="absolute inset-0 z-0 grid-bg opacity-30" />
+
+            {/* Animated Background Orbs (Subtle) */}
+            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gold-600/5 rounded-full blur-[120px] animate-pulse-slow pointer-events-none" />
+            <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-purple-600/5 rounded-full blur-[120px] animate-pulse-slow pointer-events-none" />
+            <div className="absolute inset-0 border border-gold-500/10 rounded-2xl" />
+
+            <div className="relative">
+              <div className="badge-pill mx-auto w-fit mb-6">
+                <Sparkles className="w-3.5 h-3.5" />
                 Start for Free Today
               </div>
-
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-                Ready to Land Your Dream Job?
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl text-white mb-8 text-invertase-headline">
+                Ready to land your{" "}
+                <span className="text-gold-gradient">dream job?</span>
               </h2>
-              <p className="text-lg md:text-xl text-white/90 mb-8">
-                Join thousands of successful job seekers who built their winning resumes with AI Resume Builder. No credit card required.
-              </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <motion.button
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
+                <button
                   onClick={() => navigate(user ? "/dashboard" : "/auth")}
-                  className="group flex items-center justify-center gap-2 px-8 py-4 bg-white text-purple-600 rounded-xl font-semibold shadow-xl hover:shadow-2xl transition-all"
+                  className="btn-invertase-glow py-4 px-10 text-lg"
                 >
-                  <Zap className="w-5 h-5" />
-                  {user ? "Go to Dashboard" : "Create Your Resume Now"}
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  <span>Build My Resume Now</span>
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+                <button
                   onClick={() => navigate("/examples")}
-                  className="flex items-center justify-center gap-2 px-8 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl font-semibold hover:bg-white/30 transition-all"
+                  className="btn-invertase-glow-secondary py-4 px-10 text-lg"
                 >
-                  <Eye className="w-5 h-5" />
-                  View Examples
-                </motion.button>
+                  <span>View Examples</span>
+                  <ChevronRight className="w-5 h-5" />
+                </button>
               </div>
-
-              <p className="mt-6 text-sm text-white/70 flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                No credit card required • Free forever • Cancel anytime
+              <p className="text-zinc-400 text-lg max-w-xl mx-auto mb-8">
+                Join thousands of successful job seekers who built their winning resumes with AI Resume Builder.
+                No credit card required.
               </p>
-            </motion.div>
-          </div>
-        </motion.div>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.04, y: -1 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => navigate(user ? "/dashboard" : "/auth")}
+                  className="btn-gold text-base"
+                >
+                  <Zap className="w-4 h-4" />
+                  {user ? "Go to Dashboard" : "Create My Resume — Free"}
+                  <ArrowRight className="w-4 h-4" />
+                </motion.button>
+                <button
+                  onClick={() => navigate("/examples")}
+                  className="btn-ghost text-base"
+                >
+                  Browse Templates
+                </button>
+              </div>
+              <p className="mt-6 text-xs text-zinc-600">
+                Free forever • No credit card • Cancel anytime
+              </p>
+            </div>
+          </motion.div>
+        </div>
       </section>
+
+      <Footer />
     </div>
   );
 };
