@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, getCurrentUser, onAuthStateChange } from "@/integrations/firebase/client";
 import { signOut } from "firebase/auth";
@@ -31,6 +31,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import premiumOfferImg from "@/assets/premium.png";
 import bgImage from "@/assets/bg.png";
+
+const VideoBackground = lazy(() => import("@/components/VideoBackground"));
 
 /* ── Reusable animation variants ── */
 const fadeUp = {
@@ -154,18 +156,9 @@ const Index = () => {
     <div className="min-h-screen bg-[#09090b] text-white overflow-hidden font-sans">
       <PremiumModal />
 
-      {/* ── Blended Background Section ── */}
-      <div className="absolute top-0 left-0 w-full h-[120vh] pointer-events-none z-0 overflow-hidden bg-[#09090b]">
-        <img
-          src={bgImage}
-          alt="background"
-          className="w-full h-full object-cover opacity-100 object-top"
-        />
-        {/* Blending gradients to make it feel like a continuation */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#09090b]" />
-        <div className="absolute inset-x-0 bottom-0 h-[400px] bg-gradient-to-t from-[#09090b] via-[#09090b]/80 to-transparent" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,_transparent_0%,_rgba(9,9,11,0.5)_60%,_rgba(9,9,11,0.9)_100%)]" />
-      </div>
+      <Suspense fallback={<div className="fixed inset-0 bg-[#09090b]" />}>
+        <VideoBackground />
+      </Suspense>
 
       <Navbar user={user} />
 
